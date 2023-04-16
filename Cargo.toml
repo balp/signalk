@@ -2,6 +2,7 @@
 name = "signalk"
 version = "0.1.0"
 edition = "2021"
+license = "ISC"
 license-file = "LICENSE"
 description = "A library to parse signalk maritime data"
 homepage = "https://balp.github.io/signalk/"
