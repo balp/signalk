@@ -564,7 +564,7 @@ pub struct V1BatteryCapacity {
     pub state_of_charge: Option<f64>,
     pub state_of_health: Option<f64>,
     pub discharge_since_full: Option<f64>,
-    pub time_remaining: Option<f64>,
+    pub time_remaining: Option<V1NumberValue>,
 }
 
 impl V1BatteryCapacity {
@@ -582,7 +582,7 @@ pub struct V1BatteryCapacityBuilder {
     state_of_charge: Option<f64>,
     state_of_health: Option<f64>,
     discharge_since_full: Option<f64>,
-    time_remaining: Option<f64>,
+    time_remaining: Option<V1NumberValue>,
 }
 
 impl V1BatteryCapacityBuilder {
@@ -614,7 +614,7 @@ impl V1BatteryCapacityBuilder {
         self.discharge_since_full = Some(value);
         self
     }
-    pub fn time_remaining(mut self, value: f64) -> V1BatteryCapacityBuilder {
+    pub fn time_remaining(mut self, value: V1NumberValue) -> V1BatteryCapacityBuilder {
         self.time_remaining = Some(value);
         self
     }

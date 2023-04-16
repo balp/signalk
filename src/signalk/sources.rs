@@ -6,7 +6,7 @@ use crate::signalk::definitions::V1Attr;
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 pub struct V1Sources {
-    #[serde(rename = "_attr")]
+    #[serde(rename = "type")]
     pub type_: Option<V1Attr>,
     #[serde(flatten)]
     pub fields: HashMap<String, V1Source>,

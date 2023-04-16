@@ -46,7 +46,7 @@ pub struct V1Vessel {
     pub electrical: Option<V1Electrical>,
 
     /// Notifications currently raised. Major categories have well-defined names, but the tree can be extended by any hierarchical structure
-    pub notifications: Option<V1Notification>,
+    // pub notifications: Option<V1Notification>,
 
     // pub steering: Option<V1Steering>,
     // pub tanks: Option<V1Tanks>,
@@ -195,7 +195,7 @@ impl V1VesselBuilder {
             navigation: self.navigation,
             environment: self.environment,
             electrical: self.electrical,
-            notifications: self.notifications,
+            // notifications: self.notifications,
             propulsion: self.propulsion,
             url: self.url,
             mothership_mmsi: self.mothership_mmsi,
@@ -229,7 +229,7 @@ mod context_tests {
         vessel.apply_update(&update);
 
         assert_eq!(
-            vessel.navigation.unwrap().speed_over_ground.unwrap().value,
+            vessel.navigation.unwrap().speed_over_ground.unwrap().value.unwrap(),
             12.6
         );
     }
@@ -253,7 +253,7 @@ mod context_tests {
         vessel.apply_update(&update);
 
         assert_eq!(
-            vessel.navigation.unwrap().speed_over_ground.unwrap().value,
+            vessel.navigation.unwrap().speed_over_ground.unwrap().value.unwrap(),
             5.1
         );
     }
@@ -289,7 +289,8 @@ mod context_tests {
                 .speed_over_ground
                 .as_ref()
                 .unwrap()
-                .value,
+                .value
+                .unwrap(),
             7.2
         );
         assert_eq!(
@@ -300,7 +301,8 @@ mod context_tests {
                 .course_over_ground_true
                 .as_ref()
                 .unwrap()
-                .value,
+                .value
+                .unwrap(),
             4.71238898
         );
     }

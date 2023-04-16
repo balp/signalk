@@ -53,6 +53,7 @@ pub struct V1NotificationValue {
     pub method: Vec<String>,
     pub state: String,
     pub message: String,
+    pub timestamp: Option<String>,
 }
 
 impl V1NotificationValue {
@@ -66,6 +67,7 @@ pub struct V1NotificationValueBuilder {
     method: Vec<String>,
     state: String,
     message: String,
+    timestamp: Option<String>,
 }
 
 impl V1NotificationValueBuilder {
@@ -86,6 +88,7 @@ impl V1NotificationValueBuilder {
             method: self.method,
             state: self.state,
             message: self.message,
+            timestamp: self.timestamp,
         }
     }
 }

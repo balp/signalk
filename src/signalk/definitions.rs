@@ -68,7 +68,7 @@ impl V1CommonValueFieldsBuilder {
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 pub struct V1NumberValue {
-    pub value: f64,
+    pub value: Option<f64>,
     pub timestamp: String,
     #[serde(rename = "$source")]
     pub source: String,
@@ -85,7 +85,7 @@ impl V1NumberValue {
 
 #[derive(Default)]
 pub struct V1NumberValueBuilder {
-    pub value: f64,
+    pub value: Option<f64>,
     pub timestamp: String,
     pub source: String,
     pub pgn: Option<f64>,
@@ -95,12 +95,14 @@ pub struct V1NumberValueBuilder {
 impl V1NumberValueBuilder {
     pub fn json_value(mut self, value: &serde_json::Value) -> V1NumberValueBuilder {
         if let Some(f64_value) = value.as_f64() {
-            self.value = f64_value;
+            self.value = Some(f64_value);
+        } else {
+            self.value = None;
         }
         self
     }
     pub fn value(mut self, value: f64) -> V1NumberValueBuilder {
-        self.value = value;
+        self.value = Some(value);
         self
     }
     pub fn timestamp(mut self, timestamp: String) -> V1NumberValueBuilder {

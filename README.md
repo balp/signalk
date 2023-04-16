@@ -1,10 +1,13 @@
 Signalk Library for Rust
 ========================
 
-This is tha library part, creates in signalk-rserver
-broken out into its own place.
+This library gives a rust native datatype for storing [signalk
+data](https://signalk.org/). It can be used to either create a
+SignalK server or client.
 
-This library translates Signalk rust interface into
-a rust data structure.
+Some parts of the full SignalK protocoll is still missing, it can take all
+data generated ny the n2k and nmea0183 sample data for the node-server and
+handle as rust data.
+
 
 

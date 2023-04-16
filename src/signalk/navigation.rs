@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use serde_json::value::Value;
 
 use crate::signalk::definitions::V1NumberValue;
 
@@ -9,8 +10,8 @@ pub struct V1Navigation {
     // pub lights: Option<V1Lights>,
     pub course_over_ground_magnetic: Option<V1NumberValue>,
     pub course_over_ground_true: Option<V1NumberValue>,
-    pub course_rhumbline: Option<V1NumberValue>,
-    pub course_great_circle: Option<V1NumberValue>,
+    pub course_rhumbline: Option<Value>,
+    pub course_great_circle: Option<Value>,
     // pub closest_approach: Option<V1ClosestApproach>,
     // pub racing: Option<V1Racing>,
     pub magnetic_variation: Option<V1NumberValue>,
@@ -51,10 +52,10 @@ impl V1Navigation {
             self.course_over_ground_true = Some(V1NumberValue::builder().json_value(value).build())
         }
         if path == "courseRhumbline" {
-            self.course_rhumbline = Some(V1NumberValue::builder().json_value(value).build())
+            self.course_rhumbline = Some(value.clone())
         }
         if path == "courseGreatCircle" {
-            self.course_great_circle = Some(V1NumberValue::builder().json_value(value).build())
+            self.course_great_circle = Some(value.clone())
         }
         if path == "magneticVariation" {
             self.magnetic_variation = Some(V1NumberValue::builder().json_value(value).build())
@@ -110,8 +111,8 @@ pub struct V1NavigationBuilder {
     // pub lights: Option<V1Lights>,
     course_over_ground_magnetic: Option<V1NumberValue>,
     course_over_ground_true: Option<V1NumberValue>,
-    course_rhumbline: Option<V1NumberValue>,
-    course_great_circle: Option<V1NumberValue>,
+    course_rhumbline: Option<Value>,
+    course_great_circle: Option<Value>,
     // pub closest_approach: Option<V1ClosestApproach>,
     // pub racing: Option<V1Racing>,
     magnetic_variation: Option<V1NumberValue>,
@@ -147,11 +148,11 @@ impl V1NavigationBuilder {
         self.course_over_ground_true = Some(value);
         self
     }
-    pub fn course_rhumbline(mut self, value: V1NumberValue) -> V1NavigationBuilder {
+    pub fn course_rhumbline(mut self, value: Value) -> V1NavigationBuilder {
         self.course_rhumbline = Some(value);
         self
     }
-    pub fn course_great_circle(mut self, value: V1NumberValue) -> V1NavigationBuilder {
+    pub fn course_great_circle(mut self, value: Value) -> V1NavigationBuilder {
         self.course_great_circle = Some(value);
         self
     }

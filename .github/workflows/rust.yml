@@ -36,6 +36,7 @@ jobs:
          python -m pip install sphinx myst-parser sphinxcontrib-kroki groundwork-sphinx-theme
     - name: Build User Docs
       run: |
+        cp README.md docs/
         sphinx-build -b html docs out/html
     - name: Deploy Docs
       uses: peaceiris/actions-gh-pages@v3

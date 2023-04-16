@@ -41,8 +41,8 @@ pub struct V1FullFormat {
     // TODO: Add aircraft
     // TODO: Add aton
     // TODO: Add sar
-    /// Metadata about the data sources; physical interface, address, protocol, etc.
-    pub sources: Option<V1Sources>,
+    // Metadata about the data sources; physical interface, address, protocol, etc.
+    // pub sources: Option<V1Sources>,
 }
 
 impl Default for V1FullFormat {
@@ -51,7 +51,7 @@ impl Default for V1FullFormat {
             version: "1.7.0".to_string(),
             self_: "".to_string(),
             vessels: None,
-            sources: None,
+            // sources: None,
         }
     }
 }
@@ -154,7 +154,7 @@ impl V1FullFormatBuilder {
             version: self.version,
             self_: self.self_,
             vessels: self.vessels,
-            sources: self.sources,
+            // sources: self.sources,
         }
     }
 }
@@ -210,7 +210,8 @@ mod context_tests {
                 .speed_over_ground
                 .as_ref()
                 .unwrap()
-                .value,
+                .value
+                .unwrap(),
             5.1
         )
     }
@@ -243,7 +244,8 @@ mod context_tests {
                 .speed_over_ground
                 .as_ref()
                 .unwrap()
-                .value,
+                .value
+                .unwrap(),
             5.1
         )
     }
