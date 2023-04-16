@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::BufReader;
 use std::path::{Path, PathBuf};
 
-use signalk_rserver::signalk::{V1Subscribe, V1Subscription};
+use signalk::signalk::{V1Subscribe, V1Subscription};
 
 fn read_signalk_from_file(path: PathBuf) -> V1Subscribe {
     let file = File::open(path).unwrap();

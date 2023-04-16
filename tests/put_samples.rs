@@ -4,7 +4,7 @@ use std::fs::File;
 use std::io::BufReader;
 use std::path::{Path, PathBuf};
 
-use signalk_rserver::signalk::{V1Put, V1PutValue};
+use signalk::signalk::{V1Put, V1PutValue};
 
 fn read_signalk_from_file(path: PathBuf) -> V1Put {
     let file = File::open(path).unwrap();

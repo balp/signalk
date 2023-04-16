@@ -2,6 +2,9 @@
 name = "signalk"
 version = "0.1.0"
 edition = "2021"
+license-file = "LICENSE"
+description = "A library to parse signalk maritime data"
+homepage = "https://serde.rs/"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

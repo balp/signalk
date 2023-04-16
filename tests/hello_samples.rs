@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::BufReader;
 use std::path::{Path, PathBuf};
 
-use signalk_rserver::signalk::hello::V1Hello;
+use signalk::signalk::hello::V1Hello;
 
 trait OptionExt {
     type Value;
