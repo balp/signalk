@@ -12,7 +12,9 @@ readme = "README.md"
 keywords = ["signalk", "opendata", "marine"]
 categories = ["data-structures"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
+exclude = [
+    ".idea/*",
+]
 [dependencies]
 derive_more = "0.99.17"
 bytes = "1"
