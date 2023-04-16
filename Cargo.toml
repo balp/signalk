@@ -15,6 +15,7 @@ categories = ["data-structures"]
 exclude = [
     ".idea/*",
     ".github/*",
+    "docs/*",
 ]
 [dependencies]
 derive_more = "0.99.17"
