@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::signalk::{V1DefSource, V1Meta};
+use crate::{V1DefSource, V1Meta};
 
 /// Root structure for Delta Signal K data
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default)]

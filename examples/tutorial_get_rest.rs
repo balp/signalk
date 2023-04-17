@@ -1,5 +1,5 @@
 //! This is the code from the first part of the tutorial
-use signalk::signalk::full::V1FullFormat;
+use signalk::V1FullFormat;
 use reqwest::Error;
 
 

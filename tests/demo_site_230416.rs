@@ -1,7 +1,7 @@
 use std::fs::File;
 use std::io::BufReader;
 use std::path::{Path, PathBuf};
-use signalk::signalk::full::V1FullFormat;
+use signalk::full::V1FullFormat;
 
 #[test]
 fn test_demo_230416() {

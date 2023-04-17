@@ -1,3 +1,7 @@
+#########
+Tutorials
+#########
+
 *******************************************
 Show current position from demo.signalk.org
 *******************************************
@@ -22,18 +26,29 @@ Prepare your development host for ssl-library content:
 
     sudo apt install libssl-dev
 
-.. code-block:: bash
+
+Now we can set up a new rust project with the cargo command
+
+.. code-block:: sh
 
     cargo new sk_position
     cd sk_position
-    cargo add signalk
 
-This will crate a sample application and add the dependency to
-the signalk library. Next we need to add a library to let us connect
-to the REST api and get some data. We will be using reqwest and tokio for this.
+This will crate a sample application. Cargo will make a sample
+hello_world application in main.rs. We will soon change that
+into an application that connects to SignalKs demo server
+and shows the position of the self ship.
+
+Nest we need to add dependencies to the rust dependencies that we
+need in our code.
+
+* signalk - The SignalK data library
+* reqwest - A http (REST) client library
+* tokio - The async driver to make the async REST calls
 
 .. code-block:: bash
 
+    cargo add signalk
     cargo add reqwest -F json
     cargo add tokio -F full
 
@@ -43,7 +58,7 @@ Update the main.rs file to contain the following code:
 
 .. code-block:: rust
 
-    use signalk::signalk::full::V1FullFormat;
+    use signalk::V1FullFormat;
     use reqwest::Error;
 
 
@@ -69,3 +84,4 @@ We can now run the application towards the demo.api and see the result:
 .. code-block:: sh
 
     cargo run
+

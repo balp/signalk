@@ -4,8 +4,8 @@ use std::path::{Path, PathBuf};
 
 use serde_json::{json, Number, Value};
 
-use signalk::signalk::delta::{V1DeltaFormat, V1UpdateMeta, V1UpdateType, V1UpdateValue};
-use signalk::signalk::{V1DefSource, V1Meta, V1MetaZone};
+use signalk::delta::{V1DeltaFormat, V1UpdateMeta, V1UpdateType, V1UpdateValue};
+use signalk::{V1DefSource, V1Meta, V1MetaZone};
 
 trait OptionExt {
     type Value;

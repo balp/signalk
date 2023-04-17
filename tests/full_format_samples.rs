@@ -2,8 +2,8 @@ use std::fs::File;
 use std::io::BufReader;
 use std::path::{Path, PathBuf};
 
-use signalk::signalk::full::V1FullFormat;
-use signalk::signalk::{
+use signalk::full::V1FullFormat;
+use signalk::{
     V1ACBus, V1CommonValueFields, V1Electrical, V1ElectricalACQualities, V1ElectricalIdentity,
     V1Environment, V1EnvironmentDepth, V1EnvironmentTime, V1Navigation, V1Notification,
     V1NotificationValue, V1NumberValue, V1PositionType, V1PositionValue, V1Propulsion, V1Source,

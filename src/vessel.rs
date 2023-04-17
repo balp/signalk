@@ -2,11 +2,11 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-use crate::signalk::electrical::V1Electrical;
-use crate::signalk::environment::V1Environment;
-use crate::signalk::full::Updatable;
-use crate::signalk::notification::V1Notification;
-use crate::signalk::{V1Navigation, V1NumberValue, V1Propulsion, V1UpdateType};
+use crate::electrical::V1Electrical;
+use crate::environment::V1Environment;
+use crate::full::Updatable;
+use crate::notification::V1Notification;
+use crate::{V1Navigation, V1NumberValue, V1Propulsion, V1UpdateType};
 
 /// An object describing an individual vessel. It should be an object in vessels,
 /// named using MMSI or a UUID
@@ -207,8 +207,8 @@ impl V1VesselBuilder {
 mod context_tests {
     use serde_json::{Number, Value};
 
-    use crate::signalk::full::Updatable;
-    use crate::signalk::{V1Navigation, V1NumberValue, V1UpdateType, V1UpdateValue, V1Vessel};
+    use crate::full::Updatable;
+    use crate::{V1Navigation, V1NumberValue, V1UpdateType, V1UpdateValue, V1Vessel};
 
     #[test]
     fn update_navigation_sog_12_6_in_existing_tree() {

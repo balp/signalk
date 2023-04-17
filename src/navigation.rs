@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_json::value::Value;
 
-use crate::signalk::definitions::V1NumberValue;
+use crate::definitions::V1NumberValue;
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 #[serde(rename_all = "camelCase")]

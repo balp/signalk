@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-use crate::signalk::{V1DeltaFormat, V1Sources, V1UpdateType, V1Vessel};
+use crate::{V1DeltaFormat, V1Sources, V1UpdateType, V1Vessel};
 
 /// These items can be updated by a V1UpdateType
 ///
@@ -174,7 +174,7 @@ mod context_tests {
 
     use serde_json::{Number, Value};
 
-    use crate::signalk::{
+    use crate::{
         V1DeltaFormat, V1FullFormat, V1Navigation, V1NumberValue, V1UpdateType, V1UpdateValue,
         V1Vessel,
     };

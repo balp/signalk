@@ -4,7 +4,7 @@ use std::fs::File;
 use std::io::BufReader;
 use std::path::{Path, PathBuf};
 
-use signalk::signalk::{V1Unsubscribe, V1Unsubscription};
+use signalk::{V1Unsubscribe, V1Unsubscription};
 
 fn read_signalk_from_file(path: PathBuf) -> V1Unsubscribe {
     let file = File::open(path).unwrap();
