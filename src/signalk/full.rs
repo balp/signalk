@@ -106,6 +106,15 @@ impl V1FullFormat {
             None
         }
     }
+
+    pub fn get_self(&self) -> Option<&V1Vessel> {
+        if let Some(ref vessels) = self.vessels.as_ref() {
+            let v: Vec<&str> = self.self_.split('.').collect();
+            if v[0] == "vessels" {}
+            return vessels.get(v[1]);
+        };
+        None
+    }
 }
 
 /// Builder for the Signal K Full format structure
@@ -215,6 +224,7 @@ mod context_tests {
             5.1
         )
     }
+
     #[test]
     fn update_new_mmsi() {
         let mut data = V1FullFormat::builder().build();
