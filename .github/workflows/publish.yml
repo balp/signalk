@@ -1,0 +1,20 @@
+on:
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+
+name: Publish to crates.io
+
+jobs:
+  publish:
+    name: Publish to crates.io
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v3
+
+      - name: Publish to creates
+        run: cargo --publish
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_TOKEN }}
