@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["V1Vessel","An object describing an individual vessel. It should be an object in vessels, named using MMSI or a UUID"],["V1VesselBuilder",""]]};

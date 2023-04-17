@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["V1FullFormat","Root structure for Full Signal K data"],["V1FullFormatBuilder","Builder for the Signal K Full format structure"]],"trait":[["Updatable","These items can be updated by a V1UpdateType"]]};

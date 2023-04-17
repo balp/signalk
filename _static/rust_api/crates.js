@@ -1,0 +1,1 @@
+window.ALL_CRATES = ["bytes","convert_case","derive_more","itoa","proc_macro2","quote","ryu","serde","serde_derive","serde_json","signalk","unicode_ident"];
