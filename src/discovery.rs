@@ -12,6 +12,14 @@ impl V1Discovery {
     pub fn builder() -> V1DiscoveryBuilder {
         V1DiscoveryBuilder::default()
     }
+
+    pub fn get_v1_http_endpoint(&self) -> Option<String> {
+        if let Some(ref end) = self.endpoints.get("v1") {
+            if let Some(ref http) = end.signalk_http {
+                Some(http.clone())
+            } else { None }
+        } else { None }
+    }
 }
 
 #[derive(Default)]
@@ -39,11 +47,14 @@ impl V1DiscoveryBuilder {
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default)]
 pub struct V1DiscoveryEndpoint {
-    pub version: String, // TODO: Version type?
+    pub version: String,
+    // TODO: Version type?
     #[serde(rename = "signalk-http")]
-    pub signalk_http: Option<String>, // TODO: URL type
+    pub signalk_http: Option<String>,
+    // TODO: URL type
     #[serde(rename = "signalk-ws")]
-    pub signalk_ws: Option<String>, // TODO: URL type
+    pub signalk_ws: Option<String>,
+    // TODO: URL type
     #[serde(rename = "signalk-tcp")]
     pub signalk_tcp: Option<String>, // TODO: URL type
 }
