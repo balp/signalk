@@ -1,7 +1,6 @@
 //! This is the code from the first part of the tutorial
-use signalk::V1FullFormat;
 use reqwest::Error;
-
+use signalk::V1FullFormat;
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
@@ -15,8 +14,10 @@ async fn main() -> Result<(), Error> {
     if let Some(self_vessel) = sk_data.get_self() {
         if let Some(ref nav) = self_vessel.navigation {
             if let Some(ref pos) = nav.position {
-                print!("Position: lat {} long {}",
-                       pos.value.latitude, pos.value.longitude);
+                print!(
+                    "Position: lat {} long {}",
+                    pos.value.latitude, pos.value.longitude
+                );
             }
         }
     }

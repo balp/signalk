@@ -17,8 +17,24 @@ impl V1Discovery {
         if let Some(ref end) = self.endpoints.get("v1") {
             if let Some(ref http) = end.signalk_http {
                 Some(http.clone())
-            } else { None }
-        } else { None }
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    }
+
+    pub fn get_v1_ws_endpoint(&self) -> Option<String> {
+        if let Some(ref end) = self.endpoints.get("v1") {
+            if let Some(ref ws) = end.signalk_ws {
+                Some(ws.clone())
+            } else {
+                None
+            }
+        } else {
+            None
+        }
     }
 }
 

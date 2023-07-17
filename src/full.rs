@@ -37,7 +37,6 @@ pub struct V1FullFormat {
 
     /// A wrapper object for vessel objects, each describing vessels in range, including this vessel.
     pub vessels: Option<HashMap<String, V1Vessel>>,
-
     // TODO: Add aircraft
     // TODO: Add aton
     // TODO: Add sar

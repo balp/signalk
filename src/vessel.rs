@@ -229,7 +229,13 @@ mod context_tests {
         vessel.apply_update(&update);
 
         assert_eq!(
-            vessel.navigation.unwrap().speed_over_ground.unwrap().value.unwrap(),
+            vessel
+                .navigation
+                .unwrap()
+                .speed_over_ground
+                .unwrap()
+                .value
+                .unwrap(),
             12.6
         );
     }
@@ -253,7 +259,13 @@ mod context_tests {
         vessel.apply_update(&update);
 
         assert_eq!(
-            vessel.navigation.unwrap().speed_over_ground.unwrap().value.unwrap(),
+            vessel
+                .navigation
+                .unwrap()
+                .speed_over_ground
+                .unwrap()
+                .value
+                .unwrap(),
             5.1
         );
     }
