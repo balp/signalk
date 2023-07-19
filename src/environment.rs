@@ -23,6 +23,53 @@ impl V1Environment {
     pub fn builder() -> V1EnvironmentBuilder {
         V1EnvironmentBuilder::default()
     }
+
+    pub fn update(&mut self, mut path: Vec<&str>, value: &serde_json::value::Value) {
+        log::debug!("environment update: {:?} -> {:?}", path, value);
+        match path[0] {
+            "outside" => {
+                if self.outside.is_none() {
+                    self.outside = Some(V1EnvironmentOutside::builder().build());
+                }
+                if let Some(ref mut outside) = self.outside {
+                    path.remove(0);
+                    outside.update(path, value);
+                }
+            }
+            "inside" => {}
+            "water" => {
+                if self.water.is_none() {
+                    self.water = Some(V1EnvironmentWater::new(None, None));
+                }
+                if let Some(ref mut water) = self.water {
+                    path.remove(0);
+                    water.update(path, value);
+                }
+            }
+            "depth" => {
+                if self.depth.is_none() {
+                    self.depth = Some(V1EnvironmentDepth::builder().build());
+                }
+                if let Some(ref mut depth) = self.depth {
+                    path.remove(0);
+                    depth.update(path, value);
+                }
+            }
+            "current" => {}
+            "tide" => {}
+            "heave" => {
+                self.heave =
+                    Some(V1NumberValue::builder().json_value(value).build())
+            }
+            "wind" => {}
+            "time" => {}
+            "mode" => {}
+
+            &_ => {
+                log::warn!("Unknown value to update: {:?}::{:?}", path, value);
+            }
+        }
+    }
 }
 
 #[derive(Default)]
@@ -114,6 +161,14 @@ pub struct V1EnvironmentOutside {
 impl V1EnvironmentOutside {
     pub fn builder() -> V1EnvironmentOutsideBuilder {
         V1EnvironmentOutsideBuilder::default()
+    }
+    pub fn update(&mut self, mut path: Vec<&str>, value: &serde_json::value::Value) {
+        log::debug!("V1EnvironmentOutside update: {:?} -> {:?}", path, value);
+        match path[0] {
+            &_ => {
+                log::warn!("Unknown value to update: {:?}::{:?}", path, value);
+            }
+        };
     }
 }
 
@@ -313,6 +368,25 @@ impl V1EnvironmentWater {
             salinity,
         }
     }
+    pub fn update(&mut self, mut path: Vec<&str>, value: &serde_json::value::Value) {
+        log::debug!("V1EnvironmentWater update: {:?} -> {:?}", path, value);
+        match path[0] {
+            "temperature" => {
+                if let Some(val) = value.as_f64() {
+                    self.temperature = Some(V1NumberValue::builder().value(val).build())
+                }
+            }
+            "salinity" => {
+                if let Some(val) = value.as_f64() {
+                    self.salinity = Some(V1NumberValue::builder().value(val).build())
+                }
+            }
+            &_ => {
+                log::warn!("Unknown value to update: {:?}::{:?}", path, value);
+            }
+        };
+    }
+
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
@@ -329,6 +403,40 @@ impl V1EnvironmentDepth {
     pub fn builder() -> V1EnvironmentDepthBuilder {
         V1EnvironmentDepthBuilder::default()
     }
+    pub fn update(&mut self, mut path: Vec<&str>, value: &serde_json::value::Value) {
+        log::debug!("V1EnvironmentDepth update: {:?} -> {:?}", path, value);
+        match path[0] {
+            "belowKeel" => {
+                if let Some(val) = value.as_f64() {
+                    self.below_keel = Some(V1NumberValue::builder().value(val).build())
+                }
+            }
+            "belowTransducer" => {
+                if let Some(val) = value.as_f64() {
+                    self.below_transducer = Some(V1NumberValue::builder().value(val).build())
+                }
+            }
+            "belowSurface" => {
+                if let Some(val) = value.as_f64() {
+                    self.below_surface = Some(V1NumberValue::builder().value(val).build())
+                }
+            }
+            "transducerToKeel" => {
+                if let Some(val) = value.as_f64() {
+                    self.transducer_to_keel = Some(V1NumberValue::builder().value(val).build())
+                }
+            }
+            "surfaceToTransducer" => {
+                if let Some(val) = value.as_f64() {
+                    self.surface_to_transducer = Some(V1NumberValue::builder().value(val).build())
+                }
+            }
+            &_ => {
+                log::warn!("Unknown value to update: {:?}::{:?}", path, value);
+            }
+        };
+    }
+
 }
 
 #[derive(Default)]

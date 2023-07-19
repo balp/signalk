@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use serde_json::value::Value;
+use log::{debug, error, info, warn};
 
 use crate::definitions::V1NumberValue;
 
@@ -43,65 +44,73 @@ impl V1Navigation {
         V1NavigationBuilder::default()
     }
 
-    pub fn update(&mut self, path: String, value: &serde_json::value::Value) {
-        if path == "courseOverGroundMagnetic" {
-            self.course_over_ground_magnetic =
-                Some(V1NumberValue::builder().json_value(value).build())
-        }
-        if path == "courseOverGroundTrue" {
-            self.course_over_ground_true = Some(V1NumberValue::builder().json_value(value).build())
-        }
-        if path == "courseRhumbline" {
-            self.course_rhumbline = Some(value.clone())
-        }
-        if path == "courseGreatCircle" {
-            self.course_great_circle = Some(value.clone())
-        }
-        if path == "magneticVariation" {
-            self.magnetic_variation = Some(V1NumberValue::builder().json_value(value).build())
-        }
-        if path == "magneticVariationAgeOfService" {
-            self.magnetic_variation_age_of_service =
-                Some(V1NumberValue::builder().json_value(value).build())
-        }
-        if path == "headingMagnetic" {
-            self.heading_magnetic = Some(V1NumberValue::builder().json_value(value).build())
-        }
-        if path == "magneticDeviation" {
-            self.magnetic_deviation = Some(V1NumberValue::builder().json_value(value).build())
-        }
-        if path == "headingCompass" {
-            self.heading_compass = Some(V1NumberValue::builder().json_value(value).build())
-        }
-        if path == "headingTrue" {
-            self.heading_true = Some(V1NumberValue::builder().json_value(value).build())
+    pub fn update(&mut self, path: Vec<&str>, value: &serde_json::value::Value) {
+        match path[0] {
+            "courseOverGroundMagnetic" => {
+                self.course_over_ground_magnetic =
+                    Some(V1NumberValue::builder().json_value(value).build())
+            }
+            "courseOverGroundTrue" => {
+                self.course_over_ground_true = Some(V1NumberValue::builder().json_value(value).build())
+            }
+            "courseRhumbline" => {
+                self.course_rhumbline = Some(value.clone())
+            }
+            "courseGreatCircle" => {
+                self.course_great_circle = Some(value.clone())
+            }
+            "magneticVariation" => {
+                self.magnetic_variation = Some(V1NumberValue::builder().json_value(value).build())
+            }
+            "magneticVariationAgeOfService" => {
+                self.magnetic_variation_age_of_service =
+                    Some(V1NumberValue::builder().json_value(value).build())
+            }
+            "headingMagnetic" => {
+                self.heading_magnetic = Some(V1NumberValue::builder().json_value(value).build())
+            }
+            "magneticDeviation" => {
+                self.magnetic_deviation = Some(V1NumberValue::builder().json_value(value).build())
+            }
+            "headingCompass" => {
+                self.heading_compass = Some(V1NumberValue::builder().json_value(value).build())
+            }
+            "headingTrue" => {
+                self.heading_true = Some(V1NumberValue::builder().json_value(value).build())
+            }
+            "position" => {
+                self.position = Some(V1PositionType::builder().json_value(value).build())
+            }
+            "rateOfTurn" => {
+                self.rate_of_turn = Some(V1NumberValue::builder().json_value(value).build())
+            }
+            "speedOverGround" => {
+                self.speed_over_ground = Some(V1NumberValue::builder().json_value(value).build())
+            }
+            "speedThroughWater" => {
+                self.speed_through_water = Some(V1NumberValue::builder().json_value(value).build())
+            }
+            "speedThroughWaterTransverse" => {
+                self.speed_through_water_transverse =
+                    Some(V1NumberValue::builder().json_value(value).build())
+            }
+            "speedThroughWaterLongitudinal" => {
+                self.speed_through_water_longitudinal =
+                    Some(V1NumberValue::builder().json_value(value).build())
+            }
+            "leewayAngle" => {
+                self.leeway_angle = Some(V1NumberValue::builder().json_value(value).build())
+            }
+            "log" => {
+                self.log = Some(V1NumberValue::builder().json_value(value).build())
+            }
+            &_ => {
+                warn!("Unknown value to update: {:?}::{:?}", path, value);
+            }
         }
         // if path == "position" {
         //     self.position = Some(V1NumberValue::builder().json_value(value).build())
         // }
-        if path == "rateOfTurn" {
-            self.rate_of_turn = Some(V1NumberValue::builder().json_value(value).build())
-        }
-        if path == "speedOverGround" {
-            self.speed_over_ground = Some(V1NumberValue::builder().json_value(value).build())
-        }
-        if path == "speedThroughWater" {
-            self.speed_through_water = Some(V1NumberValue::builder().json_value(value).build())
-        }
-        if path == "speedThroughWaterTransverse" {
-            self.speed_through_water_transverse =
-                Some(V1NumberValue::builder().json_value(value).build())
-        }
-        if path == "speedThroughWaterLongitudinal" {
-            self.speed_through_water_longitudinal =
-                Some(V1NumberValue::builder().json_value(value).build())
-        }
-        if path == "leewayAngle" {
-            self.leeway_angle = Some(V1NumberValue::builder().json_value(value).build())
-        }
-        if path == "log" {
-            self.log = Some(V1NumberValue::builder().json_value(value).build())
-        }
     }
 }
 
@@ -265,6 +274,27 @@ pub struct V1PositionTypeBuilder {
 }
 
 impl V1PositionTypeBuilder {
+    pub fn json_value(mut self, value: &serde_json::Value) -> V1PositionTypeBuilder {
+        if let Value::Object(ref map) = value {
+            if let Some(longitude) = map.get("longitude") {
+                if let Some(lon) = longitude.as_f64() {
+                    self.value.longitude = lon;
+                }
+            }
+            if let Some(latitude) = map.get("latitude") {
+                if let Some(lat) = latitude.as_f64() {
+                    self.value.latitude = lat;
+                }
+            }
+            if let Some(altitude) = map.get("altitude") {
+                if let Some(alt) = altitude.as_f64() {
+                    self.value.altitude = Some(alt);
+                }
+            }
+        }
+        self
+    }
+
     pub fn value(mut self, value: V1PositionValue) -> V1PositionTypeBuilder {
         self.value = value;
         self

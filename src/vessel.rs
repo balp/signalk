@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
+use log::{debug, error, info};
 
 use crate::electrical::V1Electrical;
 use crate::environment::V1Environment;
@@ -60,18 +61,67 @@ pub struct V1Vessel {
 
 impl Updatable for V1Vessel {
     fn apply_update(&mut self, update: &V1UpdateType) {
+        debug!("Apply update: {:?}", update);
         if let Some(ref values) = update.values {
             for value in values.iter() {
-                let v: Vec<&str> = value.path.split('.').collect();
-                if v[0] == "navigation" {
-                    if self.navigation.is_none() {
-                        self.navigation = Some(V1Navigation::default());
+                let mut v: Vec<&str> = value.path.split('.').collect();
+                match v[0] {
+                    "mmsi" => {
+                        if let serde_json::Value::String(ref string) = value.value {
+                            self.mmsi = Some(string.to_string());
+                        }
                     }
-                    if let Some(ref mut navigation) = self.navigation {
-                        navigation.update(v[1].into(), &value.value);
+                    "url" => {
+                        if let serde_json::Value::String(ref string) = value.value {
+                            self.url = Some(string.to_string());
+                        }
                     }
-                } else {
-                    dbg!(&value.path);
+                    "uuid" => {
+                        if let serde_json::Value::String(ref string) = value.value {
+                            self.uuid = Some(string.to_string());
+                        }
+                    }
+                    "mothership_mmsi" => {
+                        if let serde_json::Value::String(ref string) = value.value {
+                            self.mothership_mmsi = Some(string.to_string());
+                        }
+                    }
+                    "name" => {
+                        if let serde_json::Value::String(ref string) = value.value {
+                            self.name = Some(string.to_string());
+                        }
+                    }
+                    "port" => {
+                        if let serde_json::Value::String(ref string) = value.value {
+                            self.port = Some(string.to_string());
+                        }
+                    }
+                    "flag" => {
+                        if let serde_json::Value::String(ref string) = value.value {
+                            self.flag = Some(string.to_string());
+                        }
+                    }
+                    "navigation" => {
+                        if self.navigation.is_none() {
+                            self.navigation = Some(V1Navigation::default());
+                        }
+                        if let Some(ref mut navigation) = self.navigation {
+                            v.remove(0);
+                            navigation.update(v, &value.value);
+                        }
+                    }
+                    "environment" => {
+                        if self.environment.is_none() {
+                            self.environment = Some(V1Environment::default());
+                        }
+                        if let Some(ref mut environment) = self.environment {
+                            v.remove(0);
+                            environment.update(v, &value.value);
+                        }
+                    }
+                    &_ => {
+                        debug!("Unknown update pattern: {:?}", value);
+                    }
                 }
             }
         }

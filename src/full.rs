@@ -67,6 +67,9 @@ impl V1FullFormat {
     pub fn apply_delta(&mut self, delta: &V1DeltaFormat) {
         if let Some(ref context) = delta.context {
             let v: Vec<&str> = context.split('.').collect();
+            if v.len() < 2 {
+                return;
+            }
             if v[0] == "vessels" {
                 if self.vessels.is_none() {
                     self.vessels = Some(HashMap::new());
