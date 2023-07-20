@@ -2,10 +2,8 @@
 //!
 //! `signalk` is a collections of types to serialize and deserialize the
 //! signal-k protocol.
-use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
-use serde_json::value::Value;
 
 pub use definitions::{
     V1Attr, V1CommonValueFields, V1DefSource, V1Meta, V1MetaZone, V1NumberValue,
@@ -55,6 +53,14 @@ pub enum SignalKStreamMessage {
     BadData,
 }
 
+#[derive(Debug, PartialEq)]
+pub enum SignalKGetError {
+    NoSuchPath,
+    WrongDataType,
+    ValueNotSet,
+    TBD,
+}
+
 #[derive(Debug, Default)]
 pub struct Storage {
     data: V1FullFormat,
@@ -73,6 +79,10 @@ impl Storage {
     }
     pub fn new(data: V1FullFormat) -> Self {
         Self { data }
+    }
+
+    pub fn get_f64_for_path(&self, path: String) -> Result<f64, SignalKGetError> {
+        self.data.get_f64_for_path(path)
     }
 }
 

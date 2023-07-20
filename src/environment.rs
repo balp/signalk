@@ -57,10 +57,7 @@ impl V1Environment {
             }
             "current" => {}
             "tide" => {}
-            "heave" => {
-                self.heave =
-                    Some(V1NumberValue::builder().json_value(value).build())
-            }
+            "heave" => self.heave = Some(V1NumberValue::builder().json_value(value).build()),
             "wind" => {}
             "time" => {}
             "mode" => {}
@@ -386,7 +383,6 @@ impl V1EnvironmentWater {
             }
         };
     }
-
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
@@ -436,7 +432,6 @@ impl V1EnvironmentDepth {
             }
         };
     }
-
 }
 
 #[derive(Default)]

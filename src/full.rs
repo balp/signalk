@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-use crate::{V1DeltaFormat, V1Sources, V1UpdateType, V1Vessel};
+use crate::{SignalKGetError, V1DeltaFormat, V1Sources, V1UpdateType, V1Vessel};
 
 /// These items can be updated by a V1UpdateType
 ///
@@ -90,6 +90,32 @@ impl V1FullFormat {
         }
     }
 
+    pub fn get_f64_for_path(&self, path: String) -> Result<f64, SignalKGetError> {
+        let mut path_que: Vec<&str> = path.split('.').collect();
+        match path_que[0] {
+            "version" => Err(SignalKGetError::WrongDataType),
+            "self" => {
+                let self_path: Vec<&str> = self.self_.split('.').collect();
+                if self_path[0] == "vessels" {
+                    if let Some(ref vessels) = self.vessels {
+                        if let Some(vessel) = vessels.get(self_path[1]) {
+                            path_que.remove(0);
+                            vessel.get_f64_for_path(path_que)
+                        } else {
+                            Err(SignalKGetError::NoSuchPath)
+                        }
+                    } else {
+                        Err(SignalKGetError::NoSuchPath)
+                    }
+                } else {
+                    Err(SignalKGetError::NoSuchPath)
+                }
+            }
+            "vessels" => Err(SignalKGetError::NoSuchPath),
+            &_ => Err(SignalKGetError::NoSuchPath),
+        }
+    }
+
     fn get_context(&self, context: String) -> Option<Box<dyn Updatable>> {
         let v: Vec<&str> = context.split('.').collect();
         if v[0] == "vessels" {
@@ -172,8 +198,6 @@ impl V1FullFormatBuilder {
 
 #[cfg(test)]
 mod context_tests {
-    use std::ops::Deref;
-
     use serde_json::{Number, Value};
 
     use crate::{
@@ -183,31 +207,30 @@ mod context_tests {
 
     #[test]
     fn update_existing_mmsi() {
-        let mut data = V1FullFormat::builder()
-            .add_vessel(
-                "urn:mrn:imo:mmsi:366982330".into(),
-                V1Vessel::builder()
-                    .mmsi("366982330".into())
-                    .navigation(
-                        V1Navigation::builder()
-                            .speed_over_ground(V1NumberValue::builder().value(5.6).build())
-                            .build(),
-                    )
-                    .build(),
-            )
-            .build();
-        let delta = V1DeltaFormat::builder()
-            .context("vessels.urn:mrn:imo:mmsi:366982330".into())
-            .add_update(
-                V1UpdateType::builder()
-                    .add(V1UpdateValue::new(
-                        "navigation.speedOverGround".into(),
-                        Value::Number(Number::from_f64(5.1).unwrap()),
-                    ))
-                    .build(),
-            )
-            .build();
+        let mut data = make_366982330_vessel();
+        let delta = make_speed_delta_for_366982330();
         data.apply_delta(&delta);
+        assert_speed_is_5_1(&mut data);
+    }
+
+    #[test]
+    fn update_new_mmsi() {
+        let mut data = V1FullFormat::builder().build();
+
+        let delta = make_speed_delta_for_366982330();
+        data.apply_delta(&delta);
+        assert_speed_is_5_1(&mut data);
+    }
+
+    #[test]
+    fn get_self_speed_by_path() {
+        let mut data = make_366982330_vessel();
+        data.self_ = "vessels.urn:mrn:imo:mmsi:366982330".to_string();
+        let speed = data.get_f64_for_path("self.navigation.speedOverGround".to_string());
+        assert_eq!(speed, Ok(5.6))
+    }
+
+    fn assert_speed_is_5_1(data: &mut V1FullFormat) {
         assert_eq!(
             data.vessels
                 .as_ref()
@@ -227,10 +250,7 @@ mod context_tests {
         )
     }
 
-    #[test]
-    fn update_new_mmsi() {
-        let mut data = V1FullFormat::builder().build();
-
+    fn make_speed_delta_for_366982330() -> V1DeltaFormat {
         let delta = V1DeltaFormat::builder()
             .context("vessels.urn:mrn:imo:mmsi:366982330".into())
             .add_update(
@@ -242,23 +262,23 @@ mod context_tests {
                     .build(),
             )
             .build();
-        data.apply_delta(&delta);
-        assert_eq!(
-            data.vessels
-                .as_ref()
-                .unwrap()
-                .get("urn:mrn:imo:mmsi:366982330")
-                .as_ref()
-                .unwrap()
-                .navigation
-                .as_ref()
-                .unwrap()
-                .speed_over_ground
-                .as_ref()
-                .unwrap()
-                .value
-                .unwrap(),
-            5.1
-        )
+        delta
+    }
+
+    fn make_366982330_vessel() -> V1FullFormat {
+        let data = V1FullFormat::builder()
+            .add_vessel(
+                "urn:mrn:imo:mmsi:366982330".into(),
+                V1Vessel::builder()
+                    .mmsi("366982330".into())
+                    .navigation(
+                        V1Navigation::builder()
+                            .speed_over_ground(V1NumberValue::builder().value(5.6).build())
+                            .build(),
+                    )
+                    .build(),
+            )
+            .build();
+        data
     }
 }

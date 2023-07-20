@@ -1,13 +1,12 @@
 use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
-use log::{debug, error, info};
 
 use crate::electrical::V1Electrical;
 use crate::environment::V1Environment;
 use crate::full::Updatable;
 use crate::notification::V1Notification;
-use crate::{V1Navigation, V1NumberValue, V1Propulsion, V1UpdateType};
+use crate::{SignalKGetError, V1Navigation, V1Propulsion, V1UpdateType};
 
 /// An object describing an individual vessel. It should be an object in vessels,
 /// named using MMSI or a UUID
@@ -61,7 +60,7 @@ pub struct V1Vessel {
 
 impl Updatable for V1Vessel {
     fn apply_update(&mut self, update: &V1UpdateType) {
-        debug!("Apply update: {:?}", update);
+        log::debug!("Apply update: {:?}", update);
         if let Some(ref values) = update.values {
             for value in values.iter() {
                 let mut v: Vec<&str> = value.path.split('.').collect();
@@ -120,7 +119,7 @@ impl Updatable for V1Vessel {
                         }
                     }
                     &_ => {
-                        debug!("Unknown update pattern: {:?}", value);
+                        log::warn!("Unknown update pattern: {:?}", value);
                     }
                 }
             }
@@ -162,6 +161,38 @@ impl V1Vessel {
         } else {
             Self::default()
         }
+    }
+
+    pub fn get_f64_for_path(&self, mut path: Vec<&str>) -> Result<f64, SignalKGetError> {
+        match path[0] {
+            "mmsi" => Err(SignalKGetError::WrongDataType),
+            "url" => Err(SignalKGetError::WrongDataType),
+            "uuid" => Err(SignalKGetError::WrongDataType),
+            "mothership_mmsi" => Err(SignalKGetError::WrongDataType),
+            "name" => Err(SignalKGetError::WrongDataType),
+            "port" => Err(SignalKGetError::WrongDataType),
+            "flag" => Err(SignalKGetError::WrongDataType),
+            "navigation" => {
+                if let Some(ref navigation) = self.navigation {
+                    path.remove(0);
+                    navigation.get_f64_for_path(path)
+                } else {
+                    Err(SignalKGetError::NoSuchPath)
+                }
+            }
+            "environment" => Err(SignalKGetError::TBD),
+            "electrical" => Err(SignalKGetError::TBD),
+            "notifications" => Err(SignalKGetError::TBD),
+            "steering" => Err(SignalKGetError::TBD),
+            "tanks" => Err(SignalKGetError::TBD),
+            "design" => Err(SignalKGetError::TBD),
+            "sails" => Err(SignalKGetError::TBD),
+            "sensors" => Err(SignalKGetError::TBD),
+            "performance" => Err(SignalKGetError::TBD),
+            "propulsion" => Err(SignalKGetError::TBD),
+            &_ => Err(SignalKGetError::NoSuchPath),
+        }
+        // Ok(5.1)
     }
 }
 
@@ -372,5 +403,6 @@ mod context_tests {
     #[test]
     fn new_from_id() {
         let vessel = V1Vessel::new_with_id("urn:mrn:imo:mmsi:366982330");
+        assert_eq!(vessel.mmsi, Some("366982330".to_string()));
     }
 }
