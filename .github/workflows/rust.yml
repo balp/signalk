@@ -16,10 +16,21 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - name: Get rust tool chain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: stable
+        components: rustfmt, clippy
+    - name: Rust Cache # cache the rust build artefacts
+      uses: Swatinem/rust-cache@v2
     - name: Build
       run: cargo build --verbose
     - name: Run tests
       run: cargo test --verbose
+    - name: cargo clippy warning
+      run: cargo clippy --no-deps
+    - name: cargo fmt check
+      run: cargo fmt --check
     - name: Make API docs
       run: | 
         cargo doc --verbose

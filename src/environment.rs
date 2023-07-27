@@ -749,7 +749,11 @@ pub struct V1EnvironmentCurrentValue {
 
 impl V1EnvironmentCurrentValue {
     pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
-        log::debug!("V1EnvironmentCurrentValue update: {:?} -> {:?}", path, value);
+        log::debug!(
+            "V1EnvironmentCurrentValue update: {:?} -> {:?}",
+            path,
+            value
+        );
         log::warn!("Unknown value to update: {:?}::{:?}", path, value);
     }
 }
