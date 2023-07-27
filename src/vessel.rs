@@ -63,8 +63,8 @@ impl Updatable for V1Vessel {
         log::debug!("Apply update: {:?}", update);
         if let Some(ref values) = update.values {
             for value in values.iter() {
-                let mut v: Vec<&str> = value.path.split('.').collect();
-                match v[0] {
+                let mut path: Vec<&str> = value.path.split('.').collect();
+                match path[0] {
                     "mmsi" => {
                         if let serde_json::Value::String(ref string) = value.value {
                             self.mmsi = Some(string.to_string());
@@ -105,8 +105,8 @@ impl Updatable for V1Vessel {
                             self.navigation = Some(V1Navigation::default());
                         }
                         if let Some(ref mut navigation) = self.navigation {
-                            v.remove(0);
-                            navigation.update(v, &value.value);
+                            path.remove(0);
+                            navigation.update(&mut path, &value.value);
                         }
                     }
                     "environment" => {
@@ -114,8 +114,8 @@ impl Updatable for V1Vessel {
                             self.environment = Some(V1Environment::default());
                         }
                         if let Some(ref mut environment) = self.environment {
-                            v.remove(0);
-                            environment.update(v, &value.value);
+                            path.remove(0);
+                            environment.update(&mut path, &value.value);
                         }
                     }
                     &_ => {
@@ -163,7 +163,7 @@ impl V1Vessel {
         }
     }
 
-    pub fn get_f64_for_path(&self, mut path: Vec<&str>) -> Result<f64, SignalKGetError> {
+    pub fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
         match path[0] {
             "mmsi" => Err(SignalKGetError::WrongDataType),
             "url" => Err(SignalKGetError::WrongDataType),
@@ -180,7 +180,14 @@ impl V1Vessel {
                     Err(SignalKGetError::NoSuchPath)
                 }
             }
-            "environment" => Err(SignalKGetError::TBD),
+            "environment" => {
+                if let Some(ref environment) = self.environment {
+                    path.remove(0);
+                    environment.get_f64_for_path(path)
+                } else {
+                    Err(SignalKGetError::NoSuchPath)
+                }
+            }
             "electrical" => Err(SignalKGetError::TBD),
             "notifications" => Err(SignalKGetError::TBD),
             "steering" => Err(SignalKGetError::TBD),

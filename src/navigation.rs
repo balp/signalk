@@ -44,7 +44,7 @@ impl V1Navigation {
         V1NavigationBuilder::default()
     }
 
-    pub fn update(&mut self, path: Vec<&str>, value: &serde_json::value::Value) {
+    pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
         match path[0] {
             "courseOverGroundMagnetic" => {
                 self.course_over_ground_magnetic =
@@ -101,10 +101,8 @@ impl V1Navigation {
                 log::warn!("Unknown value to update: {:?}::{:?}", path, value);
             }
         }
-        // if path == "position" {
-        //     self.position = Some(V1NumberValue::builder().json_value(value).build())
-        // }
     }
+
     fn get_f64_value(value: &Option<V1NumberValue>) -> Result<f64, SignalKGetError> {
         if let Some(ref number_value) = value {
             if let Some(value) = number_value.value {
@@ -117,7 +115,7 @@ impl V1Navigation {
         }
     }
 
-    pub fn get_f64_for_path(&self, mut path: Vec<&str>) -> Result<f64, SignalKGetError> {
+    pub fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
         match path[0] {
             "course" => Err(SignalKGetError::TBD),
             "lights" => Err(SignalKGetError::TBD),

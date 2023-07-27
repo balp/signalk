@@ -100,7 +100,7 @@ impl V1FullFormat {
                     if let Some(ref vessels) = self.vessels {
                         if let Some(vessel) = vessels.get(self_path[1]) {
                             path_que.remove(0);
-                            vessel.get_f64_for_path(path_que)
+                            vessel.get_f64_for_path(&mut path_que)
                         } else {
                             Err(SignalKGetError::NoSuchPath)
                         }
@@ -113,25 +113,6 @@ impl V1FullFormat {
             }
             "vessels" => Err(SignalKGetError::NoSuchPath),
             &_ => Err(SignalKGetError::NoSuchPath),
-        }
-    }
-
-    fn get_context(&self, context: String) -> Option<Box<dyn Updatable>> {
-        let v: Vec<&str> = context.split('.').collect();
-        if v[0] == "vessels" {
-            match &self.vessels {
-                Some(vessels) => {
-                    let id = v[1].to_string();
-                    let t = vessels.get(&id);
-                    match t {
-                        None => None,
-                        Some(vessel) => Some(Box::new(vessel.clone())),
-                    }
-                }
-                _ => None,
-            }
-        } else {
-            None
         }
     }
 

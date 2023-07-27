@@ -4,6 +4,23 @@ use serde::{Deserialize, Serialize};
 
 use crate::definitions::{V1CommonValueFields, V1NumberValue};
 use crate::sources::V1Source;
+use crate::SignalKGetError;
+
+trait F64Gettable {
+    fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError>;
+}
+
+fn get_f64_value(value: &Option<V1NumberValue>) -> Result<f64, SignalKGetError> {
+    if let Some(ref number_value) = value {
+        if let Some(value) = number_value.value {
+            Ok(value)
+        } else {
+            Err(SignalKGetError::ValueNotSet)
+        }
+    } else {
+        Err(SignalKGetError::ValueNotSet)
+    }
+}
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 pub struct V1Environment {
@@ -24,19 +41,27 @@ impl V1Environment {
         V1EnvironmentBuilder::default()
     }
 
-    pub fn update(&mut self, mut path: Vec<&str>, value: &serde_json::value::Value) {
+    pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
         log::debug!("environment update: {:?} -> {:?}", path, value);
         match path[0] {
             "outside" => {
                 if self.outside.is_none() {
-                    self.outside = Some(V1EnvironmentOutside::builder().build());
+                    self.outside = Some(V1EnvironmentOutside::default());
                 }
                 if let Some(ref mut outside) = self.outside {
                     path.remove(0);
                     outside.update(path, value);
                 }
             }
-            "inside" => {}
+            "inside" => {
+                if self.inside.is_none() {
+                    self.inside = Some(V1EnvironmentInside::default());
+                }
+                if let Some(ref mut inside) = self.inside {
+                    path.remove(0);
+                    inside.update(path, value);
+                }
+            }
             "water" => {
                 if self.water.is_none() {
                     self.water = Some(V1EnvironmentWater::new(None, None));
@@ -48,23 +73,142 @@ impl V1Environment {
             }
             "depth" => {
                 if self.depth.is_none() {
-                    self.depth = Some(V1EnvironmentDepth::builder().build());
+                    self.depth = Some(V1EnvironmentDepth::default());
                 }
                 if let Some(ref mut depth) = self.depth {
                     path.remove(0);
                     depth.update(path, value);
                 }
             }
-            "current" => {}
-            "tide" => {}
+            "current" => {
+                if self.current.is_none() {
+                    self.current = Some(V1EnvironmentCurrent::default());
+                }
+                if let Some(ref mut current) = self.current {
+                    path.remove(0);
+                    current.update(path, value);
+                }
+            }
+            "tide" => {
+                if self.tide.is_none() {
+                    self.tide = Some(V1EnvironmentTide::default());
+                }
+                if let Some(ref mut tide) = self.tide {
+                    path.remove(0);
+                    tide.update(path, value);
+                }
+            }
             "heave" => self.heave = Some(V1NumberValue::builder().json_value(value).build()),
-            "wind" => {}
-            "time" => {}
-            "mode" => {}
+            "wind" => {
+                if self.wind.is_none() {
+                    self.wind = Some(V1EnvironmentWind::default());
+                }
+                if let Some(ref mut wind) = self.wind {
+                    path.remove(0);
+                    wind.update(path, value);
+                }
+            }
+            "time" => {
+                if self.time.is_none() {
+                    self.time = Some(V1EnvironmentTime::default());
+                }
+                if let Some(ref mut time) = self.time {
+                    path.remove(0);
+                    time.update(path, value);
+                }
+            }
+            "mode" => {
+                if self.mode.is_none() {
+                    self.mode = Some(V1EnvironmentMode::default());
+                }
+                if let Some(ref mut mode) = self.mode {
+                    path.remove(0);
+                    mode.update(path, value);
+                }
+            }
 
             &_ => {
                 log::warn!("Unknown value to update: {:?}::{:?}", path, value);
             }
+        }
+    }
+
+    pub fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+        match path[0] {
+            "outside" => {
+                if let Some(ref value) = self.outside {
+                    path.remove(0);
+                    value.get_f64_for_path(path)
+                } else {
+                    Err(SignalKGetError::NoSuchPath)
+                }
+            }
+            "inside" => {
+                if let Some(ref value) = self.inside {
+                    path.remove(0);
+                    value.get_f64_for_path(path)
+                } else {
+                    Err(SignalKGetError::NoSuchPath)
+                }
+            }
+            "water" => {
+                if let Some(ref value) = self.water {
+                    path.remove(0);
+                    value.get_f64_for_path(path)
+                } else {
+                    Err(SignalKGetError::NoSuchPath)
+                }
+            }
+            "depth" => {
+                if let Some(ref value) = self.depth {
+                    path.remove(0);
+                    value.get_f64_for_path(path)
+                } else {
+                    Err(SignalKGetError::NoSuchPath)
+                }
+            }
+            "current" => {
+                if let Some(ref value) = self.current {
+                    path.remove(0);
+                    value.get_f64_for_path(path)
+                } else {
+                    Err(SignalKGetError::NoSuchPath)
+                }
+            }
+            "tide" => {
+                if let Some(ref value) = self.tide {
+                    path.remove(0);
+                    value.get_f64_for_path(path)
+                } else {
+                    Err(SignalKGetError::NoSuchPath)
+                }
+            }
+            "heave" => get_f64_value(&self.heave),
+            "wind" => {
+                if let Some(ref value) = self.wind {
+                    path.remove(0);
+                    value.get_f64_for_path(path)
+                } else {
+                    Err(SignalKGetError::NoSuchPath)
+                }
+            }
+            "time" => {
+                if let Some(ref value) = self.time {
+                    path.remove(0);
+                    value.get_f64_for_path(path)
+                } else {
+                    Err(SignalKGetError::NoSuchPath)
+                }
+            }
+            "mode" => {
+                if let Some(ref value) = self.mode {
+                    path.remove(0);
+                    value.get_f64_for_path(path)
+                } else {
+                    Err(SignalKGetError::NoSuchPath)
+                }
+            }
+            &_ => Err(SignalKGetError::NoSuchPath),
         }
     }
 }
@@ -155,11 +299,33 @@ pub struct V1EnvironmentOutside {
     pub illuminance: Option<V1NumberValue>,
 }
 
+impl F64Gettable for V1EnvironmentOutside {
+    fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+        match path[0] {
+            "temperature" => get_f64_value(&self.temperature),
+            "dew_point_temperature" => get_f64_value(&self.dew_point_temperature),
+            "apparent_wind_chill_temperature" => {
+                get_f64_value(&self.apparent_wind_chill_temperature)
+            }
+            "theoretical_wind_chill_temperature" => {
+                get_f64_value(&self.theoretical_wind_chill_temperature)
+            }
+            "heat_index_temperature" => get_f64_value(&self.heat_index_temperature),
+            "pressure" => get_f64_value(&self.pressure),
+            "humidity" => get_f64_value(&self.humidity),
+            "relative_humidity" => get_f64_value(&self.relative_humidity),
+            "air_density" => get_f64_value(&self.pressure),
+            "illuminance" => get_f64_value(&self.illuminance),
+            &_ => Err(SignalKGetError::NoSuchPath),
+        }
+    }
+}
+
 impl V1EnvironmentOutside {
     pub fn builder() -> V1EnvironmentOutsideBuilder {
         V1EnvironmentOutsideBuilder::default()
     }
-    pub fn update(&mut self, mut path: Vec<&str>, value: &serde_json::value::Value) {
+    pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
         log::debug!("V1EnvironmentOutside update: {:?} -> {:?}", path, value);
         match path[0] {
             &_ => {
@@ -256,6 +422,18 @@ impl V1EnvironmentInside {
     pub fn builder() -> V1EnvironmentInsideBuilder {
         V1EnvironmentInsideBuilder::default()
     }
+    pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
+        log::debug!("V1EnvironmentOutside update: {:?} -> {:?}", path, value);
+        log::warn!("Unknown value to update: {:?}::{:?}", path, value);
+    }
+}
+
+impl F64Gettable for V1EnvironmentInside {
+    fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+        match path[0] {
+            &_ => Err(SignalKGetError::NoSuchPath),
+        }
+    }
 }
 
 #[derive(Default)]
@@ -289,6 +467,25 @@ pub struct V1EnvironmentZone {
 impl V1EnvironmentZone {
     pub fn builder() -> V1EnvironmentZoneBuilder {
         V1EnvironmentZoneBuilder::default()
+    }
+    pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
+        log::debug!("V1EnvironmentZone update: {:?} -> {:?}", path, value);
+        log::warn!("Unknown value to update: {:?}::{:?}", path, value);
+    }
+}
+impl F64Gettable for V1EnvironmentZone {
+    fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+        match path[0] {
+            "temperature" => get_f64_value(&self.temperature),
+            "heatIndexTemperature" => get_f64_value(&self.heat_index_temperature),
+            "pressure" => get_f64_value(&self.pressure),
+            "relativeHumidity" => get_f64_value(&self.relative_humidity),
+            "dewPoint" => get_f64_value(&self.dew_point),
+            "dewPointTemperature" => get_f64_value(&self.dew_point_temperature),
+            "airDensity" => get_f64_value(&self.air_density),
+            "illuminance" => get_f64_value(&self.illuminance),
+            &_ => Err(SignalKGetError::NoSuchPath),
+        }
     }
 }
 
@@ -365,7 +562,7 @@ impl V1EnvironmentWater {
             salinity,
         }
     }
-    pub fn update(&mut self, mut path: Vec<&str>, value: &serde_json::value::Value) {
+    pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
         log::debug!("V1EnvironmentWater update: {:?} -> {:?}", path, value);
         match path[0] {
             "temperature" => {
@@ -385,6 +582,16 @@ impl V1EnvironmentWater {
     }
 }
 
+impl F64Gettable for V1EnvironmentWater {
+    fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+        match path[0] {
+            "temperature" => get_f64_value(&self.temperature),
+            "salinity" => get_f64_value(&self.salinity),
+            &_ => Err(SignalKGetError::NoSuchPath),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct V1EnvironmentDepth {
@@ -399,7 +606,7 @@ impl V1EnvironmentDepth {
     pub fn builder() -> V1EnvironmentDepthBuilder {
         V1EnvironmentDepthBuilder::default()
     }
-    pub fn update(&mut self, mut path: Vec<&str>, value: &serde_json::value::Value) {
+    pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
         log::debug!("V1EnvironmentDepth update: {:?} -> {:?}", path, value);
         match path[0] {
             "belowKeel" => {
@@ -431,6 +638,19 @@ impl V1EnvironmentDepth {
                 log::warn!("Unknown value to update: {:?}::{:?}", path, value);
             }
         };
+    }
+}
+
+impl F64Gettable for V1EnvironmentDepth {
+    fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+        match path[0] {
+            "belowKeel" => get_f64_value(&self.below_keel),
+            "belowTransducer" => get_f64_value(&self.below_transducer),
+            "belowSurface" => get_f64_value(&self.below_surface),
+            "transducerToKeel" => get_f64_value(&self.transducer_to_keel),
+            "surfaceToTransducer" => get_f64_value(&self.surface_to_transducer),
+            &_ => Err(SignalKGetError::NoSuchPath),
+        }
     }
 }
 
@@ -484,6 +704,19 @@ pub struct V1EnvironmentCurrent {
     pub values: Option<HashMap<String, V1EnvironmentCurrentType>>,
 }
 
+impl V1EnvironmentCurrent {
+    pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
+        log::debug!("V1EnvironmentCurrent update: {:?} -> {:?}", path, value);
+        log::warn!("Unknown value to update: {:?}::{:?}", path, value);
+    }
+}
+
+impl F64Gettable for V1EnvironmentCurrent {
+    fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+        Err(SignalKGetError::TBD)
+    }
+}
+
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct V1EnvironmentCurrentType {
@@ -491,6 +724,19 @@ pub struct V1EnvironmentCurrentType {
     pub pgn: Option<f64>,
     pub sentence: Option<String>,
     pub value: Option<V1EnvironmentCurrentValue>,
+}
+
+impl V1EnvironmentCurrentType {
+    pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
+        log::debug!("V1EnvironmentCurrentType update: {:?} -> {:?}", path, value);
+        log::warn!("Unknown value to update: {:?}::{:?}", path, value);
+    }
+}
+
+impl F64Gettable for V1EnvironmentCurrentType {
+    fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+        Err(SignalKGetError::TBD)
+    }
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
@@ -501,6 +747,19 @@ pub struct V1EnvironmentCurrentValue {
     pub set_magnetic: Option<f64>,
 }
 
+impl V1EnvironmentCurrentValue {
+    pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
+        log::debug!("V1EnvironmentCurrentValue update: {:?} -> {:?}", path, value);
+        log::warn!("Unknown value to update: {:?}::{:?}", path, value);
+    }
+}
+
+impl F64Gettable for V1EnvironmentCurrentValue {
+    fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+        Err(SignalKGetError::TBD)
+    }
+}
+
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct V1EnvironmentTide {
@@ -509,6 +768,19 @@ pub struct V1EnvironmentTide {
     pub height_low: Option<V1NumberValue>,
     pub time_low: Option<String>,
     pub time_high: Option<String>,
+}
+
+impl V1EnvironmentTide {
+    pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
+        log::debug!("V1EnvironmentTide update: {:?} -> {:?}", path, value);
+        log::warn!("Unknown value to update: {:?}::{:?}", path, value);
+    }
+}
+
+impl F64Gettable for V1EnvironmentTide {
+    fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+        Err(SignalKGetError::TBD)
+    }
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
@@ -525,6 +797,19 @@ pub struct V1EnvironmentWind {
     pub speed_apparent: Option<V1NumberValue>,
 }
 
+impl V1EnvironmentWind {
+    pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
+        log::debug!("V1EnvironmentWind update: {:?} -> {:?}", path, value);
+        log::warn!("Unknown value to update: {:?}::{:?}", path, value);
+    }
+}
+
+impl F64Gettable for V1EnvironmentWind {
+    fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+        Err(SignalKGetError::TBD)
+    }
+}
+
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct V1EnvironmentTime {
@@ -538,6 +823,16 @@ pub struct V1EnvironmentTime {
 impl V1EnvironmentTime {
     pub fn builder() -> V1EnvironmentTimeBuilder {
         V1EnvironmentTimeBuilder::default()
+    }
+    pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
+        log::debug!("V1EnvironmentTime update: {:?} -> {:?}", path, value);
+        log::warn!("Unknown value to update: {:?}::{:?}", path, value);
+    }
+}
+
+impl F64Gettable for V1EnvironmentTime {
+    fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+        Err(SignalKGetError::TBD)
     }
 }
 
@@ -588,4 +883,17 @@ pub struct V1EnvironmentMode {
     pub value: Option<String>,
     pub timestamp: Option<String>,
     pub source: Option<String>,
+}
+
+impl V1EnvironmentMode {
+    pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
+        log::debug!("V1EnvironmentMode update: {:?} -> {:?}", path, value);
+        log::warn!("Unknown value to update: {:?}::{:?}", path, value);
+    }
+}
+
+impl F64Gettable for V1EnvironmentMode {
+    fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+        Err(SignalKGetError::WrongDataType)
+    }
 }
