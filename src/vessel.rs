@@ -148,11 +148,7 @@ impl V1Vessel {
 
     pub fn new_with_id(id: &str) -> Self {
         let id_parts: Vec<&str> = id.split(':').collect();
-        if id_parts.len() != 5 {
-            Self::default()
-        } else if id_parts[0] != "urn" {
-            Self::default()
-        } else if id_parts[1] != "mrn" {
+        if id_parts.len() != 5 && id_parts[0] != "urn" && id_parts[1] != "mrn" {
             Self::default()
         } else if id_parts[2] == "signalk" {
             Self::builder().uuid(id_parts[4].to_string()).build()
