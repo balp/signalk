@@ -1,0 +1,7 @@
+####
+GET http://annoiii.lan:3000/signalk
+
+
+
+####
+GET http://annoiii.lan:3000/signalk/v1/api/

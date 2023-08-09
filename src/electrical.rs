@@ -557,13 +557,13 @@ impl V1BatteryTemperature {
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct V1BatteryCapacity {
-    pub nominal: Option<f64>,
-    pub actual: Option<f64>,
-    pub remaining: Option<f64>,
-    pub discharge_limit: Option<f64>,
-    pub state_of_charge: Option<f64>,
-    pub state_of_health: Option<f64>,
-    pub discharge_since_full: Option<f64>,
+    pub nominal: Option<V1NumberValue>,
+    pub actual: Option<V1NumberValue>,
+    pub remaining: Option<V1NumberValue>,
+    pub discharge_limit: Option<V1NumberValue>,
+    pub state_of_charge: Option<V1NumberValue>,
+    pub state_of_health: Option<V1NumberValue>,
+    pub discharge_since_full: Option<V1NumberValue>,
     pub time_remaining: Option<V1NumberValue>,
 }
 
@@ -575,43 +575,43 @@ impl V1BatteryCapacity {
 
 #[derive(Default)]
 pub struct V1BatteryCapacityBuilder {
-    nominal: Option<f64>,
-    actual: Option<f64>,
-    remaining: Option<f64>,
-    discharge_limit: Option<f64>,
-    state_of_charge: Option<f64>,
-    state_of_health: Option<f64>,
-    discharge_since_full: Option<f64>,
+    nominal: Option<V1NumberValue>,
+    actual: Option<V1NumberValue>,
+    remaining: Option<V1NumberValue>,
+    discharge_limit: Option<V1NumberValue>,
+    state_of_charge: Option<V1NumberValue>,
+    state_of_health: Option<V1NumberValue>,
+    discharge_since_full: Option<V1NumberValue>,
     time_remaining: Option<V1NumberValue>,
 }
 
 impl V1BatteryCapacityBuilder {
     pub fn nominal(mut self, value: f64) -> V1BatteryCapacityBuilder {
-        self.nominal = Some(value);
+        self.nominal = Some(V1NumberValue::builder().value(value).build());
         self
     }
     pub fn actual(mut self, value: f64) -> V1BatteryCapacityBuilder {
-        self.actual = Some(value);
+        self.actual = Some(V1NumberValue::builder().value(value).build());
         self
     }
     pub fn remaining(mut self, value: f64) -> V1BatteryCapacityBuilder {
-        self.remaining = Some(value);
+        self.remaining = Some(V1NumberValue::builder().value(value).build());
         self
     }
     pub fn discharge_limit(mut self, value: f64) -> V1BatteryCapacityBuilder {
-        self.discharge_limit = Some(value);
+        self.discharge_limit = Some(V1NumberValue::builder().value(value).build());
         self
     }
     pub fn state_of_charge(mut self, value: f64) -> V1BatteryCapacityBuilder {
-        self.state_of_charge = Some(value);
+        self.state_of_charge = Some(V1NumberValue::builder().value(value).build());
         self
     }
     pub fn state_of_health(mut self, value: f64) -> V1BatteryCapacityBuilder {
-        self.state_of_health = Some(value);
+        self.state_of_health = Some(V1NumberValue::builder().value(value).build());
         self
     }
     pub fn discharge_since_full(mut self, value: f64) -> V1BatteryCapacityBuilder {
-        self.discharge_since_full = Some(value);
+        self.discharge_since_full = Some(V1NumberValue::builder().value(value).build());
         self
     }
     pub fn time_remaining(mut self, value: V1NumberValue) -> V1BatteryCapacityBuilder {
@@ -642,8 +642,8 @@ pub struct V1Battery {
     pub chemistry: Option<String>,
     pub temperature: Option<V1BatteryTemperature>,
     pub capacity: Option<V1BatteryCapacity>,
-    pub lifetime_discharge: Option<f64>,
-    pub lifetime_recharge: Option<f64>,
+    pub lifetime_discharge: Option<V1NumberValue>,
+    pub lifetime_recharge: Option<V1NumberValue>,
 }
 
 impl V1Battery {
@@ -659,8 +659,8 @@ pub struct V1BatteryBuilder {
     chemistry: Option<String>,
     temperature: Option<V1BatteryTemperature>,
     capacity: Option<V1BatteryCapacity>,
-    lifetime_discharge: Option<f64>,
-    lifetime_recharge: Option<f64>,
+    lifetime_discharge: Option<V1NumberValue>,
+    lifetime_recharge: Option<V1NumberValue>,
 }
 
 impl V1BatteryBuilder {
@@ -685,11 +685,11 @@ impl V1BatteryBuilder {
         self
     }
     pub fn lifetime_discharge(mut self, value: f64) -> V1BatteryBuilder {
-        self.lifetime_discharge = Some(value);
+        self.lifetime_discharge = Some(V1NumberValue::builder().value(value).build());
         self
     }
     pub fn lifetime_recharge(mut self, value: f64) -> V1BatteryBuilder {
-        self.lifetime_recharge = Some(value);
+        self.lifetime_recharge = Some(V1NumberValue::builder().value(value).build());
         self
     }
     pub fn build(self) -> V1Battery {
@@ -872,11 +872,11 @@ pub struct V1Solar {
     #[serde(flatten)]
     pub charger: Option<V1ElectricalChargerQualities>,
     pub value: Option<String>,
-    pub panel_voltage: Option<f64>,
-    pub panel_current: Option<f64>,
-    pub panel_temperature: Option<f64>,
+    pub panel_voltage: Option<V1NumberValue>,
+    pub panel_current: Option<V1NumberValue>,
+    pub panel_temperature: Option<V1NumberValue>,
     pub load: Option<V1SolarLoad>,
-    pub load_current: Option<f64>,
+    pub load_current: Option<V1NumberValue>,
 }
 
 impl V1Solar {
@@ -891,11 +891,11 @@ pub struct V1SolarBuilder {
     dc: Option<V1ElectricalDCQualities>,
     charger: Option<V1ElectricalChargerQualities>,
     value: Option<String>,
-    panel_voltage: Option<f64>,
-    panel_current: Option<f64>,
-    panel_temperature: Option<f64>,
+    panel_voltage: Option<V1NumberValue>,
+    panel_current: Option<V1NumberValue>,
+    panel_temperature: Option<V1NumberValue>,
     load: Option<V1SolarLoad>,
-    load_current: Option<f64>,
+    load_current: Option<V1NumberValue>,
 }
 
 impl V1SolarBuilder {
@@ -916,15 +916,15 @@ impl V1SolarBuilder {
         self
     }
     pub fn panel_voltage(mut self, value: f64) -> V1SolarBuilder {
-        self.panel_voltage = Some(value);
+        self.panel_voltage = Some(V1NumberValue::builder().value(value).build());
         self
     }
     pub fn panel_current(mut self, value: f64) -> V1SolarBuilder {
-        self.panel_current = Some(value);
+        self.panel_current = Some(V1NumberValue::builder().value(value).build());
         self
     }
     pub fn panel_temperature(mut self, value: f64) -> V1SolarBuilder {
-        self.panel_temperature = Some(value);
+        self.panel_temperature = Some(V1NumberValue::builder().value(value).build());
         self
     }
     pub fn load(mut self, value: V1SolarLoad) -> V1SolarBuilder {
@@ -932,7 +932,7 @@ impl V1SolarBuilder {
         self
     }
     pub fn load_current(mut self, value: f64) -> V1SolarBuilder {
-        self.load_current = Some(value);
+        self.load_current = Some(V1NumberValue::builder().value(value).build());
         self
     }
     pub fn build(self) -> V1Solar {
