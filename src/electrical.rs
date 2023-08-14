@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 
 use crate::definitions::{V1CommonValueFields, V1NumberValue};
+use crate::SignalKGetError;
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 pub struct V1Electrical {
@@ -14,9 +15,74 @@ pub struct V1Electrical {
     pub ac: Option<HashMap<String, V1ACBus>>,
 }
 
+fn get_f64_value(value: &Option<V1NumberValue>) -> Result<f64, SignalKGetError> {
+    if let Some(ref number_value) = value {
+        if let Some(value) = number_value.value {
+            Ok(value)
+        } else {
+            Err(SignalKGetError::ValueNotSet)
+        }
+    } else {
+        Err(SignalKGetError::ValueNotSet)
+    }
+}
+
 impl V1Electrical {
     pub fn builder() -> V1ElectricalBuilder {
         V1ElectricalBuilder::default()
+    }
+
+    pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
+        match path[0] {
+            "batteries" => {
+                if self.batteries.is_none() {
+                    self.batteries = Some(HashMap::new());
+                }
+                if let Some(ref mut batteries) = self.batteries {
+                    let id = path[1].to_string();
+                    if !batteries.contains_key(&id) {
+                        batteries.insert(id.clone(), V1Battery::builder()
+                            .identity(V1ElectricalIdentity::builder()
+                                .name(id.clone()).build())
+                            .build());
+                    }
+                    let mut t = batteries.get_mut(&id);
+                    if let Some(ref mut battery) = t {
+                        path.remove(0); // Remove batteries
+                        path.remove(0); // and the index of the bank
+                        battery.update(path, value);
+                    }
+                }
+
+            }
+
+            &_ => {
+                log::warn!("Unknown value to update: {:?}::{:?}", path, value);
+            }
+        }
+    }
+
+    pub fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+        match path[0] {
+            "batteries" => {
+                log::debug!("batteries path: {:?}", path);
+                if let Some(ref batteries) = self.batteries {
+                    if let Some(battery) = batteries.get(path[1]) {
+                        path.remove(0); // Remove both batteries
+                        path.remove(0); // Remove name instance
+                        battery.get_f64_for_path(path)
+                    } else {
+                        Err(SignalKGetError::NoSuchPath)
+                    }
+                } else {
+                    Err(SignalKGetError::ValueNotSet)
+                }
+            },
+            &_ => {
+                log::info!("path: {:?}", path);
+                Err(SignalKGetError::NoSuchPath)
+            },
+        }
     }
 }
 
@@ -649,6 +715,46 @@ pub struct V1Battery {
 impl V1Battery {
     pub fn builder() -> V1BatteryBuilder {
         V1BatteryBuilder::default()
+    }
+    pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
+        match path[0] {
+            "voltage" => {
+                if self.dc_qualities.is_none() {
+                    self.dc_qualities = Some(V1ElectricalDCQualities::default());
+                }
+                if let Some(ref mut dc) = self.dc_qualities {
+                    let val = V1NumberValue::builder().json_value(value).build();
+                    dc.voltage = Some(V1ElectricalDCVoltageValue::builder().value(val).build());
+                }
+            },
+            "current" => {
+                if self.dc_qualities.is_none() {
+                    self.dc_qualities = Some(V1ElectricalDCQualities::default());
+                }
+                if let Some(ref mut dc) = self.dc_qualities {
+                    let val = V1NumberValue::builder().json_value(value).build();
+                    dc.current = Some(V1ElectricalDCCurrentValue::builder().value(val).build());
+                }
+            },
+            &_ => {
+                log::warn!("{:?}--Unknown value to update: {:?}::{:?}", self, path, value);
+            }
+        }
+    }
+
+    pub fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+        log::info!("V1Batterypath: {:?}", path);
+        match path[0] {
+            "voltage" => {
+                if let Some(ref dc) = self.dc_qualities {
+                    if let Some(ref voltage) = dc.voltage {
+                        get_f64_value(&voltage.value)
+                    } else { Err(SignalKGetError::ValueNotSet) }
+                } else { Err(SignalKGetError::ValueNotSet) }
+            }
+            &_ => Err(SignalKGetError::TBD),
+        }
+
     }
 }
 

@@ -118,6 +118,15 @@ impl Updatable for V1Vessel {
                             environment.update(&mut path, &value.value);
                         }
                     }
+                    "electrical" => {
+                        if self.electrical.is_none() {
+                            self.electrical = Some(V1Electrical::default());
+                        }
+                        if let Some(ref mut electrical) = self.electrical {
+                            path.remove(0);
+                            electrical.update(&mut path, &value.value);
+                        }
+                    }
                     &_ => {
                         log::warn!("Unknown update pattern: {:?}", value);
                     }
@@ -184,7 +193,15 @@ impl V1Vessel {
                     Err(SignalKGetError::NoSuchPath)
                 }
             }
-            "electrical" => Err(SignalKGetError::TBD),
+            "electrical" => {
+                log::info!("get: path {:?}", path);
+                if let Some(ref electrical) = self.electrical {
+                    path.remove(0);
+                    electrical.get_f64_for_path(path)
+                } else {
+                    Err(SignalKGetError::NoSuchPath)
+                }
+            }
             "notifications" => Err(SignalKGetError::TBD),
             "steering" => Err(SignalKGetError::TBD),
             "tanks" => Err(SignalKGetError::TBD),

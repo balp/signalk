@@ -92,6 +92,7 @@ impl V1FullFormat {
 
     pub fn get_f64_for_path(&self, path: String) -> Result<f64, SignalKGetError> {
         let mut path_que: Vec<&str> = path.split('.').collect();
+        log::debug!("get_f64_for_path(&self, {:?})", path_que);
         match path_que[0] {
             "version" => Err(SignalKGetError::WrongDataType),
             "self" => {
