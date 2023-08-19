@@ -3,14 +3,13 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 
 use crate::definitions::{V1CommonValueFields, V1NumberValue};
+use crate::helper_functions::get_f64_value;
 use crate::sources::V1Source;
 use crate::SignalKGetError;
-use crate::helper_functions::get_f64_value;
 
 trait F64Gettable {
     fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError>;
 }
-
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 pub struct V1Environment {
@@ -702,7 +701,7 @@ impl V1EnvironmentCurrent {
 }
 
 impl F64Gettable for V1EnvironmentCurrent {
-    fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+    fn get_f64_for_path(&self, _path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
         Err(SignalKGetError::TBD)
     }
 }
@@ -724,7 +723,7 @@ impl V1EnvironmentCurrentType {
 }
 
 impl F64Gettable for V1EnvironmentCurrentType {
-    fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+    fn get_f64_for_path(&self, _path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
         Err(SignalKGetError::TBD)
     }
 }
@@ -749,7 +748,7 @@ impl V1EnvironmentCurrentValue {
 }
 
 impl F64Gettable for V1EnvironmentCurrentValue {
-    fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+    fn get_f64_for_path(&self, _path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
         Err(SignalKGetError::TBD)
     }
 }
@@ -772,7 +771,7 @@ impl V1EnvironmentTide {
 }
 
 impl F64Gettable for V1EnvironmentTide {
-    fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+    fn get_f64_for_path(&self, _path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
         Err(SignalKGetError::TBD)
     }
 }
@@ -799,7 +798,7 @@ impl V1EnvironmentWind {
 }
 
 impl F64Gettable for V1EnvironmentWind {
-    fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+    fn get_f64_for_path(&self, _path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
         Err(SignalKGetError::TBD)
     }
 }
@@ -825,7 +824,7 @@ impl V1EnvironmentTime {
 }
 
 impl F64Gettable for V1EnvironmentTime {
-    fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+    fn get_f64_for_path(&self, _path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
         Err(SignalKGetError::TBD)
     }
 }
@@ -887,7 +886,7 @@ impl V1EnvironmentMode {
 }
 
 impl F64Gettable for V1EnvironmentMode {
-    fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+    fn get_f64_for_path(&self, _path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
         Err(SignalKGetError::WrongDataType)
     }
 }

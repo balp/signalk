@@ -118,7 +118,7 @@ impl V1FullFormat {
     }
 
     pub fn get_self(&self) -> Option<&V1Vessel> {
-        if let Some(ref vessels) = self.vessels.as_ref() {
+        if let Some(vessels) = self.vessels.as_ref() {
             let v: Vec<&str> = self.self_.split('.').collect();
             if v[0] == "vessels" {}
             return vessels.get(v[1]);
@@ -237,7 +237,7 @@ mod context_tests {
             .context("vessels.urn:mrn:imo:mmsi:366982330".into())
             .add_update(
                 V1UpdateType::builder()
-                    .add(V1UpdateValue::new(
+                    .add_update(V1UpdateValue::new(
                         "navigation.speedOverGround".into(),
                         Value::Number(Number::from_f64(5.1).unwrap()),
                     ))

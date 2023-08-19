@@ -29,10 +29,12 @@ impl V1Electrical {
                 if let Some(ref mut batteries) = self.batteries {
                     let id = path[1].to_string();
                     if !batteries.contains_key(&id) {
-                        batteries.insert(id.clone(), V1Battery::builder()
-                            .identity(V1ElectricalIdentity::builder()
-                                .name(id.clone()).build())
-                            .build());
+                        batteries.insert(
+                            id.clone(),
+                            V1Battery::builder()
+                                .identity(V1ElectricalIdentity::builder().name(id.clone()).build())
+                                .build(),
+                        );
                     }
                     let mut t = batteries.get_mut(&id);
                     if let Some(ref mut battery) = t {
@@ -41,7 +43,6 @@ impl V1Electrical {
                         battery.update(path, value);
                     }
                 }
-
             }
 
             &_ => {
@@ -65,11 +66,11 @@ impl V1Electrical {
                 } else {
                     Err(SignalKGetError::ValueNotSet)
                 }
-            },
+            }
             &_ => {
                 log::info!("path: {:?}", path);
                 Err(SignalKGetError::NoSuchPath)
-            },
+            }
         }
     }
 }
@@ -714,7 +715,7 @@ impl V1Battery {
                     let val = V1NumberValue::builder().json_value(value).build();
                     dc.voltage = Some(V1ElectricalDCVoltageValue::builder().value(val).build());
                 }
-            },
+            }
             "current" => {
                 if self.dc_qualities.is_none() {
                     self.dc_qualities = Some(V1ElectricalDCQualities::default());
@@ -723,9 +724,14 @@ impl V1Battery {
                     let val = V1NumberValue::builder().json_value(value).build();
                     dc.current = Some(V1ElectricalDCCurrentValue::builder().value(val).build());
                 }
-            },
+            }
             &_ => {
-                log::warn!("{:?}--Unknown value to update: {:?}::{:?}", self, path, value);
+                log::warn!(
+                    "{:?}--Unknown value to update: {:?}::{:?}",
+                    self,
+                    path,
+                    value
+                );
             }
         }
     }
@@ -737,12 +743,15 @@ impl V1Battery {
                 if let Some(ref dc) = self.dc_qualities {
                     if let Some(ref voltage) = dc.voltage {
                         helper_functions::get_f64_value(&voltage.value)
-                    } else { Err(SignalKGetError::ValueNotSet) }
-                } else { Err(SignalKGetError::ValueNotSet) }
+                    } else {
+                        Err(SignalKGetError::ValueNotSet)
+                    }
+                } else {
+                    Err(SignalKGetError::ValueNotSet)
+                }
             }
             &_ => Err(SignalKGetError::TBD),
         }
-
     }
 }
 

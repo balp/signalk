@@ -64,7 +64,7 @@ pub struct V1UpdateTypeBuilder {
 }
 
 impl V1UpdateTypeBuilder {
-    pub fn add(mut self, value: V1UpdateValue) -> V1UpdateTypeBuilder {
+    pub fn add_update(mut self, value: V1UpdateValue) -> V1UpdateTypeBuilder {
         if self.values.is_none() {
             self.values = Some(Vec::new());
         }

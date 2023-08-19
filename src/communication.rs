@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use crate::{helper_functions, SignalKGetError};
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 pub struct V1Communication {
@@ -19,18 +19,7 @@ impl V1Communication {
     }
 
     pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
-        if path.len() > 0 {
-            match path[0] {
-                "callsignVhf" => self.callsign_vhf = helper_functions::json_as_optional_string(value),
-                "callsignHf" => self.callsign_hf = helper_functions::json_as_optional_string(value),
-                "phoneNumber" => self.phone_number = helper_functions::json_as_optional_string(value),
-                "emailHf" => self.email_hf = helper_functions::json_as_optional_string(value),
-                "email" => self.email = helper_functions::json_as_optional_string(value),
-                "satPhoneNumber" => self.sat_phone_number = helper_functions::json_as_optional_string(value),
-                "skipperName" => self.skipper_name = helper_functions::json_as_optional_string(value),
-                &_ => log::warn!("Unknown value to update: {:?}::{:?}", path, value),
-            }
-        } else {
+        if path.is_empty() {
             log::warn!("Complex value object {:?}", value);
             if let serde_json::Value::Object(ref map) = value {
                 for (k, v) in map.iter() {
@@ -39,12 +28,29 @@ impl V1Communication {
                     self.update(&mut path, v);
                 }
             }
-
+        } else {
+            match path[0] {
+                "callsignVhf" => {
+                    self.callsign_vhf = helper_functions::json_as_optional_string(value)
+                }
+                "callsignHf" => self.callsign_hf = helper_functions::json_as_optional_string(value),
+                "phoneNumber" => {
+                    self.phone_number = helper_functions::json_as_optional_string(value)
+                }
+                "emailHf" => self.email_hf = helper_functions::json_as_optional_string(value),
+                "email" => self.email = helper_functions::json_as_optional_string(value),
+                "satPhoneNumber" => {
+                    self.sat_phone_number = helper_functions::json_as_optional_string(value)
+                }
+                "skipperName" => {
+                    self.skipper_name = helper_functions::json_as_optional_string(value)
+                }
+                &_ => log::warn!("Unknown value to update: {:?}::{:?}", path, value),
+            }
         }
     }
 
-
-    pub fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+    pub fn get_f64_for_path(&self, _path: &mut [&str]) -> Result<f64, SignalKGetError> {
         Err(SignalKGetError::WrongDataType) // None of the types are f64
     }
 }

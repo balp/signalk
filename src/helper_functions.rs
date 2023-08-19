@@ -1,5 +1,5 @@
-use serde_json::Value;
 use crate::{SignalKGetError, V1NumberValue};
+use serde_json::Value;
 
 pub fn json_as_optional_string(value: &Value) -> Option<String> {
     if let serde_json::Value::String(ref string) = value {

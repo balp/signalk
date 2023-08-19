@@ -104,7 +104,7 @@ impl V1Navigation {
         }
     }
 
-    pub fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+    pub fn get_f64_for_path(&self, path: &mut [&str]) -> Result<f64, SignalKGetError> {
         match path[0] {
             "course" => Err(SignalKGetError::TBD),
             "lights" => Err(SignalKGetError::TBD),

@@ -2,10 +2,9 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-
 use crate::communication::V1Communication;
-use crate::environment::V1Environment;
 use crate::electrical::V1Electrical;
+use crate::environment::V1Environment;
 use crate::full::Updatable;
 use crate::notification::V1Notification;
 use crate::{SignalKGetError, V1Navigation, V1Propulsion, V1UpdateType};
@@ -104,97 +103,101 @@ impl V1Vessel {
         }
     }
     pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
-        if path.len() > 0 {
-            match path[0] {
-                "mmsi" => {
-                    if let serde_json::Value::String(ref string) = value {
-                        self.mmsi = Some(string.to_string());
+        if path.is_empty() {
+            return;
+        }
+        match path[0] {
+            "mmsi" => {
+                if let serde_json::Value::String(ref string) = value {
+                    self.mmsi = Some(string.to_string());
+                }
+            }
+            "url" => {
+                if let serde_json::Value::String(ref string) = value {
+                    self.url = Some(string.to_string());
+                }
+            }
+            "uuid" => {
+                if let serde_json::Value::String(ref string) = value {
+                    self.uuid = Some(string.to_string());
+                }
+            }
+            "mothership_mmsi" => {
+                if let serde_json::Value::String(ref string) = value {
+                    self.mothership_mmsi = Some(string.to_string());
+                }
+            }
+            "name" => {
+                if let serde_json::Value::String(ref string) = value {
+                    self.name = Some(string.to_string());
+                }
+            }
+            "port" => {
+                if let serde_json::Value::String(ref string) = value {
+                    self.port = Some(string.to_string());
+                }
+            }
+            "flag" => {
+                if let serde_json::Value::String(ref string) = value {
+                    self.flag = Some(string.to_string());
+                }
+            }
+            "navigation" => {
+                if self.navigation.is_none() {
+                    self.navigation = Some(V1Navigation::default());
+                }
+                if let Some(ref mut navigation) = self.navigation {
+                    path.remove(0);
+                    navigation.update(path, value);
+                }
+            }
+            "environment" => {
+                if self.environment.is_none() {
+                    self.environment = Some(V1Environment::default());
+                }
+                if let Some(ref mut environment) = self.environment {
+                    path.remove(0);
+                    environment.update(path, value);
+                }
+            }
+            "electrical" => {
+                if self.electrical.is_none() {
+                    self.electrical = Some(V1Electrical::default());
+                }
+                if let Some(ref mut electrical) = self.electrical {
+                    path.remove(0);
+                    electrical.update(path, value);
+                }
+            }
+            "communication" => {
+                if self.communication.is_none() {
+                    self.communication = Some(V1Communication::default());
+                }
+                if let Some(ref mut communication) = self.communication {
+                    path.remove(0);
+                    communication.update(path, value);
+                }
+            }
+            "" => {
+                log::error!(
+                    "Not sure about comples update objects: {:?}::{:?}",
+                    path,
+                    value
+                );
+                log::warn!("?? objects: {:?}", value);
+                if let serde_json::Value::Object(ref map) = value {
+                    for (k, v) in map.iter() {
+                        log::debug!(" key: {:?} value: {:?}", k, v);
+                        let mut path = vec![k.as_str()];
+                        self.update(&mut path, v);
                     }
                 }
-                "url" => {
-                    if let serde_json::Value::String(ref string) = value {
-                        self.url = Some(string.to_string());
-                    }
-                }
-                "uuid" => {
-                    if let serde_json::Value::String(ref string) = value {
-                        self.uuid = Some(string.to_string());
-                    }
-                }
-                "mothership_mmsi" => {
-                    if let serde_json::Value::String(ref string) = value {
-                        self.mothership_mmsi = Some(string.to_string());
-                    }
-                }
-                "name" => {
-                    if let serde_json::Value::String(ref string) = value {
-                        self.name = Some(string.to_string());
-                    }
-                }
-                "port" => {
-                    if let serde_json::Value::String(ref string) = value {
-                        self.port = Some(string.to_string());
-                    }
-                }
-                "flag" => {
-                    if let serde_json::Value::String(ref string) = value {
-                        self.flag = Some(string.to_string());
-                    }
-                }
-                "navigation" => {
-                    if self.navigation.is_none() {
-                        self.navigation = Some(V1Navigation::default());
-                    }
-                    if let Some(ref mut navigation) = self.navigation {
-                        path.remove(0);
-                        navigation.update(path, value);
-                    }
-                }
-                "environment" => {
-                    if self.environment.is_none() {
-                        self.environment = Some(V1Environment::default());
-                    }
-                    if let Some(ref mut environment) = self.environment {
-                        path.remove(0);
-                        environment.update(path, value);
-                    }
-                }
-                "electrical" => {
-                    if self.electrical.is_none() {
-                        self.electrical = Some(V1Electrical::default());
-                    }
-                    if let Some(ref mut electrical) = self.electrical {
-                        path.remove(0);
-                        electrical.update(path, value);
-                    }
-                }
-                "communication" => {
-                    if self.communication.is_none() {
-                        self.communication = Some(V1Communication::default());
-                    }
-                    if let Some(ref mut communication) = self.communication {
-                        path.remove(0);
-                        communication.update(path, value);
-                    }
-                }
-                "" => {
-                    log::error!("Not sure about comples update objects: {:?}::{:?}", path, value);
-                    log::warn!("?? objects: {:?}", value);
-                    if let serde_json::Value::Object(ref map) = value {
-                        for (k, v) in map.iter() {
-                            log::debug!(" key: {:?} value: {:?}", k, v);
-                            let mut path = vec![k.as_str()];
-                            self.update(&mut path, v);
-                        }
-                    }
-                }
-                &_ => {
-                    log::warn!("Unknown update pattern: {:?}::{:?}", path, value);
-                }
+            }
+            &_ => {
+                log::warn!("Unknown update pattern: {:?}::{:?}", path, value);
             }
         }
     }
-
 
     pub fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
         match path[0] {
@@ -355,7 +358,7 @@ mod context_tests {
             )
             .build();
         let update = V1UpdateType::builder()
-            .add(V1UpdateValue::new(
+            .add_update(V1UpdateValue::new(
                 "navigation.speedOverGround".into(),
                 Value::Number(Number::from_f64(12.6).unwrap()),
             ))
@@ -385,7 +388,7 @@ mod context_tests {
             )
             .build();
         let update = V1UpdateType::builder()
-            .add(V1UpdateValue::new(
+            .add_update(V1UpdateValue::new(
                 "navigation.speedOverGround".into(),
                 Value::Number(Number::from_f64(5.1).unwrap()),
             ))
@@ -416,11 +419,11 @@ mod context_tests {
             )
             .build();
         let update = V1UpdateType::builder()
-            .add(V1UpdateValue::new(
+            .add_update(V1UpdateValue::new(
                 "navigation.speedOverGround".into(),
                 Value::Number(Number::from_f64(7.2).unwrap()),
             ))
-            .add(V1UpdateValue::new(
+            .add_update(V1UpdateValue::new(
                 "navigation.courseOverGroundTrue".into(),
                 Value::Number(Number::from_f64(4.71238898).unwrap()),
             ))

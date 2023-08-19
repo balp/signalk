@@ -26,6 +26,7 @@ pub use subscribe::{V1Subscribe, V1Subscription};
 pub use unsubscribe::{V1Unsubscribe, V1Unsubscription};
 pub use vessel::V1Vessel;
 
+pub mod communication;
 pub mod definitions;
 pub mod delta;
 pub mod discovery;
@@ -33,6 +34,7 @@ pub mod electrical;
 pub mod environment;
 pub mod full;
 pub mod hello;
+mod helper_functions;
 pub mod navigation;
 pub mod notification;
 pub mod propulsion;
@@ -41,8 +43,6 @@ pub mod sources;
 pub mod subscribe;
 pub mod unsubscribe;
 pub mod vessel;
-pub mod communication;
-mod helper_functions;
 
 /// Type for messages that can be received over the signal-k stream
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default)]
@@ -124,7 +124,7 @@ mod storage_tests {
             .context("vessels.urn:mrn:imo:mmsi:366982330".into())
             .add_update(
                 V1UpdateType::builder()
-                    .add(V1UpdateValue::new(
+                    .add_update(V1UpdateValue::new(
                         "navigation.speedOverGround".into(),
                         Value::Number(Number::from_f64(5.6).unwrap()),
                     ))
@@ -155,7 +155,7 @@ mod storage_tests {
             .context("vessels.urn:mrn:imo:mmsi:366982330".into())
             .add_update(
                 V1UpdateType::builder()
-                    .add(V1UpdateValue::new(
+                    .add_update(V1UpdateValue::new(
                         "navigation.speedOverGround".into(),
                         Value::Number(Number::from_f64(15.8).unwrap()),
                     ))
