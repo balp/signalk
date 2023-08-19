@@ -41,6 +41,8 @@ pub mod sources;
 pub mod subscribe;
 pub mod unsubscribe;
 pub mod vessel;
+pub mod communication;
+mod helper_functions;
 
 /// Type for messages that can be received over the signal-k stream
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default)]

@@ -5,22 +5,12 @@ use serde::{Deserialize, Serialize};
 use crate::definitions::{V1CommonValueFields, V1NumberValue};
 use crate::sources::V1Source;
 use crate::SignalKGetError;
+use crate::helper_functions::get_f64_value;
 
 trait F64Gettable {
     fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError>;
 }
 
-fn get_f64_value(value: &Option<V1NumberValue>) -> Result<f64, SignalKGetError> {
-    if let Some(ref number_value) = value {
-        if let Some(value) = number_value.value {
-            Ok(value)
-        } else {
-            Err(SignalKGetError::ValueNotSet)
-        }
-    } else {
-        Err(SignalKGetError::ValueNotSet)
-    }
-}
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 pub struct V1Environment {

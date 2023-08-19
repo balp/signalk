@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::value::Value;
 
 use crate::definitions::V1NumberValue;
+use crate::helper_functions::get_f64_value;
 use crate::SignalKGetError;
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
@@ -103,50 +104,77 @@ impl V1Navigation {
         }
     }
 
-    fn get_f64_value(value: &Option<V1NumberValue>) -> Result<f64, SignalKGetError> {
-        if let Some(ref number_value) = value {
-            if let Some(value) = number_value.value {
-                Ok(value)
-            } else {
-                Err(SignalKGetError::ValueNotSet)
-            }
-        } else {
-            Err(SignalKGetError::ValueNotSet)
-        }
-    }
-
     pub fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
         match path[0] {
             "course" => Err(SignalKGetError::TBD),
             "lights" => Err(SignalKGetError::TBD),
-            "courseOverGroundMagnetic" => Self::get_f64_value(&self.course_over_ground_magnetic),
-            "courseOverGroundTrue" => Self::get_f64_value(&self.course_over_ground_true),
+            "courseOverGroundMagnetic" => {
+                let value = &self.course_over_ground_magnetic;
+                get_f64_value(value)
+            }
+            "courseOverGroundTrue" => {
+                let value = &self.course_over_ground_true;
+                get_f64_value(value)
+            }
             "courseRhumbline" => Err(SignalKGetError::WrongDataType),
             "courseGreatCircle" => Err(SignalKGetError::WrongDataType),
             "closestApproach" => Err(SignalKGetError::TBD),
             "racing" => Err(SignalKGetError::TBD),
-            "magneticVariation" => Self::get_f64_value(&self.magnetic_variation),
+            "magneticVariation" => {
+                let value = &self.magnetic_variation;
+                get_f64_value(value)
+            }
             "magneticVariationAgeOfService" => {
-                Self::get_f64_value(&self.magnetic_variation_age_of_service)
+                let value = &self.magnetic_variation_age_of_service;
+                get_f64_value(value)
             }
             "destination" => Err(SignalKGetError::TBD),
             "gnss" => Err(SignalKGetError::TBD),
-            "headingMagnetic" => Self::get_f64_value(&self.heading_magnetic),
-            "magneticDeviation" => Self::get_f64_value(&self.magnetic_deviation),
-            "headingCompass" => Self::get_f64_value(&self.heading_compass),
-            "headingTrue" => Self::get_f64_value(&self.heading_true),
+            "headingMagnetic" => {
+                let value = &self.heading_magnetic;
+                get_f64_value(value)
+            }
+            "magneticDeviation" => {
+                let value = &self.magnetic_deviation;
+                get_f64_value(value)
+            }
+            "headingCompass" => {
+                let value = &self.heading_compass;
+                get_f64_value(value)
+            }
+            "headingTrue" => {
+                let value = &self.heading_true;
+                get_f64_value(value)
+            }
             "position" => Err(SignalKGetError::TBD),
-            "rateOfTurn" => Self::get_f64_value(&self.rate_of_turn),
-            "speedOverGround" => Self::get_f64_value(&self.speed_over_ground),
-            "speedThroughWater" => Self::get_f64_value(&self.speed_through_water),
+            "rateOfTurn" => {
+                let value = &self.rate_of_turn;
+                get_f64_value(value)
+            }
+            "speedOverGround" => {
+                let value = &self.speed_over_ground;
+                get_f64_value(value)
+            }
+            "speedThroughWater" => {
+                let value = &self.speed_through_water;
+                get_f64_value(value)
+            }
             "speedThroughWaterTransverse" => {
-                Self::get_f64_value(&self.speed_through_water_transverse)
+                let value = &self.speed_through_water_transverse;
+                get_f64_value(value)
             }
             "speedThroughWaterLongitudinal" => {
-                Self::get_f64_value(&self.speed_through_water_longitudinal)
+                let value = &self.speed_through_water_longitudinal;
+                get_f64_value(value)
             }
-            "leewayAngle" => Self::get_f64_value(&self.leeway_angle),
-            "log" => Self::get_f64_value(&self.log),
+            "leewayAngle" => {
+                let value = &self.leeway_angle;
+                get_f64_value(value)
+            }
+            "log" => {
+                let value = &self.log;
+                get_f64_value(value)
+            }
             "trip" => Err(SignalKGetError::TBD),
             "state" => Err(SignalKGetError::TBD),
             "anchor" => Err(SignalKGetError::TBD),

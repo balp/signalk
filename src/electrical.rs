@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 
 use crate::definitions::{V1CommonValueFields, V1NumberValue};
-use crate::SignalKGetError;
+use crate::{helper_functions, SignalKGetError};
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 pub struct V1Electrical {
@@ -13,18 +13,6 @@ pub struct V1Electrical {
     pub alternators: Option<HashMap<String, V1Alternator>>,
     pub solar: Option<HashMap<String, V1Solar>>,
     pub ac: Option<HashMap<String, V1ACBus>>,
-}
-
-fn get_f64_value(value: &Option<V1NumberValue>) -> Result<f64, SignalKGetError> {
-    if let Some(ref number_value) = value {
-        if let Some(value) = number_value.value {
-            Ok(value)
-        } else {
-            Err(SignalKGetError::ValueNotSet)
-        }
-    } else {
-        Err(SignalKGetError::ValueNotSet)
-    }
 }
 
 impl V1Electrical {
@@ -748,7 +736,7 @@ impl V1Battery {
             "voltage" => {
                 if let Some(ref dc) = self.dc_qualities {
                     if let Some(ref voltage) = dc.voltage {
-                        get_f64_value(&voltage.value)
+                        helper_functions::get_f64_value(&voltage.value)
                     } else { Err(SignalKGetError::ValueNotSet) }
                 } else { Err(SignalKGetError::ValueNotSet) }
             }
