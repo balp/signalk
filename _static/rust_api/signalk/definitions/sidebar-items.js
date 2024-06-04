@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["V1Attr","V1CommonValueFields","V1CommonValueFieldsBuilder","V1DefSource","V1DefSourceBuilder","V1Meta","V1MetaBuilder","V1MetaDisplayScale","V1MetaDisplayScaleBuilder","V1MetaProperties","V1MetaPropertiesBuilder","V1MetaZone","V1MetaZoneBuilder","V1NumberValue","V1NumberValueBuilder"]};
