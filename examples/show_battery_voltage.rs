@@ -1,7 +1,8 @@
 use serde_json;
-use signalk::{V1DeltaFormat, V1FullFormat, V1Hello, V1Subscribe, V1Subscription};
 use tungstenite::{connect, Message};
-use url::Url;
+
+use signalk::{V1DeltaFormat, V1FullFormat, V1Hello, V1Subscribe, V1Subscription};
+
 fn main() {
     // Initialice the env logger
     env_logger::init();
@@ -12,7 +13,7 @@ fn main() {
     // without any subscribed data. Then send an subscription message for only
     // battery voltage
     let (mut socket, _response) =
-        connect(Url::parse("ws://annoiii.lan:3000/signalk/v1/stream?subscribe=none").unwrap())
+        connect("ws://annoiii.lan:3000/signalk/v1/stream?subscribe=none")
             .expect("Can't connect");
     let subscribe = V1Subscribe::builder()
         .context("self".to_string())
@@ -37,7 +38,7 @@ fn main() {
                 panic!()
             }
         };
-        let parsed: serde_json::Value =
+        let _parsed: serde_json::Value =
             serde_json::from_str(&raw_json).expect("Can't parse to JSON");
 
         // The SignalK hello message, will tell us the servers self value, add it to the data

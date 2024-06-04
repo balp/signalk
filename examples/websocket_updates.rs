@@ -1,12 +1,12 @@
 use serde_json;
-use signalk::{V1DeltaFormat, V1FullFormat, V1Hello, V1Subscribe, V1Subscription};
-use tungstenite::{connect, Message};
-use url::Url;
+use signalk::{V1DeltaFormat, V1FullFormat, V1Hello};
+use tungstenite::connect;
+
 fn main() {
     env_logger::init();
     let mut data = V1FullFormat::default();
     let (mut socket, _response) =
-        connect(Url::parse("ws://annoiii.lan:3000/signalk/v1/stream").unwrap())
+        connect("ws://annoiii.lan:3000/signalk/v1/stream")
             .expect("Can't connect");
 
     // Loop forever, handling parsing each message
@@ -18,7 +18,7 @@ fn main() {
                 panic!()
             }
         };
-        let parsed: serde_json::Value =
+        let _parsed: serde_json::Value =
             serde_json::from_str(&raw_json).expect("Can't parse to JSON");
 
         // The SignalK hello message, will tell us the servers self value, add it to the data
