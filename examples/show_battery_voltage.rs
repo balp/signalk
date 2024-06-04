@@ -13,8 +13,7 @@ fn main() {
     // without any subscribed data. Then send an subscription message for only
     // battery voltage
     let (mut socket, _response) =
-        connect("ws://annoiii.lan:3000/signalk/v1/stream?subscribe=none")
-            .expect("Can't connect");
+        connect("ws://annoiii.lan:3000/signalk/v1/stream?subscribe=none").expect("Can't connect");
     let subscribe = V1Subscribe::builder()
         .context("self".to_string())
         .subscribe(

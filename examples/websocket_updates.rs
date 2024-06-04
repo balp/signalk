@@ -6,8 +6,7 @@ fn main() {
     env_logger::init();
     let mut data = V1FullFormat::default();
     let (mut socket, _response) =
-        connect("ws://annoiii.lan:3000/signalk/v1/stream")
-            .expect("Can't connect");
+        connect("ws://annoiii.lan:3000/signalk/v1/stream").expect("Can't connect");
 
     // Loop forever, handling parsing each message
     loop {
