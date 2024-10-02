@@ -1,19 +1,18 @@
 use serde::{Deserialize, Serialize};
 use serde_json::value::Value;
 
-use crate::definitions::V1NumberValue;
+use crate::definitions::{V1DateTime, V1NumberValue};
 use crate::helper_functions::get_f64_value;
 use crate::SignalKGetError;
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct V1Navigation {
-    // pub course: Option<V1Course>,
     // pub lights: Option<V1Lights>,
     pub course_over_ground_magnetic: Option<V1NumberValue>,
     pub course_over_ground_true: Option<V1NumberValue>,
-    pub course_rhumbline: Option<Value>,
-    pub course_great_circle: Option<Value>,
+    pub course_rhumbline: Option<V1Course>,
+    pub course_great_circle: Option<V1Course>,
     // pub closest_approach: Option<V1ClosestApproach>,
     // pub racing: Option<V1Racing>,
     pub magnetic_variation: Option<V1NumberValue>,
@@ -55,8 +54,14 @@ impl V1Navigation {
                 self.course_over_ground_true =
                     Some(V1NumberValue::builder().json_value(value).build())
             }
-            "courseRhumbline" => self.course_rhumbline = Some(value.clone()),
-            "courseGreatCircle" => self.course_great_circle = Some(value.clone()),
+            "courseRhumbline" => {
+                path.remove(0);
+                self.course_rhumbline = Some(V1Course::builder().json_value(path, value).build())
+            }
+            "courseGreatCircle" => {
+                path.remove(0);
+                self.course_great_circle = Some(V1Course::builder().json_value(path, value).build())
+            }
             "magneticVariation" => {
                 self.magnetic_variation = Some(V1NumberValue::builder().json_value(value).build())
             }
@@ -186,12 +191,11 @@ impl V1Navigation {
 
 #[derive(Default)]
 pub struct V1NavigationBuilder {
-    // pub course: Option<V1Course>,
     // pub lights: Option<V1Lights>,
     course_over_ground_magnetic: Option<V1NumberValue>,
     course_over_ground_true: Option<V1NumberValue>,
-    course_rhumbline: Option<Value>,
-    course_great_circle: Option<Value>,
+    course_rhumbline: Option<V1Course>,
+    course_great_circle: Option<V1Course>,
     // pub closest_approach: Option<V1ClosestApproach>,
     // pub racing: Option<V1Racing>,
     magnetic_variation: Option<V1NumberValue>,
@@ -227,11 +231,11 @@ impl V1NavigationBuilder {
         self.course_over_ground_true = Some(value);
         self
     }
-    pub fn course_rhumbline(mut self, value: Value) -> V1NavigationBuilder {
+    pub fn course_rhumbline(mut self, value: V1Course) -> V1NavigationBuilder {
         self.course_rhumbline = Some(value);
         self
     }
-    pub fn course_great_circle(mut self, value: Value) -> V1NavigationBuilder {
+    pub fn course_great_circle(mut self, value: V1Course) -> V1NavigationBuilder {
         self.course_great_circle = Some(value);
         self
     }
@@ -314,6 +318,96 @@ impl V1NavigationBuilder {
             position: self.position,
             rate_of_turn: self.rate_of_turn,
             log: self.log,
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+pub struct V1Course {
+    pub cross_track_error: Option<V1NumberValue>,
+    pub bearing_track_true: Option<V1NumberValue>,
+    pub bearing_track_magnetic: Option<V1NumberValue>,
+    pub active_route: Option<V1ActiveRoute>,
+    // pub next_point: Option<V1CourseNextPoint>,
+    // pub previous_point: Option<V1CourseNextPoint>,
+}
+
+impl V1Course {
+    pub fn builder() -> V1CourseBuilder {
+        V1CourseBuilder::default()
+    }
+}
+#[derive(Default)]
+pub struct V1CourseBuilder {
+    pub cross_track_error: Option<V1NumberValue>,
+    pub bearing_track_true: Option<V1NumberValue>,
+    pub bearing_track_magnetic: Option<V1NumberValue>,
+    pub active_route: Option<V1ActiveRoute>,
+    // pub next_point: Option<V1CourseNextPoint>,
+    // pub previous_point: Option<V1CourseNextPoint>,
+}
+impl V1CourseBuilder {
+    pub fn json_value(mut self, path: &mut Vec<&str>, value: &serde_json::Value) -> V1CourseBuilder {
+        match path[0] {
+            "crossTrackError" => {
+                self.cross_track_error = Some(V1NumberValue::builder().json_value(value).build());
+            }
+            "bearingTrackTrue" => {
+                self.bearing_track_true = Some(V1NumberValue::builder().json_value(value).build());
+            }
+            "bearingTrackMagnetic" => {
+                self.bearing_track_magnetic = Some(V1NumberValue::builder().json_value(value).build());
+            }
+            &_ => {
+                log::warn!("Unknown value to update: {:?}::{:?}", path, value);
+            }
+        }
+        self
+    }
+    pub fn build(self) -> V1Course {
+        V1Course {
+            cross_track_error: self.cross_track_error,
+            bearing_track_true: self.bearing_track_true,
+            bearing_track_magnetic: self.bearing_track_magnetic,
+            active_route: self.active_route,
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+pub struct V1ActiveRoute {
+    pub href: Option<String>,
+    pub estimated_time_of_arrival: Option<V1DateTime>,
+    pub start_time: Option<V1DateTime>,
+}
+impl V1ActiveRoute {
+    pub fn builder() -> V1ActiveRouteBuilder { V1ActiveRouteBuilder::default() }
+}
+#[derive(Default)]
+pub struct V1ActiveRouteBuilder {
+    pub href: Option<String>,
+    pub estimated_time_of_arrival: Option<V1DateTime>,
+    pub start_time: Option<V1DateTime>,
+}
+
+impl crate::navigation::V1ActiveRouteBuilder {
+    pub fn href(mut self, value: String) -> V1ActiveRouteBuilder {
+        self.href = Some(value);
+        self
+    }
+    pub fn estimated_time_of_arrival(mut self, value: V1DateTime) -> V1ActiveRouteBuilder {
+        self.estimated_time_of_arrival = Some(value);
+        self
+    }
+    pub fn start_time(mut self, value: V1DateTime) -> V1ActiveRouteBuilder {
+        self.start_time = Some(value);
+        self
+    }
+    pub fn build(self) -> V1ActiveRoute {
+        V1ActiveRoute {
+            href: self.href,
+            estimated_time_of_arrival: self.estimated_time_of_arrival,
+            start_time: self.start_time,
         }
     }
 }
@@ -418,4 +512,83 @@ impl V1PositionValue {
             altitude: Some(altitude),
         }
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use serde_json::{Number, Value};
+    use crate::navigation::{V1Course, V1Navigation};
+
+    #[test]
+    fn update_navigation_course_rl_xte() {
+        let mut navigation = V1Navigation::builder()
+            .course_rhumbline(V1Course::builder()
+                .build())
+            .build();
+        let mut path = vec!["courseRhumbline", "crossTrackError"];
+        let value = Value::Number(Number::from_f64(1.5).unwrap());
+        navigation.update(&mut path, &value);
+        assert_eq!(
+            navigation
+                .course_rhumbline
+                .as_ref()
+                .unwrap()
+                .cross_track_error
+                .as_ref()
+                .unwrap()
+                .value
+                .unwrap()
+            ,
+            1.5
+        )
+    }
+
+    #[test]
+    fn update_navigation_course_rl_bearing_track_true() {
+        let mut navigation = V1Navigation::builder()
+            .course_rhumbline(V1Course::builder()
+                .build())
+            .build();
+        let mut path = vec!["courseRhumbline", "bearingTrackTrue"];
+        let value = Value::Number(Number::from_f64(0.1234).unwrap());
+        navigation.update(&mut path, &value);
+        assert_eq!(
+            navigation
+                .course_rhumbline
+                .as_ref()
+                .unwrap()
+                .bearing_track_true
+                .as_ref()
+                .unwrap()
+                .value
+                .unwrap()
+            ,
+            0.1234
+        )
+    }
+    #[test]
+    fn update_navigation_course_rl_bearing_track_magnetic() {
+        let mut navigation = V1Navigation::builder()
+            .course_rhumbline(V1Course::builder()
+                .build())
+            .build();
+        let mut path = vec!["courseRhumbline", "bearingTrackMagnetic"];
+        let value = Value::Number(Number::from_f64(1.2345).unwrap());
+        navigation.update(&mut path, &value);
+        assert_eq!(
+            navigation
+                .course_rhumbline
+                .as_ref()
+                .unwrap()
+                .bearing_track_magnetic
+                .as_ref()
+                .unwrap()
+                .value
+                .unwrap()
+            ,
+            1.2345
+        )
+    }
+
+
 }

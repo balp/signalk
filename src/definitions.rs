@@ -1,3 +1,5 @@
+use crate::navigation::V1PositionTypeBuilder;
+use crate::V1PositionValue;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -564,5 +566,73 @@ impl V1DefSourceBuilder {
             talker: self.talker,
             ais_type: self.ais_type,
         }
+    }
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+pub struct V1DateTime {
+    pub timestamp: Option<V1Timestamp>,
+    pub pgn: Option<f64>,
+    pub sentence: Option<String>,
+}
+
+impl V1DateTime {
+    pub fn builder() -> V1DateTimeBuilder {
+        V1DateTimeBuilder::default()
+    }
+}
+
+#[derive(Default)]
+pub struct V1DateTimeBuilder {
+    pub timestamp: Option<V1Timestamp>,
+    pub pgn: Option<f64>,
+    pub sentence: Option<String>,
+}
+
+impl crate::definitions::V1DateTimeBuilder {
+    pub fn timestamp(mut self, value: V1Timestamp) -> crate::definitions::V1DateTimeBuilder {
+        self.timestamp = Some(value);
+        self
+    }
+    pub fn pgn(mut self, value: f64) -> crate::definitions::V1DateTimeBuilder {
+        self.pgn = Some(value);
+        self
+    }
+    pub fn sentence(mut self, sentence: String) -> V1DateTimeBuilder {
+        self.sentence = Some(sentence);
+        self
+    }
+    pub fn build(self) -> V1DateTime {
+        V1DateTime {
+            timestamp: self.timestamp,
+            pgn: self.pgn,
+            sentence: self.sentence,
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+pub struct V1Timestamp {
+    pub value: Option<String>,
+}
+
+impl V1Timestamp {
+    pub fn builder() -> V1TimestampBuilder {
+        V1TimestampBuilder::default()
+    }
+}
+
+#[derive(Default)]
+pub struct V1TimestampBuilder {
+    pub value: Option<String>,
+}
+
+impl V1TimestampBuilder {
+    pub fn value(mut self, value: String) -> V1TimestampBuilder {
+        self.value = Some(value);
+        self
+    }
+    pub fn build(self) -> V1Timestamp {
+        V1Timestamp { value: self.value }
     }
 }

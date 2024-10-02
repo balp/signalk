@@ -23,7 +23,7 @@ impl V1Discovery {
 
     pub fn get_v1_ws_endpoint(&self) -> Option<String> {
         if let Some(end) = self.endpoints.get("v1") {
-            end.signalk_http.as_ref().cloned()
+            end.signalk_ws.as_ref().cloned()
         } else {
             None
         }

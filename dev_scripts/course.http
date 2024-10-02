@@ -1,0 +1,13 @@
+### GET request to example server
+GET http://localhost:3000/signalk/v2/api/vessels/self/navigation/course
+
+###
+GET http://localhost:3000/signalk/v2/api/resources
+###
+GET http://localhost:3000/signalk/v2/api/resources/routes
+###
+GET http://localhost:3000/signalk/v2/api/resources/waypoints
+###
+GET http://localhost:3000/signalk/v2/api/resources/notes
+###
+GET http://localhost:3000/signalk/v2/api/resources/regions
