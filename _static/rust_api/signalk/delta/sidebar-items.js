@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["V1UpdateValueType"],"struct":["V1DeltaFormat","V1DeltaFormatBuilder","V1UpdateMeta","V1UpdateType","V1UpdateTypeBuilder","V1UpdateValue"]};

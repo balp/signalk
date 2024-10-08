@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["V1Notification","V1NotificationBuilder","V1NotificationValue","V1NotificationValueBuilder"]};

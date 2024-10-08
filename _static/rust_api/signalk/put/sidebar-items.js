@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["V1Put","V1PutBuilder","V1PutValue"]};
