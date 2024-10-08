@@ -1,4 +1,4 @@
-### GET request to example server
+### Cource api
 GET http://localhost:3000/signalk/v2/api/vessels/self/navigation/course
 
 ###

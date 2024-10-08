@@ -1,5 +1,3 @@
-use crate::navigation::V1PositionTypeBuilder;
-use crate::V1PositionValue;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -570,10 +568,12 @@ impl V1DefSourceBuilder {
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
-pub struct V1DateTime {
-    pub timestamp: Option<V1Timestamp>,
-    pub pgn: Option<f64>,
-    pub sentence: Option<String>,
+#[serde(untagged)]
+pub enum V1DateTime {
+    #[default]
+    None,
+    String(String),
+    Object(V1DateTimeValue),
 }
 
 impl V1DateTime {
@@ -581,38 +581,34 @@ impl V1DateTime {
         V1DateTimeBuilder::default()
     }
 }
+#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+pub struct V1DateTimeValue {
+    value: Option<String>,
+    timestamp: Option<String>,
+    pgn: Option<i64>,
+    sentence: Option<String>,
+}
 
 #[derive(Default)]
 pub struct V1DateTimeBuilder {
-    pub timestamp: Option<V1Timestamp>,
-    pub pgn: Option<f64>,
-    pub sentence: Option<String>,
+    value: Option<String>,
+    _object: Option<V1DateTimeValue>,
 }
 
-impl crate::definitions::V1DateTimeBuilder {
-    pub fn timestamp(mut self, value: V1Timestamp) -> crate::definitions::V1DateTimeBuilder {
-        self.timestamp = Some(value);
+impl V1DateTimeBuilder {
+    pub fn timestamp(mut self, value: String) -> V1DateTimeBuilder {
+        self.value = Some(value);
         self
     }
-    pub fn pgn(mut self, value: f64) -> crate::definitions::V1DateTimeBuilder {
-        self.pgn = Some(value);
-        self
-    }
-    pub fn sentence(mut self, sentence: String) -> V1DateTimeBuilder {
-        self.sentence = Some(sentence);
-        self
-    }
+
     pub fn build(self) -> V1DateTime {
-        V1DateTime {
-            timestamp: self.timestamp,
-            pgn: self.pgn,
-            sentence: self.sentence,
-        }
+        V1DateTime::None
     }
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 pub struct V1Timestamp {
+    #[serde(flatten)]
     pub value: Option<String>,
 }
 
@@ -634,5 +630,93 @@ impl V1TimestampBuilder {
     }
     pub fn build(self) -> V1Timestamp {
         V1Timestamp { value: self.value }
+    }
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+pub struct V1StringValue {
+    pub value: Option<String>,
+    #[serde(flatten)]
+    pub common_value_fields: Option<V1CommonValueFields>,
+}
+impl V1StringValue {
+    pub fn builder() -> V1StringValueBuilder {
+        V1StringValueBuilder::default()
+    }
+}
+#[derive(Default)]
+pub struct V1StringValueBuilder {
+    value: Option<String>,
+    common_value_fields: Option<V1CommonValueFields>,
+}
+impl V1StringValueBuilder {
+    pub fn value(mut self, value: String) -> V1StringValueBuilder {
+        self.value = Some(value);
+        self
+    }
+    pub fn common_value_fields(mut self, value: V1CommonValueFields) -> V1StringValueBuilder {
+        self.common_value_fields = Some(value);
+        self
+    }
+
+    pub fn build(self) -> V1StringValue {
+        V1StringValue {
+            value: self.value,
+            common_value_fields: self.common_value_fields,
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::definitions::{V1DateTime, V1DateTimeValue};
+
+    #[test]
+    fn datetime_object_json() {
+        let j = r#"
+        {
+          "value": "2015-12-05T13:11:59Z",
+          "gnssTimeSource": "GPS",
+          "timestamp": "2014-08-15T19:00:15.123456789Z",
+          "$source": "foo.bar"
+        }"#;
+        let datetime: V1DateTime = serde_json::from_str(j).unwrap();
+    }
+
+    #[test]
+    fn datetime_value_object_json() {
+        let j = r#"
+        {
+          "value": "2015-12-05T13:11:59Z",
+          "gnssTimeSource": "GPS",
+          "timestamp": "2014-08-15T19:00:15.123456789Z",
+          "$source": "foo.bar"
+        }"#;
+        let datetime: V1DateTimeValue = serde_json::from_str(j).unwrap();
+    }
+    #[test]
+    fn datetime_value_null_value_object_() {
+        let j = r#"
+        {
+          "value": null,
+          "gnssTimeSource": "GPS",
+          "timestamp": "2014-08-15T19:00:15.123456789Z",
+          "$source": "foo.bar"
+        }"#;
+        let datetime: V1DateTimeValue = serde_json::from_str(j).unwrap();
+    }
+
+    #[test]
+    fn datetime_string_json() {
+        let j = r#""2014-08-15T19:05:29.57200Z""#;
+        let datetime: V1DateTime = serde_json::from_str(j).unwrap();
+    }
+
+    #[test]
+    fn date_time_creation() {
+        let date_time = V1DateTime::String("2015-12-05T13:11:59Z".into());
+        println!("{:?}", date_time);
+        assert!(matches!(date_time, V1DateTime::String(_)));
+        //assert_eq!(date_time.value.unwrap(), "2015-09-03T09:30:09Z");
     }
 }

@@ -46,7 +46,11 @@ impl V1Electrical {
             }
 
             &_ => {
-                log::warn!("Unknown value to update: {:?}::{:?}", path, value);
+                log::warn!(
+                    "V1Electrical: Unknown value to update: {:?}::{:?}",
+                    path,
+                    value
+                );
             }
         }
     }
@@ -587,6 +591,9 @@ impl V1ElectricalACQualitiesBuilder {
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct V1BatteryTemperature {
+    #[serde(flatten)]
+    pub value: Option<V1NumberValue>,
+
     pub limit_discharge_lower: Option<f64>,
     pub limit_discharge_upper: Option<f64>,
     pub limit_recharge_lower: Option<f64>,
@@ -595,12 +602,14 @@ pub struct V1BatteryTemperature {
 
 impl V1BatteryTemperature {
     pub fn new(
+        value: Option<V1NumberValue>,
         limit_discharge_lower: Option<f64>,
         limit_discharge_upper: Option<f64>,
         limit_recharge_lower: Option<f64>,
         limit_recharge_upper: Option<f64>,
     ) -> Self {
         Self {
+            value,
             limit_discharge_lower,
             limit_discharge_upper,
             limit_recharge_lower,
@@ -625,6 +634,37 @@ pub struct V1BatteryCapacity {
 impl V1BatteryCapacity {
     pub fn builder() -> V1BatteryCapacityBuilder {
         V1BatteryCapacityBuilder::default()
+    }
+    pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
+        match path[0] {
+            "nominal" => self.nominal = Some(V1NumberValue::builder().json_value(value).build()),
+            "actual" => self.actual = Some(V1NumberValue::builder().json_value(value).build()),
+            "remaining" => {
+                self.remaining = Some(V1NumberValue::builder().json_value(value).build())
+            }
+            "dischargeLimit" => {
+                self.discharge_limit = Some(V1NumberValue::builder().json_value(value).build())
+            }
+            "stateOfCharge" => {
+                self.state_of_charge = Some(V1NumberValue::builder().json_value(value).build())
+            }
+            "stateOfHealth" => {
+                self.state_of_health = Some(V1NumberValue::builder().json_value(value).build())
+            }
+            "dischargeSinceFull" => {
+                self.discharge_since_full = Some(V1NumberValue::builder().json_value(value).build())
+            }
+            "timeRemaining" => {
+                self.time_remaining = Some(V1NumberValue::builder().json_value(value).build())
+            }
+            &_ => {
+                log::warn!(
+                    "V1BatteryCapacity: Unknown value to update: {:?}::{:?}",
+                    path,
+                    value
+                );
+            }
+        }
     }
 }
 
@@ -707,6 +747,13 @@ impl V1Battery {
     }
     pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
         match path[0] {
+            // V1ElectricalIdentity
+            // name
+            // location
+            // dateInstalled
+            // manufacturer
+            // V1ElectricalDCQualities
+            // associated_bus
             "voltage" => {
                 if self.dc_qualities.is_none() {
                     self.dc_qualities = Some(V1ElectricalDCQualities::default());
@@ -725,9 +772,27 @@ impl V1Battery {
                     dc.current = Some(V1ElectricalDCCurrentValue::builder().value(val).build());
                 }
             }
+            "temperature" => {
+                if self.temperature.is_none() {
+                    self.temperature = Some(V1BatteryTemperature::default());
+                }
+                if let Some(ref mut temperature) = self.temperature {
+                    let val = V1NumberValue::builder().json_value(value).build();
+                    temperature.value = Some(val);
+                }
+            }
+            "capacity" => {
+                if self.capacity.is_none() {
+                    self.capacity = Some(V1BatteryCapacity::default());
+                }
+                if let Some(ref mut capacity) = self.capacity {
+                    path.remove(0);
+                    capacity.update(path, value);
+                }
+            }
             &_ => {
                 log::warn!(
-                    "{:?}--Unknown value to update: {:?}::{:?}",
+                    "V1Battery: {:?}--Unknown value to update: {:?}::{:?}",
                     self,
                     path,
                     value

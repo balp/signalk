@@ -1,9 +1,9 @@
-use serde::{Deserialize, Serialize};
-use serde_json::value::Value;
-
-use crate::definitions::{V1DateTime, V1NumberValue};
+use crate::definitions::{V1DateTime, V1NumberValue, V1StringValue, V1Timestamp};
 use crate::helper_functions::get_f64_value;
 use crate::SignalKGetError;
+use serde::{Deserialize, Serialize};
+use serde_json::value::Value;
+use std::net::Shutdown::Read;
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -29,14 +29,15 @@ pub struct V1Navigation {
     pub rate_of_turn: Option<V1NumberValue>,
     pub speed_over_ground: Option<V1NumberValue>,
     pub speed_through_water: Option<V1NumberValue>,
+    pub speed_through_water_reference_type: Option<V1StringValue>,
     pub speed_through_water_transverse: Option<V1NumberValue>,
     pub speed_through_water_longitudinal: Option<V1NumberValue>,
     pub leeway_angle: Option<V1NumberValue>,
     pub log: Option<V1NumberValue>,
-    // pub trip: Option<V1Trip>,
+    pub trip: Option<V1Trip>,
     // pub state: Option<V1State>,
     // pub anchor: Option<V1Anchor>,
-    // pub datetime: Option<V1Datetime>,
+    pub datetime: Option<V1DateTime>,
 }
 
 impl V1Navigation {
@@ -91,6 +92,12 @@ impl V1Navigation {
             "speedThroughWater" => {
                 self.speed_through_water = Some(V1NumberValue::builder().json_value(value).build())
             }
+            "speedThroughWaterReferenceType" => {
+                if let Some(s) = value.as_str() {
+                    self.speed_through_water_reference_type =
+                        Some(V1StringValue::builder().value(s.to_string()).build())
+                }
+            }
             "speedThroughWaterTransverse" => {
                 self.speed_through_water_transverse =
                     Some(V1NumberValue::builder().json_value(value).build())
@@ -103,8 +110,31 @@ impl V1Navigation {
                 self.leeway_angle = Some(V1NumberValue::builder().json_value(value).build())
             }
             "log" => self.log = Some(V1NumberValue::builder().json_value(value).build()),
+            "trip" => {
+                if self.trip.is_none() {
+                    self.trip = Some(V1Trip::default());
+                }
+                if let Some(ref mut trip) = self.trip {
+                    path.remove(0);
+                    trip.update(path, value);
+                }
+            }
+            "datetime" => {
+                let datetime: Result<V1DateTime, serde_json::Error> =
+                    serde_json::from_value(value.clone());
+                if let Ok(datetime) = datetime {
+                    self.datetime = Some(datetime);
+                } else {
+                    log::error!("Invalid datetime value: {:?}", datetime);
+                    self.datetime = None;
+                }
+            }
             &_ => {
-                log::warn!("Unknown value to update: {:?}::{:?}", path, value);
+                log::warn!(
+                    "V1Navigation: Unknown value to update: {:?}::{:?}",
+                    path,
+                    value
+                );
             }
         }
     }
@@ -212,14 +242,15 @@ pub struct V1NavigationBuilder {
     rate_of_turn: Option<V1NumberValue>,
     speed_over_ground: Option<V1NumberValue>,
     speed_through_water: Option<V1NumberValue>,
+    speed_through_water_reference_type: Option<V1StringValue>,
     speed_through_water_transverse: Option<V1NumberValue>,
     speed_through_water_longitudinal: Option<V1NumberValue>,
     leeway_angle: Option<V1NumberValue>,
     log: Option<V1NumberValue>,
-    // pub trip: Option<V1Trip>,
+    trip: Option<V1Trip>,
     // pub state: Option<V1State>,
     // pub anchor: Option<V1Anchor>,
-    // pub datetime: Option<V1Datetime>,
+    datetime: Option<V1DateTime>,
 }
 
 impl V1NavigationBuilder {
@@ -298,11 +329,20 @@ impl V1NavigationBuilder {
         self.log = Some(value);
         self
     }
+    pub fn trip(mut self, value: V1Trip) -> V1NavigationBuilder {
+        self.trip = Some(value);
+        self
+    }
+    pub fn datetime(mut self, value: V1DateTime) -> V1NavigationBuilder {
+        self.datetime = Some(value);
+        self
+    }
     pub fn build(self) -> V1Navigation {
         V1Navigation {
             course_over_ground_magnetic: self.course_over_ground_magnetic,
             speed_over_ground: self.speed_over_ground,
             speed_through_water: self.speed_through_water,
+            speed_through_water_reference_type: self.speed_through_water_reference_type,
             speed_through_water_transverse: self.speed_through_water_transverse,
             speed_through_water_longitudinal: self.speed_through_water_longitudinal,
             leeway_angle: self.leeway_angle,
@@ -318,11 +358,14 @@ impl V1NavigationBuilder {
             position: self.position,
             rate_of_turn: self.rate_of_turn,
             log: self.log,
+            trip: self.trip,
+            datetime: self.datetime,
         }
     }
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct V1Course {
     pub cross_track_error: Option<V1NumberValue>,
     pub bearing_track_true: Option<V1NumberValue>,
@@ -344,10 +387,14 @@ pub struct V1CourseBuilder {
     pub bearing_track_magnetic: Option<V1NumberValue>,
     pub active_route: Option<V1ActiveRoute>,
     // pub next_point: Option<V1CourseNextPoint>,
-    // pub previous_point: Option<V1CourseNextPoint>,
+    // pub previous_point: Option<V1CoursePreviousPoint>,
 }
 impl V1CourseBuilder {
-    pub fn json_value(mut self, path: &mut Vec<&str>, value: &serde_json::Value) -> V1CourseBuilder {
+    pub fn json_value(
+        mut self,
+        path: &mut Vec<&str>,
+        value: &serde_json::Value,
+    ) -> V1CourseBuilder {
         match path[0] {
             "crossTrackError" => {
                 self.cross_track_error = Some(V1NumberValue::builder().json_value(value).build());
@@ -356,12 +403,36 @@ impl V1CourseBuilder {
                 self.bearing_track_true = Some(V1NumberValue::builder().json_value(value).build());
             }
             "bearingTrackMagnetic" => {
-                self.bearing_track_magnetic = Some(V1NumberValue::builder().json_value(value).build());
+                self.bearing_track_magnetic =
+                    Some(V1NumberValue::builder().json_value(value).build());
+            }
+            "activeRoute" => {
+                self.active_route = Some(V1ActiveRoute::builder().json_value(value).build());
             }
             &_ => {
-                log::warn!("Unknown value to update: {:?}::{:?}", path, value);
+                log::warn!(
+                    "V1CourseBuilder: Unknown value to update: {:?}::{:?}",
+                    path,
+                    value
+                );
             }
         }
+        self
+    }
+    pub fn cross_track_error(mut self, value: V1NumberValue) -> V1CourseBuilder {
+        self.cross_track_error = Some(value);
+        self
+    }
+    pub fn bearing_track_true(mut self, value: V1NumberValue) -> V1CourseBuilder {
+        self.bearing_track_true = Some(value);
+        self
+    }
+    pub fn bearing_track_magnetic(mut self, value: V1NumberValue) -> V1CourseBuilder {
+        self.bearing_track_magnetic = Some(value);
+        self
+    }
+    pub fn active_route(mut self, value: V1ActiveRoute) -> V1CourseBuilder {
+        self.active_route = Some(value);
         self
     }
     pub fn build(self) -> V1Course {
@@ -375,23 +446,39 @@ impl V1CourseBuilder {
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct V1ActiveRoute {
-    pub href: Option<String>,
+    pub href: Option<V1StringValue>,
     pub estimated_time_of_arrival: Option<V1DateTime>,
     pub start_time: Option<V1DateTime>,
 }
 impl V1ActiveRoute {
-    pub fn builder() -> V1ActiveRouteBuilder { V1ActiveRouteBuilder::default() }
+    pub fn builder() -> V1ActiveRouteBuilder {
+        V1ActiveRouteBuilder::default()
+    }
 }
 #[derive(Default)]
 pub struct V1ActiveRouteBuilder {
-    pub href: Option<String>,
+    pub href: Option<V1StringValue>,
     pub estimated_time_of_arrival: Option<V1DateTime>,
     pub start_time: Option<V1DateTime>,
 }
 
 impl crate::navigation::V1ActiveRouteBuilder {
-    pub fn href(mut self, value: String) -> V1ActiveRouteBuilder {
+    pub fn json_value(mut self, value: &serde_json::Value) -> V1ActiveRouteBuilder {
+        if let Value::Object(ref map) = value {
+            if let Some(href) = map.get("href") {
+                if let Some(_href) = href.as_str() {
+                    self.href = Some(V1StringValue::builder().value(_href.to_string()).build());
+                }
+            }
+            if let Some(eta) = map.get("estimatedTimeOfArrival") {
+                //self.estimated_time_of_arrival = V1Timestamp::builder().value(value).build();
+            }
+        }
+        self
+    }
+    pub fn href(mut self, value: V1StringValue) -> V1ActiveRouteBuilder {
         self.href = Some(value);
         self
     }
@@ -408,6 +495,57 @@ impl crate::navigation::V1ActiveRouteBuilder {
             href: self.href,
             estimated_time_of_arrival: self.estimated_time_of_arrival,
             start_time: self.start_time,
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct V1Trip {
+    pub log: Option<V1NumberValue>,
+    pub last_reset: Option<V1DateTime>,
+}
+impl V1Trip {
+    pub fn builder() -> V1TripBuilder {
+        V1TripBuilder::default()
+    }
+    pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
+        match path[0] {
+            "log" => self.log = Some(V1NumberValue::builder().json_value(value).build()),
+            "lastReset" => {
+                let val: Result<V1DateTime, serde_json::Error> =
+                    serde_json::from_value(value.clone());
+                if let Ok(val) = val {
+                    self.last_reset = Some(val);
+                } else {
+                    log::warn!("V1Trip: Invalid last reset value");
+                }
+            }
+            &_ => {
+                log::warn!("V1Trip: Unknown value to update: {:?}::{:?}", path, value);
+            }
+        }
+    }
+}
+#[derive(Default)]
+pub struct V1TripBuilder {
+    log: Option<V1NumberValue>,
+    last_reset: Option<V1DateTime>,
+}
+
+impl V1TripBuilder {
+    pub fn log(mut self, value: V1NumberValue) -> V1TripBuilder {
+        self.log = Some(value);
+        self
+    }
+    pub fn last_reset(mut self, value: V1DateTime) -> V1TripBuilder {
+        self.last_reset = Some(value);
+        self
+    }
+    pub fn build(self) -> V1Trip {
+        V1Trip {
+            log: self.log,
+            last_reset: self.last_reset,
         }
     }
 }
@@ -516,14 +654,14 @@ impl V1PositionValue {
 
 #[cfg(test)]
 mod tests {
+    use crate::definitions::{V1DateTime, V1StringValue, V1Timestamp};
+    use crate::navigation::{V1ActiveRoute, V1Course, V1Navigation};
     use serde_json::{Number, Value};
-    use crate::navigation::{V1Course, V1Navigation};
 
     #[test]
     fn update_navigation_course_rl_xte() {
         let mut navigation = V1Navigation::builder()
-            .course_rhumbline(V1Course::builder()
-                .build())
+            .course_rhumbline(V1Course::builder().build())
             .build();
         let mut path = vec!["courseRhumbline", "crossTrackError"];
         let value = Value::Number(Number::from_f64(1.5).unwrap());
@@ -537,8 +675,7 @@ mod tests {
                 .as_ref()
                 .unwrap()
                 .value
-                .unwrap()
-            ,
+                .unwrap(),
             1.5
         )
     }
@@ -546,8 +683,7 @@ mod tests {
     #[test]
     fn update_navigation_course_rl_bearing_track_true() {
         let mut navigation = V1Navigation::builder()
-            .course_rhumbline(V1Course::builder()
-                .build())
+            .course_rhumbline(V1Course::builder().build())
             .build();
         let mut path = vec!["courseRhumbline", "bearingTrackTrue"];
         let value = Value::Number(Number::from_f64(0.1234).unwrap());
@@ -561,16 +697,14 @@ mod tests {
                 .as_ref()
                 .unwrap()
                 .value
-                .unwrap()
-            ,
+                .unwrap(),
             0.1234
         )
     }
     #[test]
     fn update_navigation_course_rl_bearing_track_magnetic() {
         let mut navigation = V1Navigation::builder()
-            .course_rhumbline(V1Course::builder()
-                .build())
+            .course_rhumbline(V1Course::builder().build())
             .build();
         let mut path = vec!["courseRhumbline", "bearingTrackMagnetic"];
         let value = Value::Number(Number::from_f64(1.2345).unwrap());
@@ -584,11 +718,42 @@ mod tests {
                 .as_ref()
                 .unwrap()
                 .value
-                .unwrap()
-            ,
+                .unwrap(),
             1.2345
         )
     }
-
-
+    #[test]
+    fn update_navigation_course_rl_active_route() {
+        let mut navigation = V1Navigation::builder()
+            .course_rhumbline(V1Course::builder()
+                .active_route(V1ActiveRoute::builder()
+                    .href(V1StringValue::builder()
+                        .value("/resources/routes/urn:mrn:signalk:uuid:3dd34dcc-36bf-4d61-ba80-233799b25672".to_string())
+                        .build())
+                    .estimated_time_of_arrival(V1DateTime::builder()
+                        .timestamp("2014-04-10T08:33:53Z".to_string())
+                        .build())
+                    .start_time(V1DateTime::builder()
+                        .timestamp("2014-04-09T08:33:53Z".to_string())
+                        .build())
+                    .build())
+                .build())
+            .build();
+        assert_eq!(
+            navigation
+                .course_rhumbline
+                .as_ref()
+                .unwrap()
+                .active_route
+                .as_ref()
+                .unwrap()
+                .href
+                .as_ref()
+                .unwrap()
+                .value
+                .as_ref()
+                .unwrap(),
+            "/resources/routes/urn:mrn:signalk:uuid:3dd34dcc-36bf-4d61-ba80-233799b25672"
+        );
+    }
 }

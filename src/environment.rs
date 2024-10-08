@@ -117,7 +117,11 @@ impl V1Environment {
             }
 
             &_ => {
-                log::warn!("Unknown value to update: {:?}::{:?}", path, value);
+                log::warn!(
+                    "V1Environment: Unknown value to update: {:?}::{:?}",
+                    path,
+                    value
+                );
             }
         }
     }
@@ -318,7 +322,11 @@ impl V1EnvironmentOutside {
         log::debug!("V1EnvironmentOutside update: {:?} -> {:?}", path, value);
         match path[0] {
             &_ => {
-                log::warn!("Unknown value to update: {:?}::{:?}", path, value);
+                log::warn!(
+                    "V1EnvironmentOutside: Unknown value to update: {:?}::{:?}",
+                    path,
+                    value
+                );
             }
         };
     }
@@ -413,7 +421,11 @@ impl V1EnvironmentInside {
     }
     pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
         log::debug!("V1EnvironmentOutside update: {:?} -> {:?}", path, value);
-        log::warn!("Unknown value to update: {:?}::{:?}", path, value);
+        log::warn!(
+            "V1EnvironmentInside: Unknown value to update: {:?}::{:?}",
+            path,
+            value
+        );
     }
 }
 
@@ -459,7 +471,11 @@ impl V1EnvironmentZone {
     }
     pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
         log::debug!("V1EnvironmentZone update: {:?} -> {:?}", path, value);
-        log::warn!("Unknown value to update: {:?}::{:?}", path, value);
+        log::warn!(
+            "V1EnvironmentZone: Unknown value to update: {:?}::{:?}",
+            path,
+            value
+        );
     }
 }
 impl F64Gettable for V1EnvironmentZone {
@@ -565,7 +581,11 @@ impl V1EnvironmentWater {
                 }
             }
             &_ => {
-                log::warn!("Unknown value to update: {:?}::{:?}", path, value);
+                log::warn!(
+                    "V1EnvironmentWater: Unknown value to update: {:?}::{:?}",
+                    path,
+                    value
+                );
             }
         };
     }
@@ -624,7 +644,11 @@ impl V1EnvironmentDepth {
                 }
             }
             &_ => {
-                log::warn!("Unknown value to update: {:?}::{:?}", path, value);
+                log::warn!(
+                    "V1EnvironmentDepth: Unknown value to update: {:?}::{:?}",
+                    path,
+                    value
+                );
             }
         };
     }
@@ -696,7 +720,18 @@ pub struct V1EnvironmentCurrent {
 impl V1EnvironmentCurrent {
     pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
         log::debug!("V1EnvironmentCurrent update: {:?} -> {:?}", path, value);
-        log::warn!("Unknown value to update: {:?}::{:?}", path, value);
+        let val: Result<V1EnvironmentCurrentValue, serde_json::Error> =
+            serde_json::from_value(value.clone());
+        if let Ok(cur) = val {
+            log::debug!("V1EnvironmentCurrent value: {:?}", cur);
+            self.value = Some(cur);
+        } else {
+            log::warn!(
+                "V1EnvironmentCurrent: Unknown value to update: {:?}::{:?}",
+                path,
+                value
+            );
+        }
     }
 }
 
@@ -718,7 +753,11 @@ pub struct V1EnvironmentCurrentType {
 impl V1EnvironmentCurrentType {
     pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
         log::debug!("V1EnvironmentCurrentType update: {:?} -> {:?}", path, value);
-        log::warn!("Unknown value to update: {:?}::{:?}", path, value);
+        log::warn!(
+            "V1EnvironmentCurrentType: Unknown value to update: {:?}::{:?}",
+            path,
+            value
+        );
     }
 }
 
@@ -743,7 +782,11 @@ impl V1EnvironmentCurrentValue {
             path,
             value
         );
-        log::warn!("Unknown value to update: {:?}::{:?}", path, value);
+        log::warn!(
+            "V1EnvironmentCurrentValue: Unknown value to update: {:?}::{:?}",
+            path,
+            value
+        );
     }
 }
 
@@ -766,7 +809,11 @@ pub struct V1EnvironmentTide {
 impl V1EnvironmentTide {
     pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
         log::debug!("V1EnvironmentTide update: {:?} -> {:?}", path, value);
-        log::warn!("Unknown value to update: {:?}::{:?}", path, value);
+        log::warn!(
+            "V1EnvironmentTide: Unknown value to update: {:?}::{:?}",
+            path,
+            value
+        );
     }
 }
 
@@ -793,7 +840,60 @@ pub struct V1EnvironmentWind {
 impl V1EnvironmentWind {
     pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
         log::debug!("V1EnvironmentWind update: {:?} -> {:?}", path, value);
-        log::warn!("Unknown value to update: {:?}::{:?}", path, value);
+        match path[0] {
+            "angleApparent" => {
+                if let Some(val) = value.as_f64() {
+                    self.angle_apparent = Some(V1NumberValue::builder().value(val).build())
+                }
+            }
+            "angleTrueGround" => {
+                if let Some(val) = value.as_f64() {
+                    self.angle_true_ground = Some(V1NumberValue::builder().value(val).build())
+                }
+            }
+            "angleTrueWater" => {
+                if let Some(val) = value.as_f64() {
+                    self.angle_true_water = Some(V1NumberValue::builder().value(val).build())
+                }
+            }
+            "directionChangeAlarm" => {
+                if let Some(val) = value.as_f64() {
+                    self.direction_change_alarm = Some(V1NumberValue::builder().value(val).build())
+                }
+            }
+            "directionTrue" => {
+                if let Some(val) = value.as_f64() {
+                    self.direction_true = Some(V1NumberValue::builder().value(val).build())
+                }
+            }
+            "directionMagnetic" => {
+                if let Some(val) = value.as_f64() {
+                    self.direction_magnetic = Some(V1NumberValue::builder().value(val).build())
+                }
+            }
+            "speedTrue" => {
+                if let Some(val) = value.as_f64() {
+                    self.speed_true = Some(V1NumberValue::builder().value(val).build())
+                }
+            }
+            "speedOverGround" => {
+                if let Some(val) = value.as_f64() {
+                    self.speed_over_ground = Some(V1NumberValue::builder().value(val).build())
+                }
+            }
+            "speedApparent" => {
+                if let Some(val) = value.as_f64() {
+                    self.speed_apparent = Some(V1NumberValue::builder().value(val).build())
+                }
+            }
+            &_ => {
+                log::warn!(
+                    "V1EnvironmentWind: Unknown value to update: {:?}::{:?}",
+                    path,
+                    value
+                );
+            }
+        }
     }
 }
 
@@ -819,7 +919,11 @@ impl V1EnvironmentTime {
     }
     pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
         log::debug!("V1EnvironmentTime update: {:?} -> {:?}", path, value);
-        log::warn!("Unknown value to update: {:?}::{:?}", path, value);
+        log::warn!(
+            "V1EnvironmentTime: Unknown value to update: {:?}::{:?}",
+            path,
+            value
+        );
     }
 }
 
@@ -881,7 +985,11 @@ pub struct V1EnvironmentMode {
 impl V1EnvironmentMode {
     pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
         log::debug!("V1EnvironmentMode update: {:?} -> {:?}", path, value);
-        log::warn!("Unknown value to update: {:?}::{:?}", path, value);
+        log::warn!(
+            "V1EnvironmentMode: Unknown value to update: {:?}::{:?}",
+            path,
+            value
+        );
     }
 }
 

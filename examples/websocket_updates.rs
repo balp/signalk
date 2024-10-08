@@ -6,7 +6,7 @@ fn main() {
     env_logger::init();
     let mut data = V1FullFormat::default();
     let (mut socket, _response) =
-        connect("ws://annoiii.lan:3000/signalk/v1/stream").expect("Can't connect");
+        connect("ws://127.0.0.1:3000/signalk/v1/stream").expect("Can't connect");
 
     // Loop forever, handling parsing each message
     loop {
@@ -40,6 +40,13 @@ fn main() {
         log::info!("Voltage: {:?} from {:?}", voltage_result, data);
         if let Ok(voltage) = voltage_result {
             println!("Current voltage is {}", voltage)
+        }
+        // Get the current battery voltage, and display it
+        let depth_below_keel =
+            data.get_f64_for_path("self.environment.depth.belowKeel".to_string());
+        log::info!("Depth: {:?} from {:?}", depth_below_keel, data);
+        if let Ok(voltage) = depth_below_keel {
+            println!("Current depth is {}", voltage)
         }
     }
 }
