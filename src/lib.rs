@@ -36,6 +36,8 @@ pub mod full;
 pub mod hello;
 mod helper_functions;
 pub mod navigation;
+mod navigation_course;
+mod navigation_gnss;
 pub mod notification;
 pub mod propulsion;
 pub mod put;
