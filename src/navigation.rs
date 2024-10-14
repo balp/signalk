@@ -1,6 +1,6 @@
-use crate::definitions::{V1DateTime, V1NumberValue, V1StringValue, V1Timestamp};
+use crate::definitions::{V1DateTime, V1NumberValue, V1StringValue};
 use crate::helper_functions::get_f64_value;
-use crate::{SignalKGetError, V1CommonValueFields};
+use crate::{SignalKGetError, V1CommonValueFields, V1MetaZone};
 use serde::{Deserialize, Serialize};
 use serde_json::value::Value;
 use std::net::Shutdown::Read;
@@ -523,6 +523,7 @@ pub struct V1gnss {
     position_dilution: Option<V1NumberValue>,
     geoidal_separation: Option<V1NumberValue>,
     differential_age: Option<V1NumberValue>,
+    satellites_in_view: Option<V1gnssSatellitesInView>,
 }
 impl V1gnss {
     pub fn builder() -> V1gnssBuilder {
@@ -556,12 +557,25 @@ impl V1gnss {
                 if let Ok(integrity_value) = integrity_result {
                     self.integrity = Some(integrity_value);
                 } else {
-                    log::error!("Invalid GNSS Method Quality: {:?}", integrity_result);
+                    log::error!("Invalid GNSS Integrity: {:?}", integrity_result);
                     self.integrity = None;
                 }
             }
             "satellites" => {
                 self.satellites = Some(V1NumberValue::builder().json_value(value).build())
+            }
+            "satellitesInView" => {
+                let satellites_in_view_result: Result<V1gnssSatellitesInView, serde_json::Error> =
+                    serde_json::from_value(value.clone());
+                if let Ok(satellites_in_view_value) = satellites_in_view_result {
+                    self.satellites_in_view = Some(satellites_in_view_value);
+                } else {
+                    log::error!(
+                        "Invalid GNSS Satellites In View: {:?}",
+                        satellites_in_view_result
+                    );
+                    self.satellites_in_view = None;
+                }
             }
             "antennaAltitude" => {
                 self.antenna_altitude = Some(V1NumberValue::builder().json_value(value).build())
@@ -624,7 +638,7 @@ pub enum V1gnssMethodQuality {
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 pub struct V1gnssExpandedMethodQuality {
-    value: Option<V1gnssMethodQualityValue>,
+    value: V1gnssMethodQualityValue,
     #[serde(flatten)]
     pub common_value_fields: Option<V1CommonValueFields>,
 }
@@ -663,7 +677,7 @@ pub enum V1gnssIntegrity {
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 pub struct V1gnssExpandedIntegrity {
-    value: Option<V1gnssIntegrityValue>,
+    value: V1gnssIntegrityValue,
     #[serde(flatten)]
     pub common_value_fields: Option<V1CommonValueFields>,
 }
@@ -676,6 +690,35 @@ pub enum V1gnssIntegrityValue {
     Safe,
     Caution,
     Unsafe,
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+#[serde(untagged)]
+pub enum V1gnssSatellitesInView {
+    Expanded(V1gnssExpandedSatellitesInView),
+    Value(V1gnssSatellitesInViewValue),
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+pub struct V1gnssExpandedSatellitesInView {
+    value: V1gnssSatellitesInViewValue,
+    #[serde(flatten)]
+    pub common_value_fields: Option<V1CommonValueFields>,
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+pub struct V1gnssSatellitesInViewValue {
+    count: i64,
+    satellites: Option<Vec<V1gnssSatellite>>,
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+pub struct V1gnssSatellite {
+    id: Option<i64>,
+    elevation: Option<f64>,
+    azimuth: Option<f64>,
+    #[serde(rename = "SNR")]
+    signal_to_noise_ratio: Option<i64>,
 }
 
 #[derive(Default)]
@@ -836,8 +879,10 @@ impl V1PositionValue {
 
 #[cfg(test)]
 mod tests {
-    use crate::definitions::{V1DateTime, V1StringValue, V1Timestamp};
-    use crate::navigation::{V1ActiveRoute, V1Course, V1Navigation};
+    use crate::definitions::{V1DateTime, V1DateTimeValue, V1StringValue, V1Timestamp};
+    use crate::navigation::{
+        V1ActiveRoute, V1Course, V1Navigation, V1gnssExpandedSatellitesInView, V1gnssSatellite,
+    };
     use serde_json::{Number, Value};
 
     #[test]
@@ -937,5 +982,39 @@ mod tests {
                 .unwrap(),
             "/resources/routes/urn:mrn:signalk:uuid:3dd34dcc-36bf-4d61-ba80-233799b25672"
         );
+    }
+
+    #[test]
+    fn satellite_value_object_json() {
+        let j = r#"
+        {
+          "id": 17,
+          "elevation": 0.3665,
+          "azimuth": 5.5676,
+          "SNR": 39
+        }"#;
+        let satellite: V1gnssSatellite = serde_json::from_str(j).unwrap();
+    }
+    #[test]
+    fn satellites_in_view_value_object_json() {
+        let j = r#"
+        {
+            "meta": {},
+            "value": {
+              "count": 11,
+              "satellites": [
+                {
+                  "id": 32,
+                  "elevation": 1.2043,
+                  "azimuth": 3.8921,
+                  "SNR": 32
+                }
+              ]
+            },
+            "$source": "n2k-sample-data.160",
+            "timestamp": "2014-08-15T19:00:51.130Z",
+            "pgn": 129540
+        }"#;
+        let satellites_in_view: V1gnssExpandedSatellitesInView = serde_json::from_str(j).unwrap();
     }
 }
