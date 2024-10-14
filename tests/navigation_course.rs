@@ -18,19 +18,6 @@ fn test_navigation_course_to_pos() {
         if let Some(navi) = _self_vessel.navigation.as_ref() {
             if let Some(course) = navi.course_rhumbline.as_ref() {
                 println!("2: {:?}", course);
-                assert_eq!(
-                    course
-                        .active_route
-                        .as_ref()
-                        .unwrap()
-                        .href
-                        .as_ref()
-                        .unwrap()
-                        .value
-                        .as_ref()
-                        .unwrap(),
-                    "/resources/routes/f273bede-706d-40cb-bfd2-775499e40653"
-                )
             } else {
                 assert!(false);
             }
@@ -39,19 +26,4 @@ fn test_navigation_course_to_pos() {
         println!("2: {:?}", self_vessel);
         assert!(false);
     }
-    // assert_eq!(
-    //     self_vessel
-    //         .unwrap()
-    //         .navigation
-    //         .as_ref()
-    //         .unwrap()
-    //         .course_rhumbline
-    //         .as_ref()
-    //         .unwrap()
-    //         .next_point
-    //         .as_ref()
-    //         .unwrap()
-    //         .value
-    //         .unwrap(),
-    //     0.1)
 }

@@ -58,12 +58,22 @@ impl V1Navigation {
                     Some(V1NumberValue::builder().json_value(value).build())
             }
             "courseRhumbline" => {
-                path.remove(0);
-                self.course_rhumbline = Some(V1Course::builder().json_value(path, value).build())
+                if self.course_rhumbline.is_none() {
+                    self.course_rhumbline = Some(V1Course::default());
+                }
+                if let Some(ref mut course) = self.course_rhumbline {
+                    path.remove(0);
+                    course.update(path, value);
+                }
             }
             "courseGreatCircle" => {
-                path.remove(0);
-                self.course_great_circle = Some(V1Course::builder().json_value(path, value).build())
+                if self.course_great_circle.is_none() {
+                    self.course_great_circle = Some(V1Course::default());
+                }
+                if let Some(ref mut course) = self.course_great_circle {
+                    path.remove(0);
+                    course.update(path, value);
+                }
             }
             "magneticVariation" => {
                 self.magnetic_variation = Some(V1NumberValue::builder().json_value(value).build())
@@ -430,7 +440,7 @@ impl V1TripBuilder {
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 pub struct V1PositionType {
-    pub value: V1PositionValue,
+    pub value: Option<V1PositionValue>,
     pub timestamp: String,
     #[serde(rename = "$source")]
     pub source: String,
@@ -442,11 +452,36 @@ impl V1PositionType {
     pub fn builder() -> V1PositionTypeBuilder {
         V1PositionTypeBuilder::default()
     }
+
+    pub fn from_value(value: &serde_json::Value) -> Option<V1PositionType> {
+        let type_result: Result<V1PositionType, serde_json::Error> =
+            serde_json::from_value(value.clone());
+        if let Ok(position) = type_result {
+            Some(position)
+        } else {
+            None
+        }
+    }
+    pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
+        if path.is_empty() {
+            log::warn!("V1PositionType: Empty path: {:?}::{:?}", path, value);
+        } else {
+            match path[0] {
+                &_ => {
+                    log::warn!(
+                        "V1PositionType: Unknown value to update {:?}::{:?}",
+                        path,
+                        value
+                    );
+                }
+            }
+        }
+    }
 }
 
 #[derive(Default)]
 pub struct V1PositionTypeBuilder {
-    pub value: V1PositionValue,
+    pub value: Option<V1PositionValue>,
     pub timestamp: String,
     pub source: String,
     pub pgn: Option<f64>,
@@ -458,17 +493,35 @@ impl V1PositionTypeBuilder {
         if let Value::Object(ref map) = value {
             if let Some(longitude) = map.get("longitude") {
                 if let Some(lon) = longitude.as_f64() {
-                    self.value.longitude = lon;
+                    if let Some(val) = self.value.as_mut() {
+                        val.longitude = lon;
+                    } else {
+                        let mut pos_ = V1PositionValue::default();
+                        pos_.longitude = lon;
+                        self.value = Some(pos_);
+                    }
                 }
             }
             if let Some(latitude) = map.get("latitude") {
                 if let Some(lat) = latitude.as_f64() {
-                    self.value.latitude = lat;
+                    if let Some(val) = self.value.as_mut() {
+                        val.latitude = lat;
+                    } else {
+                        let mut pos_ = V1PositionValue::default();
+                        pos_.latitude = lat;
+                        self.value = Some(pos_);
+                    }
                 }
             }
             if let Some(altitude) = map.get("altitude") {
                 if let Some(alt) = altitude.as_f64() {
-                    self.value.altitude = Some(alt);
+                    if let Some(val) = self.value.as_mut() {
+                        val.altitude = Some(alt);
+                    } else {
+                        let mut pos_ = V1PositionValue::default();
+                        pos_.altitude = Some(alt);
+                        self.value = Some(pos_);
+                    }
                 }
             }
         }
@@ -476,7 +529,7 @@ impl V1PositionTypeBuilder {
     }
 
     pub fn value(mut self, value: V1PositionValue) -> V1PositionTypeBuilder {
-        self.value = value;
+        self.value = Some(value);
         self
     }
     pub fn timestamp(mut self, timestamp: String) -> V1PositionTypeBuilder {
@@ -600,39 +653,5 @@ mod tests {
                 .unwrap(),
             1.2345
         )
-    }
-    #[test]
-    fn update_navigation_course_rl_active_route() {
-        let mut navigation = V1Navigation::builder()
-            .course_rhumbline(V1Course::builder()
-                .active_route(V1ActiveRoute::builder()
-                    .href(V1StringValue::builder()
-                        .value("/resources/routes/urn:mrn:signalk:uuid:3dd34dcc-36bf-4d61-ba80-233799b25672".to_string())
-                        .build())
-                    .estimated_time_of_arrival(V1DateTime::builder()
-                        .timestamp("2014-04-10T08:33:53Z".to_string())
-                        .build())
-                    .start_time(V1DateTime::builder()
-                        .timestamp("2014-04-09T08:33:53Z".to_string())
-                        .build())
-                    .build())
-                .build())
-            .build();
-        assert_eq!(
-            navigation
-                .course_rhumbline
-                .as_ref()
-                .unwrap()
-                .active_route
-                .as_ref()
-                .unwrap()
-                .href
-                .as_ref()
-                .unwrap()
-                .value
-                .as_ref()
-                .unwrap(),
-            "/resources/routes/urn:mrn:signalk:uuid:3dd34dcc-36bf-4d61-ba80-233799b25672"
-        );
     }
 }

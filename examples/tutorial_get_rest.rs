@@ -14,10 +14,12 @@ async fn main() -> Result<(), Error> {
     if let Some(self_vessel) = sk_data.get_self() {
         if let Some(ref nav) = self_vessel.navigation {
             if let Some(ref pos) = nav.position {
-                print!(
-                    "Position: lat {} long {}",
-                    pos.value.latitude, pos.value.longitude
-                );
+                if let Some(ref pos_value) = pos.value {
+                    print!(
+                        "Position: lat {} long {}",
+                        pos_value.latitude, pos_value.longitude
+                    );
+                }
             }
         }
     }

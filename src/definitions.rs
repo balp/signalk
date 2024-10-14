@@ -81,6 +81,20 @@ impl V1NumberValue {
     pub fn builder() -> V1NumberValueBuilder {
         V1NumberValueBuilder::default()
     }
+
+    pub fn from_value(value: &Value) -> Option<V1NumberValue> {
+        if value.is_null() {
+            None
+        } else {
+            let type_result: Result<V1NumberValue, serde_json::Error> =
+                serde_json::from_value(value.clone());
+            if let Ok(type_value) = type_result {
+                Some(type_value)
+            } else {
+                None
+            }
+        }
+    }
 }
 
 #[derive(Default)]
@@ -633,8 +647,14 @@ impl V1TimestampBuilder {
     }
 }
 
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+#[serde(untagged)]
+pub enum V1StringValue {
+    Expanded(V1StringExpandedValue),
+    Value(String),
+}
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
-pub struct V1StringValue {
+pub struct V1StringExpandedValue {
     pub value: Option<String>,
     #[serde(flatten)]
     pub common_value_fields: Option<V1CommonValueFields>,
@@ -660,9 +680,17 @@ impl V1StringValueBuilder {
     }
 
     pub fn build(self) -> V1StringValue {
-        V1StringValue {
-            value: self.value,
-            common_value_fields: self.common_value_fields,
+        if let Some(ref _value) = self.common_value_fields {
+            V1StringValue::Expanded(V1StringExpandedValue {
+                value: self.value,
+                common_value_fields: self.common_value_fields,
+            })
+        } else {
+            if let Some(value) = self.value {
+                V1StringValue::Value(value.clone())
+            } else {
+                V1StringValue::Value("".to_string())
+            }
         }
     }
 }
