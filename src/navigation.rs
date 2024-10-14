@@ -1,6 +1,6 @@
 use crate::definitions::{V1DateTime, V1NumberValue, V1StringValue, V1Timestamp};
 use crate::helper_functions::get_f64_value;
-use crate::SignalKGetError;
+use crate::{SignalKGetError, V1CommonValueFields};
 use serde::{Deserialize, Serialize};
 use serde_json::value::Value;
 use std::net::Shutdown::Read;
@@ -18,7 +18,7 @@ pub struct V1Navigation {
     pub magnetic_variation: Option<V1NumberValue>,
     pub magnetic_variation_age_of_service: Option<V1NumberValue>,
     // pub destination: Option<V1Destination>,
-    // pub gnss: Option<V1gnss>,
+    pub gnss: Option<V1gnss>,
     pub heading_magnetic: Option<V1NumberValue>,
     pub magnetic_deviation: Option<V1NumberValue>,
     pub heading_compass: Option<V1NumberValue>,
@@ -70,6 +70,16 @@ impl V1Navigation {
                 self.magnetic_variation_age_of_service =
                     Some(V1NumberValue::builder().json_value(value).build())
             }
+            "gnss" => {
+                if self.gnss.is_none() {
+                    self.gnss = Some(V1gnss::default());
+                }
+                if let Some(ref mut gnss) = self.gnss {
+                    path.remove(0);
+                    gnss.update(path, value);
+                }
+            }
+
             "headingMagnetic" => {
                 self.heading_magnetic = Some(V1NumberValue::builder().json_value(value).build())
             }
@@ -231,7 +241,7 @@ pub struct V1NavigationBuilder {
     magnetic_variation: Option<V1NumberValue>,
     magnetic_variation_age_of_service: Option<V1NumberValue>,
     // pub destination: Option<V1Destination>,
-    // pub gnss: Option<V1gnss>,
+    gnss: Option<V1gnss>,
     heading_magnetic: Option<V1NumberValue>,
     magnetic_deviation: Option<V1NumberValue>,
     heading_compass: Option<V1NumberValue>,
@@ -351,6 +361,7 @@ impl V1NavigationBuilder {
             course_great_circle: self.course_great_circle,
             magnetic_variation: self.magnetic_variation,
             magnetic_variation_age_of_service: self.magnetic_variation_age_of_service,
+            gnss: self.gnss,
             heading_magnetic: self.heading_magnetic,
             magnetic_deviation: self.magnetic_deviation,
             heading_compass: self.heading_compass,
@@ -464,7 +475,7 @@ pub struct V1ActiveRouteBuilder {
     pub start_time: Option<V1DateTime>,
 }
 
-impl crate::navigation::V1ActiveRouteBuilder {
+impl V1ActiveRouteBuilder {
     pub fn json_value(mut self, value: &serde_json::Value) -> V1ActiveRouteBuilder {
         if let Value::Object(ref map) = value {
             if let Some(href) = map.get("href") {
@@ -498,6 +509,125 @@ impl crate::navigation::V1ActiveRouteBuilder {
         }
     }
 }
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct V1gnss {
+    #[serde(rename="type")]
+    type_: Option<V1gnssType>,
+    method_quality: Option<V1gnssMethodQuality>,
+    integrity: Option<V1gnssIntegrity>,
+    satellites: Option<V1NumberValue>,
+    antenna_altitude: Option<V1NumberValue>,
+    horizontal_dilution: Option<V1NumberValue>,
+    position_dilution: Option<V1NumberValue>,
+    geoidal_separation: Option<V1NumberValue>,
+    differential_age: Option<V1NumberValue>,
+}
+impl V1gnss {
+    pub fn builder() -> V1gnssBuilder {
+        V1gnssBuilder::default()
+    }
+    pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
+        match path[0] {
+            "type" => {
+                let type_result: Result<V1gnssType, serde_json::Error> = serde_json::from_value(value.clone());
+                if let Ok(type_value) = type_result {
+                    self.type_ = Some(type_value);
+                } else {
+                    log::error!("Invalid GNSS type: {:?}", type_result);
+                    self.type_ = None;
+                }
+            }
+            "methodQuality" => {
+                let quality_result: Result<V1gnssMethodQuality, serde_json::Error> = serde_json::from_value(value.clone());
+                if let Ok(quality_value) = quality_result {
+                    self.method_quality = Some(quality_value);
+                } else {
+                    log::error!("Invalid GNSS Method Quality: {:?}", quality_result);
+                    self.method_quality = None;
+                }
+            }
+            "integrity" => {
+                let integrity_result: Result<V1gnssIntegrity, serde_json::Error> = serde_json::from_value(value.clone());
+                if let Ok(integrity_value) = integrity_result {
+                    self.integrity = Some(integrity_value);
+                } else {
+                    log::error!("Invalid GNSS Method Quality: {:?}", integrity_result);
+                    self.integrity = None;
+                }
+            }
+            "satellites" => self.satellites = Some(V1NumberValue::builder().json_value(value).build()),
+            "antennaAltitude" => self.antenna_altitude = Some(V1NumberValue::builder().json_value(value).build()),
+            "horizontalDilution" => self.horizontal_dilution = Some(V1NumberValue::builder().json_value(value).build()),
+            "positionDilution" => self.position_dilution = Some(V1NumberValue::builder().json_value(value).build()),
+            "geoidalSeparation" => self.geoidal_separation = Some(V1NumberValue::builder().json_value(value).build()),
+            "differentialAge" => self.differential_age = Some(V1NumberValue::builder().json_value(value).build()),
+            &_ => {
+                log::warn!("V1gnss: Unknown value to update: {:?}::{:?}", path, value);
+            }
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+pub enum V1gnssType {
+    #[default]
+    Undefined,
+    GPS,
+    GLONASS,
+    #[serde(rename = "Combined GPS/GLONASS")]
+    CombinedGpsGlonass,
+    #[serde(rename = "Loran-C")]
+    LoranC,
+    Chayka,
+    #[serde(rename = "Integrated navigation system")]
+    IntegratedNavigationSystem,
+    Surveyed,
+    Galileo,
+}
+
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+pub enum V1gnssMethodQuality {
+    #[default]
+    #[serde(rename = "no GPS")]
+    NoGps,
+    #[serde(rename = "GNSS Fix")]
+    GNSSFix,
+    #[serde(rename = "DGNSS Fix")]
+    DGNSSFix,
+    #[serde(rename = "Precise GNSS")]
+    PreciseGNSS,
+    #[serde(rename = "RTK fixed integer")]
+    RTKFixedInteger,
+    #[serde(rename = "RTK float")]
+    RTKFloat,
+    #[serde(rename = "Estimated (DR) mode")]
+    EstimatedDRMode,
+    #[serde(rename = "Manual input")]
+    ManualInput,
+    #[serde(rename = "Simulator mode")]
+    SimulatorMode,
+    #[serde(rename = "Error")]
+    Error,
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+pub enum V1gnssIntegrity {
+    #[default]
+    #[serde(rename = "no Integrity checking")]
+    NoIntegrityChecking,
+    Safe,
+    Caution,
+    Unsafe,
+}
+
+
+#[derive(Default)]
+pub struct V1gnssBuilder {
+}
+
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 #[serde(rename_all = "camelCase")]
