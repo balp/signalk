@@ -1,5 +1,4 @@
 use crate::definitions::{V1DateTime, V1StringValue};
-use crate::navigation_gnss::{V1gnssMethodQuality, V1gnssType};
 use crate::{V1CommonValueFields, V1NumberValue, V1PositionType};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -85,7 +84,7 @@ impl V1CourseBuilder {
                     Some(V1NumberValue::builder().json_value(value).build());
             }
             "activeRoute" => {
-                self.active_route = Some(V1ActiveRoute::builder().json_value(value).build());
+                self.active_route = V1ActiveRoute::from_value(value);
             }
             &_ => {
                 log::warn!(
@@ -139,6 +138,20 @@ pub struct V1ActiveRoute {
 impl V1ActiveRoute {
     pub fn builder() -> V1ActiveRouteBuilder {
         V1ActiveRouteBuilder::default()
+    }
+
+    pub fn from_value(value: &Value) -> Option<V1ActiveRoute> {
+        if value.is_null() {
+            None
+        } else {
+            let route_result: Result<V1ActiveRoute, serde_json::Error> =
+                serde_json::from_value(value.clone());
+            if let Ok(route_value) = route_result {
+                Some(route_value)
+            } else {
+                None
+            }
+        }
     }
 
     pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
@@ -201,19 +214,6 @@ pub struct V1ActiveRouteBuilder {
 }
 
 impl V1ActiveRouteBuilder {
-    pub fn json_value(mut self, value: &serde_json::Value) -> V1ActiveRouteBuilder {
-        if let Value::Object(ref map) = value {
-            if let Some(href) = map.get("href") {
-                if let Some(_href) = href.as_str() {
-                    self.href = Some(V1StringValue::builder().value(_href.to_string()).build());
-                }
-            }
-            if let Some(eta) = map.get("estimatedTimeOfArrival") {
-                //self.estimated_time_of_arrival = V1Timestamp::builder().value(value).build();
-            }
-        }
-        self
-    }
     pub fn href(mut self, value: V1StringValue) -> V1ActiveRouteBuilder {
         self.href = Some(value);
         self

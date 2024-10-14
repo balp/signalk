@@ -2,10 +2,9 @@ use crate::definitions::{V1DateTime, V1NumberValue, V1StringValue};
 use crate::helper_functions::get_f64_value;
 use crate::navigation_course::V1Course;
 use crate::navigation_gnss::V1gnss;
-use crate::{SignalKGetError, V1CommonValueFields, V1MetaZone};
+use crate::SignalKGetError;
 use serde::{Deserialize, Serialize};
 use serde_json::value::Value;
-use std::net::Shutdown::Read;
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 #[serde(rename_all = "camelCase")]
