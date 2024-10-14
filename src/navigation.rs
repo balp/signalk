@@ -513,7 +513,7 @@ impl V1ActiveRouteBuilder {
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct V1gnss {
-    #[serde(rename="type")]
+    #[serde(rename = "type")]
     type_: Option<V1gnssType>,
     method_quality: Option<V1gnssMethodQuality>,
     integrity: Option<V1gnssIntegrity>,
@@ -531,7 +531,8 @@ impl V1gnss {
     pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
         match path[0] {
             "type" => {
-                let type_result: Result<V1gnssType, serde_json::Error> = serde_json::from_value(value.clone());
+                let type_result: Result<V1gnssType, serde_json::Error> =
+                    serde_json::from_value(value.clone());
                 if let Ok(type_value) = type_result {
                     self.type_ = Some(type_value);
                 } else {
@@ -540,7 +541,8 @@ impl V1gnss {
                 }
             }
             "methodQuality" => {
-                let quality_result: Result<V1gnssMethodQuality, serde_json::Error> = serde_json::from_value(value.clone());
+                let quality_result: Result<V1gnssMethodQuality, serde_json::Error> =
+                    serde_json::from_value(value.clone());
                 if let Ok(quality_value) = quality_result {
                     self.method_quality = Some(quality_value);
                 } else {
@@ -549,7 +551,8 @@ impl V1gnss {
                 }
             }
             "integrity" => {
-                let integrity_result: Result<V1gnssIntegrity, serde_json::Error> = serde_json::from_value(value.clone());
+                let integrity_result: Result<V1gnssIntegrity, serde_json::Error> =
+                    serde_json::from_value(value.clone());
                 if let Ok(integrity_value) = integrity_result {
                     self.integrity = Some(integrity_value);
                 } else {
@@ -557,12 +560,24 @@ impl V1gnss {
                     self.integrity = None;
                 }
             }
-            "satellites" => self.satellites = Some(V1NumberValue::builder().json_value(value).build()),
-            "antennaAltitude" => self.antenna_altitude = Some(V1NumberValue::builder().json_value(value).build()),
-            "horizontalDilution" => self.horizontal_dilution = Some(V1NumberValue::builder().json_value(value).build()),
-            "positionDilution" => self.position_dilution = Some(V1NumberValue::builder().json_value(value).build()),
-            "geoidalSeparation" => self.geoidal_separation = Some(V1NumberValue::builder().json_value(value).build()),
-            "differentialAge" => self.differential_age = Some(V1NumberValue::builder().json_value(value).build()),
+            "satellites" => {
+                self.satellites = Some(V1NumberValue::builder().json_value(value).build())
+            }
+            "antennaAltitude" => {
+                self.antenna_altitude = Some(V1NumberValue::builder().json_value(value).build())
+            }
+            "horizontalDilution" => {
+                self.horizontal_dilution = Some(V1NumberValue::builder().json_value(value).build())
+            }
+            "positionDilution" => {
+                self.position_dilution = Some(V1NumberValue::builder().json_value(value).build())
+            }
+            "geoidalSeparation" => {
+                self.geoidal_separation = Some(V1NumberValue::builder().json_value(value).build())
+            }
+            "differentialAge" => {
+                self.differential_age = Some(V1NumberValue::builder().json_value(value).build())
+            }
             &_ => {
                 log::warn!("V1gnss: Unknown value to update: {:?}::{:?}", path, value);
             }
@@ -570,8 +585,21 @@ impl V1gnss {
     }
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+#[serde(untagged)]
 pub enum V1gnssType {
+    Expanded(V1gnssExpandedType),
+    Value(V1gnssTypeValue),
+}
+#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+pub struct V1gnssExpandedType {
+    value: Option<V1gnssTypeValue>,
+    #[serde(flatten)]
+    pub common_value_fields: Option<V1CommonValueFields>,
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+pub enum V1gnssTypeValue {
     #[default]
     Undefined,
     GPS,
@@ -587,9 +615,22 @@ pub enum V1gnssType {
     Galileo,
 }
 
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+#[serde(untagged)]
+pub enum V1gnssMethodQuality {
+    Expanded(V1gnssExpandedMethodQuality),
+    Value(V1gnssMethodQualityValue),
+}
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
-pub enum V1gnssMethodQuality {
+pub struct V1gnssExpandedMethodQuality {
+    value: Option<V1gnssMethodQualityValue>,
+    #[serde(flatten)]
+    pub common_value_fields: Option<V1CommonValueFields>,
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+pub enum V1gnssMethodQualityValue {
     #[default]
     #[serde(rename = "no GPS")]
     NoGps,
@@ -613,8 +654,22 @@ pub enum V1gnssMethodQuality {
     Error,
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+#[serde(untagged)]
 pub enum V1gnssIntegrity {
+    Expanded(V1gnssExpandedIntegrity),
+    Value(V1gnssIntegrityValue),
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+pub struct V1gnssExpandedIntegrity {
+    value: Option<V1gnssIntegrityValue>,
+    #[serde(flatten)]
+    pub common_value_fields: Option<V1CommonValueFields>,
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+pub enum V1gnssIntegrityValue {
     #[default]
     #[serde(rename = "no Integrity checking")]
     NoIntegrityChecking,
@@ -623,11 +678,8 @@ pub enum V1gnssIntegrity {
     Unsafe,
 }
 
-
 #[derive(Default)]
-pub struct V1gnssBuilder {
-}
-
+pub struct V1gnssBuilder {}
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 #[serde(rename_all = "camelCase")]
