@@ -1,6 +1,6 @@
 use crate::definitions::{V1DateTime, V1NumberValue, V1StringValue};
 use crate::helper_functions::get_f64_value;
-use crate::navigation_course::V1Course;
+use crate::navigation_course::{V1Course, V1CourseApi};
 use crate::navigation_gnss::V1gnss;
 use crate::SignalKGetError;
 use serde::{Deserialize, Serialize};
@@ -12,6 +12,7 @@ pub struct V1Navigation {
     // pub lights: Option<V1Lights>,
     pub course_over_ground_magnetic: Option<V1NumberValue>,
     pub course_over_ground_true: Option<V1NumberValue>,
+    pub course: Option<V1CourseApi>,
     pub course_rhumbline: Option<V1Course>,
     pub course_great_circle: Option<V1Course>,
     // pub closest_approach: Option<V1ClosestApproach>,
@@ -55,6 +56,15 @@ impl V1Navigation {
             "courseOverGroundTrue" => {
                 self.course_over_ground_true =
                     Some(V1NumberValue::builder().json_value(value).build())
+            }
+            "course" => {
+                if self.course.is_none() {
+                    self.course = Some(V1CourseApi::default());
+                }
+                if let Some(ref mut course) = self.course {
+                    path.remove(0);
+                    course.update(path, value);
+                }
             }
             "courseRhumbline" => {
                 if self.course_rhumbline.is_none() {
@@ -245,6 +255,7 @@ pub struct V1NavigationBuilder {
     // pub lights: Option<V1Lights>,
     course_over_ground_magnetic: Option<V1NumberValue>,
     course_over_ground_true: Option<V1NumberValue>,
+    course: Option<V1CourseApi>,
     course_rhumbline: Option<V1Course>,
     course_great_circle: Option<V1Course>,
     // pub closest_approach: Option<V1ClosestApproach>,
@@ -367,6 +378,7 @@ impl V1NavigationBuilder {
             speed_through_water_transverse: self.speed_through_water_transverse,
             speed_through_water_longitudinal: self.speed_through_water_longitudinal,
             leeway_angle: self.leeway_angle,
+            course: self.course,
             course_over_ground_true: self.course_over_ground_true,
             course_rhumbline: self.course_rhumbline,
             course_great_circle: self.course_great_circle,

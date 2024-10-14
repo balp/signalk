@@ -594,6 +594,20 @@ impl V1DateTime {
     pub fn builder() -> V1DateTimeBuilder {
         V1DateTimeBuilder::default()
     }
+
+    pub fn from_value(value: &Value) -> Option<V1DateTime> {
+        if value.is_null() {
+            None
+        } else {
+            let type_result: Result<V1DateTime, serde_json::Error> =
+                serde_json::from_value(value.clone());
+            if let Ok(type_value) = type_result {
+                Some(type_value)
+            } else {
+                None
+            }
+        }
+    }
 }
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 pub struct V1DateTimeValue {
@@ -653,17 +667,33 @@ pub enum V1StringValue {
     Expanded(V1StringExpandedValue),
     Value(String),
 }
-#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
-pub struct V1StringExpandedValue {
-    pub value: Option<String>,
-    #[serde(flatten)]
-    pub common_value_fields: Option<V1CommonValueFields>,
+
+impl Default for V1StringValue {
+    fn default() -> Self {
+        V1StringValue::Value(String::default())
+    }
 }
+
 impl V1StringValue {
     pub fn builder() -> V1StringValueBuilder {
         V1StringValueBuilder::default()
     }
+
+    pub fn from_value(value: &Value) -> Option<V1StringValue> {
+        if value.is_null() {
+            None
+        } else {
+            let type_result: Result<V1StringValue, serde_json::Error> =
+                serde_json::from_value(value.clone());
+            if let Ok(type_value) = type_result {
+                Some(type_value)
+            } else {
+                None
+            }
+        }
+    }
 }
+
 #[derive(Default)]
 pub struct V1StringValueBuilder {
     value: Option<String>,
@@ -693,6 +723,13 @@ impl V1StringValueBuilder {
             }
         }
     }
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+pub struct V1StringExpandedValue {
+    pub value: Option<String>,
+    #[serde(flatten)]
+    pub common_value_fields: Option<V1CommonValueFields>,
 }
 
 #[cfg(test)]

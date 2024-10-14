@@ -5,13 +5,96 @@ use serde_json::Value;
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct V1CourseApi {
+    pub active_route: Option<V1CourseApiActiveRouteModel>,
+    pub next_point: Option<V1CourseApiPointModel>,
+    pub previous_point: Option<V1CourseApiPointModel>,
+    pub start_time: Option<V1DateTime>,
+    pub target_arrival_time: Option<V1DateTime>,
+    pub arrival_circle: Option<V1NumberValue>,
+}
+
+impl V1CourseApi {
+    pub fn update(&mut self, path: &mut Vec<&str>, value: &Value) {
+        match path[0] {
+            "activeRoute" => self.active_route = V1CourseApiActiveRouteModel::from_value(value),
+            "nextPoint" => self.next_point = V1CourseApiPointModel::from_value(value),
+            "previousPoint" => self.previous_point = V1CourseApiPointModel::from_value(value),
+            "startTime" => self.start_time = V1DateTime::from_value(value),
+            "targetArrivalTime" => self.target_arrival_time = V1DateTime::from_value(value),
+            "arrivalCircle" => self.arrival_circle = V1NumberValue::from_value(value),
+
+            &_ => {
+                log::warn!(
+                    "V1CourseApi: Unknown value to update {:?}::{:?}",
+                    path,
+                    value
+                );
+            }
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct V1CourseApiActiveRouteModel {
+    pub href: V1StringValue,
+    pub name: Option<V1StringValue>,
+    pub point_index: i64,
+    pub point_total: i64,
+    pub reverse: bool,
+}
+
+impl V1CourseApiActiveRouteModel {
+    pub fn from_value(value: &Value) -> Option<V1CourseApiActiveRouteModel> {
+        if value.is_null() {
+            None
+        } else {
+            let route_result: Result<V1CourseApiActiveRouteModel, serde_json::Error> =
+                serde_json::from_value(value.clone());
+            if let Ok(route_value) = route_result {
+                Some(route_value)
+            } else {
+                None
+            }
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct V1CourseApiPointModel {
+    pub position: V1PositionType,
+    pub href: Option<V1StringValue>,
+    #[serde(rename = "type")]
+    pub type_: Option<V1StringValue>,
+}
+
+impl V1CourseApiPointModel {
+    pub fn from_value(value: &Value) -> Option<V1CourseApiPointModel> {
+        if value.is_null() {
+            None
+        } else {
+            let route_result: Result<V1CourseApiPointModel, serde_json::Error> =
+                serde_json::from_value(value.clone());
+            if let Ok(route_value) = route_result {
+                Some(route_value)
+            } else {
+                None
+            }
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct V1Course {
     pub cross_track_error: Option<V1NumberValue>,
     pub bearing_track_true: Option<V1NumberValue>,
     pub bearing_track_magnetic: Option<V1NumberValue>,
     pub active_route: Option<V1ActiveRoute>,
     pub next_point: Option<V1CourseNextPoint>,
-    // pub previous_point: Option<V1CourseNextPoint>,
+    pub previous_point: Option<V1CoursePreviousPoint>,
 }
 
 impl V1Course {
@@ -49,6 +132,15 @@ impl V1Course {
                     netxt_point.update(path, value);
                 }
             }
+            "previousPoint" => {
+                if self.previous_point.is_none() {
+                    self.previous_point = Some(V1CoursePreviousPoint::default());
+                }
+                if let Some(ref mut netxt_point) = self.previous_point {
+                    path.remove(0);
+                    netxt_point.update(path, value);
+                }
+            }
             &_ => {
                 log::warn!("V1Course: Unknown value to update {:?}::{:?}", path, value);
             }
@@ -63,7 +155,7 @@ pub struct V1CourseBuilder {
     bearing_track_magnetic: Option<V1NumberValue>,
     active_route: Option<V1ActiveRoute>,
     next_point: Option<V1CourseNextPoint>,
-    // pub previous_point: Option<V1CoursePreviousPoint>,
+    previous_point: Option<V1CoursePreviousPoint>,
 }
 
 impl V1CourseBuilder {
@@ -116,6 +208,10 @@ impl V1CourseBuilder {
         self.next_point = Some(value);
         self
     }
+    pub fn previous_point(mut self, value: V1CoursePreviousPoint) -> V1CourseBuilder {
+        self.previous_point = Some(value);
+        self
+    }
     pub fn build(self) -> V1Course {
         V1Course {
             cross_track_error: self.cross_track_error,
@@ -123,6 +219,7 @@ impl V1CourseBuilder {
             bearing_track_magnetic: self.bearing_track_magnetic,
             active_route: self.active_route,
             next_point: self.next_point,
+            previous_point: self.previous_point,
         }
     }
 }
@@ -234,6 +331,7 @@ impl V1ActiveRouteBuilder {
         }
     }
 }
+
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct V1CourseNextPoint {
@@ -315,41 +413,8 @@ pub struct V1CourseNextPointValue {
 impl V1CourseNextPointValue {
     pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::Value) {
         match path[0] {
-            "type" => {
-                if value.is_null() {
-                    self.href = None;
-                } else {
-                    let type_result: Result<V1StringValue, serde_json::Error> =
-                        serde_json::from_value(value.clone());
-                    if let Ok(type_value) = type_result {
-                        self.type_ = Some(type_value);
-                    } else {
-                        log::error!(
-                            "V1CourseNextPointValue:type: Invalid StringValue type: {:?}",
-                            type_result
-                        );
-                        self.type_ = None;
-                    }
-                }
-            }
-            "href" => {
-                if value.is_null() {
-                    self.href = None;
-                } else {
-                    let type_result: Result<V1StringValue, serde_json::Error> =
-                        serde_json::from_value(value.clone());
-                    if let Ok(type_value) = type_result {
-                        self.href = Some(type_value);
-                    } else {
-                        log::error!(
-                            "V1CourseNextPointValue:href: Invalid StringValue type:{:?}::{:?}",
-                            value,
-                            type_result
-                        );
-                        self.href = None;
-                    }
-                }
-            }
+            "type" => self.type_ = V1StringValue::from_value(value),
+            "href" => self.href = V1StringValue::from_value(value),
             &_ => {
                 log::warn!(
                     "V1CourseNextPointValue: Unknown value to update {:?}::{:?}",
@@ -361,9 +426,83 @@ impl V1CourseNextPointValue {
     }
 }
 
+#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct V1CoursePreviousPoint {
+    value: Option<V1CoursePreviousPointValue>,
+    distance: Option<V1NumberValue>,
+    position: Option<V1PositionType>,
+    #[serde(flatten)]
+    pub common_value_fields: Option<V1CommonValueFields>,
+}
+
+impl V1CoursePreviousPoint {
+    pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
+        match path[0] {
+            "value" => {
+                if self.value.is_none() {
+                    self.value = Some(V1CoursePreviousPointValue::default());
+                }
+                if let Some(ref mut point_value) = self.value {
+                    path.remove(0);
+                    point_value.update(path, value);
+                }
+            }
+            "distance" => {
+                self.distance = V1NumberValue::from_value(value);
+            }
+            "position" => {
+                if path.len() == 1 {
+                    self.position = V1PositionType::from_value(value);
+                } else {
+                    if self.position.is_none() {
+                        self.position = Some(V1PositionType::default());
+                    }
+                    if let Some(ref mut position) = self.position {
+                        path.remove(0);
+                        position.update(path, value);
+                    }
+                }
+            }
+
+            &_ => {
+                log::warn!(
+                    "V1CoursePreviousPoint: Unknown value to update {:?}::{:?}",
+                    path,
+                    value
+                );
+            }
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct V1CoursePreviousPointValue {
+    #[serde(rename = "type")]
+    type_: Option<V1StringValue>,
+    href: Option<V1StringValue>,
+}
+
+impl V1CoursePreviousPointValue {
+    pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::Value) {
+        match path[0] {
+            "type" => self.type_ = V1StringValue::from_value(value),
+            "href" => self.href = V1StringValue::from_value(value),
+            &_ => {
+                log::warn!(
+                    "V1CoursePreviousPointValue: Unknown value to update {:?}::{:?}",
+                    path,
+                    value
+                );
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::navigation_course::{V1Course, V1CourseNextPoint};
+    use crate::navigation_course::{V1Course, V1CourseNextPoint, V1CoursePreviousPoint};
 
     #[test]
     fn course_full_valid() {
@@ -504,6 +643,29 @@ mod tests {
           }
         }"#;
         let course_with_point: V1CourseNextPoint = serde_json::from_str(j).unwrap();
+        println!("{:?}", course_with_point);
+    }
+
+    #[test]
+    fn previous_point_valid() {
+        let j = r#"
+        {
+          "value": {
+            "type": "Waypoint",
+            "href": "/vessels/vessels.urn:mrn:imo:mmsi:230099999/resources/waypoints/urn:mrn:signalk:uuid:dd4a4c06-0c1d-4b5e-90c3-963649ee5e6d"
+          },
+          "timestamp": "2017-01-25T00:23:05.385Z",
+          "$source": "a.suitable.path",
+          "position": {
+            "timestamp": "2017-01-25T00:23:05.385Z",
+            "$source": "a.suitable.path",
+            "value": {
+              "latitude": 49.287333333333336,
+              "longitude": -123.1595
+            }
+          }
+        }"#;
+        let course_with_point: V1CoursePreviousPoint = serde_json::from_str(j).unwrap();
         println!("{:?}", course_with_point);
     }
 }
