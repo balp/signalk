@@ -452,9 +452,9 @@ impl V1TripBuilder {
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 pub struct V1PositionType {
     pub value: Option<V1PositionValue>,
-    pub timestamp: String,
+    pub timestamp: Option<String>,
     #[serde(rename = "$source")]
-    pub source: String,
+    pub source: Option<String>,
     pub pgn: Option<f64>,
     pub sentence: Option<String>,
 }
@@ -493,8 +493,8 @@ impl V1PositionType {
 #[derive(Default)]
 pub struct V1PositionTypeBuilder {
     pub value: Option<V1PositionValue>,
-    pub timestamp: String,
-    pub source: String,
+    pub timestamp: Option<String>,
+    pub source: Option<String>,
     pub pgn: Option<f64>,
     pub sentence: Option<String>,
 }
@@ -544,11 +544,11 @@ impl V1PositionTypeBuilder {
         self
     }
     pub fn timestamp(mut self, timestamp: String) -> V1PositionTypeBuilder {
-        self.timestamp = timestamp;
+        self.timestamp = Some(timestamp);
         self
     }
     pub fn source(mut self, source: String) -> V1PositionTypeBuilder {
-        self.source = source;
+        self.source = Some(source);
         self
     }
     pub fn pgn(mut self, pgn: f64) -> V1PositionTypeBuilder {

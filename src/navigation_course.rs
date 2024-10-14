@@ -11,7 +11,7 @@ pub struct V1CourseApi {
     pub previous_point: Option<V1CourseApiPointModel>,
     pub start_time: Option<V1DateTime>,
     pub target_arrival_time: Option<V1DateTime>,
-    pub arrival_circle: Option<V1NumberValue>,
+    pub arrival_circle: Option<i64>,
 }
 
 impl V1CourseApi {
@@ -22,7 +22,7 @@ impl V1CourseApi {
             "previousPoint" => self.previous_point = V1CourseApiPointModel::from_value(value),
             "startTime" => self.start_time = V1DateTime::from_value(value),
             "targetArrivalTime" => self.target_arrival_time = V1DateTime::from_value(value),
-            "arrivalCircle" => self.arrival_circle = V1NumberValue::from_value(value),
+            "arrivalCircle" => self.arrival_circle = value.as_i64(),
 
             &_ => {
                 log::warn!(
@@ -502,7 +502,9 @@ impl V1CoursePreviousPointValue {
 
 #[cfg(test)]
 mod tests {
-    use crate::navigation_course::{V1Course, V1CourseNextPoint, V1CoursePreviousPoint};
+    use crate::navigation_course::{
+        V1Course, V1CourseApi, V1CourseNextPoint, V1CoursePreviousPoint,
+    };
 
     #[test]
     fn course_full_valid() {
@@ -666,6 +668,38 @@ mod tests {
           }
         }"#;
         let course_with_point: V1CoursePreviousPoint = serde_json::from_str(j).unwrap();
+        println!("{:?}", course_with_point);
+    }
+
+    #[test]
+    fn course_api_valid() {
+        let j = r#"
+        {
+          "activeRoute": {
+            "href": "/resources/routes/ac3a3b2d-07e8-4f25-92bc-98e7c92f7f1a",
+            "name": "Here to eternity.",
+            "pointIndex": 0,
+            "pointTotal": 0,
+            "reverse": true
+          },
+          "nextPoint": {
+            "position": {
+              "latitude": 65.4567,
+              "longitude": 3.3452
+            }
+          },
+          "previousPoint": {
+            "position": {
+              "latitude": 65.4567,
+              "longitude": 3.3452
+            }
+          },
+          "startTime": "2022-04-22T05:02:56.484Z",
+          "targetArrivalTime": "2022-04-22T05:02:56.484Z",
+          "arrivalCircle": 500
+        }"#;
+        println!("{:?}", j);
+        let course_with_point: V1CourseApi = serde_json::from_str(j).unwrap();
         println!("{:?}", course_with_point);
     }
 }

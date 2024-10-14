@@ -776,6 +776,11 @@ mod tests {
         let j = r#""2014-08-15T19:05:29.57200Z""#;
         let datetime: V1DateTime = serde_json::from_str(j).unwrap();
     }
+    #[test]
+    fn datetime_string_2022_json() {
+        let j = r#""2022-04-22T05:02:56.484Z""#;
+        let datetime: V1DateTime = serde_json::from_str(j).unwrap();
+    }
 
     #[test]
     fn date_time_creation() {
