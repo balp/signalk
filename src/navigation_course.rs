@@ -245,6 +245,7 @@ pub struct V1CourseNextPoint {
     time_to_go: Option<V1NumberValue>,
     position: Option<V1PositionType>,
     estimated_time_of_arrival: Option<V1DateTime>,
+    arrival_circle: Option<V1NumberValue>,
     #[serde(flatten)]
     pub common_value_fields: Option<V1CommonValueFields>,
 }
@@ -288,6 +289,9 @@ impl V1CourseNextPoint {
                         position.update(path, value);
                     }
                 }
+            }
+            "arrivalCircle" => {
+                self.arrival_circle = V1NumberValue::from_value(value);
             }
             &_ => {
                 log::warn!(
