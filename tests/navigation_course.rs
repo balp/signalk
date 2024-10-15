@@ -1,8 +1,3 @@
-use log::{debug, error, info, warn};
-use signalk::full::V1FullFormat;
-use std::fs::File;
-use std::io::BufReader;
-use std::path::Path;
 
 // #[test]
 // fn test_navigation_course_to_pos() {
