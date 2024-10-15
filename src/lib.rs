@@ -40,6 +40,7 @@ pub mod navigation;
 mod navigation_course;
 mod navigation_gnss;
 pub mod notification;
+mod performance;
 pub mod propulsion;
 pub mod put;
 pub mod sources;

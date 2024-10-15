@@ -8,6 +8,7 @@ use crate::electrical::V1Electrical;
 use crate::environment::V1Environment;
 use crate::full::Updatable;
 use crate::notification::V1Notification;
+use crate::performance::V1Performance;
 use crate::{SignalKGetError, V1Navigation, V1Propulsion, V1UpdateType};
 
 /// An object describing an individual vessel. It should be an object in vessels,
@@ -55,7 +56,7 @@ pub struct V1Vessel {
     pub design: Option<V1Design>,
     // pub sails: Option<V1Sails>,
     // pub sensors: Option<V1Sensors>,
-    // pub performance: Option<V1Performance>,
+    pub performance: Option<V1Performance>,
     /// Engine data, each engine identified by a unique name i.e. Port_Engine
     pub propulsion: Option<HashMap<String, V1Propulsion>>,
 }
@@ -188,6 +189,15 @@ impl V1Vessel {
                     design.update(path, value);
                 }
             }
+            "performance" => {
+                if self.performance.is_none() {
+                    self.performance = Some(V1Performance::default());
+                }
+                if let Some(ref mut performance) = self.performance {
+                    path.remove(0);
+                    performance.update(path, value);
+                }
+            }
             "" => {
                 log::debug!("root path to vessel: {:?}::{:?}", path, value);
                 if let serde_json::Value::Object(ref map) = value {
@@ -268,6 +278,7 @@ pub struct V1VesselBuilder {
     notifications: Option<V1Notification>,
     propulsion: Option<HashMap<String, V1Propulsion>>,
     design: Option<V1Design>,
+    performance: Option<V1Performance>,
 }
 
 impl V1VesselBuilder {
@@ -348,6 +359,7 @@ impl V1VesselBuilder {
             propulsion: self.propulsion,
             url: self.url,
             mothership_mmsi: self.mothership_mmsi,
+            performance: self.performance,
         }
     }
 }
