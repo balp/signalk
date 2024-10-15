@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 
 use crate::communication::V1Communication;
+use crate::design::V1Design;
 use crate::electrical::V1Electrical;
 use crate::environment::V1Environment;
 use crate::full::Updatable;
@@ -51,7 +52,7 @@ pub struct V1Vessel {
 
     // pub steering: Option<V1Steering>,
     // pub tanks: Option<V1Tanks>,
-    // pub design: Option<V1Design>,
+    pub design: Option<V1Design>,
     // pub sails: Option<V1Sails>,
     // pub sensors: Option<V1Sensors>,
     // pub performance: Option<V1Performance>,
@@ -178,13 +179,17 @@ impl V1Vessel {
                     communication.update(path, value);
                 }
             }
+            "design" => {
+                if self.design.is_none() {
+                    self.design = Some(V1Design::default());
+                }
+                if let Some(ref mut design) = self.design {
+                    path.remove(0);
+                    design.update(path, value);
+                }
+            }
             "" => {
-                log::error!(
-                    "Not sure about comples update objects: {:?}::{:?}",
-                    path,
-                    value
-                );
-                log::warn!("?? objects: {:?}", value);
+                log::debug!("root path to vessel: {:?}::{:?}", path, value);
                 if let serde_json::Value::Object(ref map) = value {
                     for (k, v) in map.iter() {
                         log::debug!(" key: {:?} value: {:?}", k, v);
@@ -194,7 +199,7 @@ impl V1Vessel {
                 }
             }
             &_ => {
-                log::warn!("Unknown update pattern: {:?}::{:?}", path, value);
+                log::warn!("V1Vessel: Unknown update pattern: {:?}::{:?}", path, value);
             }
         }
     }
@@ -262,6 +267,7 @@ pub struct V1VesselBuilder {
     electrical: Option<V1Electrical>,
     notifications: Option<V1Notification>,
     propulsion: Option<HashMap<String, V1Propulsion>>,
+    design: Option<V1Design>,
 }
 
 impl V1VesselBuilder {
@@ -313,6 +319,10 @@ impl V1VesselBuilder {
         self.notifications = Some(value);
         self
     }
+    pub fn design(mut self, value: V1Design) -> V1VesselBuilder {
+        self.design = Some(value);
+        self
+    }
     pub fn add_propulsion(mut self, key: String, value: V1Propulsion) -> V1VesselBuilder {
         if self.propulsion.is_none() {
             self.propulsion = Some(HashMap::new());
@@ -334,6 +344,7 @@ impl V1VesselBuilder {
             environment: self.environment,
             electrical: self.electrical,
             // notifications: self.notifications,
+            design: self.design,
             propulsion: self.propulsion,
             url: self.url,
             mothership_mmsi: self.mothership_mmsi,

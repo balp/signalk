@@ -29,6 +29,7 @@ pub use vessel::V1Vessel;
 pub mod communication;
 pub mod definitions;
 pub mod delta;
+mod design;
 pub mod discovery;
 pub mod electrical;
 pub mod environment;
