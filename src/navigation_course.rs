@@ -12,6 +12,7 @@ pub struct V1CourseApi {
     pub start_time: Option<V1DateTime>,
     pub target_arrival_time: Option<V1DateTime>,
     pub arrival_circle: Option<i64>,
+    pub calc_values: Option<V1CourseCalculationsModel>,
 }
 
 impl V1CourseApi {
@@ -23,6 +24,7 @@ impl V1CourseApi {
             "startTime" => self.start_time = V1DateTime::from_value(value),
             "targetArrivalTime" => self.target_arrival_time = V1DateTime::from_value(value),
             "arrivalCircle" => self.arrival_circle = value.as_i64(),
+            "calcValues" => self.calc_values = V1CourseCalculationsModel::from_value(value),
 
             &_ => {
                 log::warn!(
@@ -84,6 +86,87 @@ impl V1CourseApiPointModel {
             }
         }
     }
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct V1CourseCalculationsModel {
+    pub calc_method: V1CourseCalculationsMethod,
+    pub cross_track_error: Option<f64>,
+    pub bearing_track_true: Option<f64>,
+    pub bearing_track_magnetic: Option<f64>,
+    pub estimated_time_of_arrival: Option<V1DateTime>,
+    pub distance: Option<i64>,
+    pub bearing_true: Option<f64>,
+    pub bearing_magnetic: Option<f64>,
+    pub velocity_made_good: Option<f64>,
+    pub time_to_go: Option<i64>,
+    pub target_speed: Option<f64>,
+    pub previous_point: Option<V1CourseCalculationsPreviousPoint>,
+}
+
+impl V1CourseCalculationsModel {
+    pub fn from_value(value: &Value) -> Option<V1CourseCalculationsModel> {
+        if value.is_null() {
+            None
+        } else {
+            let route_result: Result<V1CourseCalculationsModel, serde_json::Error> =
+                serde_json::from_value(value.clone());
+            if let Ok(route_value) = route_result {
+                Some(route_value)
+            } else {
+                None
+            }
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct V1CourseCalculationsPreviousPoint {
+    pub distance: Option<i64>,
+}
+
+impl V1CourseCalculationsPreviousPoint {
+    pub fn from_value(value: &Value) -> Option<V1CourseCalculationsPreviousPoint> {
+        if value.is_null() {
+            None
+        } else {
+            let route_result: Result<V1CourseCalculationsPreviousPoint, serde_json::Error> =
+                serde_json::from_value(value.clone());
+            if let Ok(route_value) = route_result {
+                Some(route_value)
+            } else {
+                None
+            }
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+#[serde(untagged)]
+pub enum V1CourseCalculationsMethod {
+    Expanded(V1CourseCalculationsExpandedMethod),
+    Value(V1CourseCalculationsMethodValue),
+}
+
+impl Default for V1CourseCalculationsMethod {
+    fn default() -> Self {
+        V1CourseCalculationsMethod::Value(V1CourseCalculationsMethodValue::default())
+    }
+}
+#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+pub struct V1CourseCalculationsExpandedMethod {
+    pub value: Option<V1CourseCalculationsMethodValue>,
+    #[serde(flatten)]
+    pub common_value_fields: Option<V1CommonValueFields>,
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+pub enum V1CourseCalculationsMethodValue {
+    #[default]
+    GreatCircle,
+    Rhumbline,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
@@ -503,7 +586,7 @@ impl V1CoursePreviousPointValue {
 #[cfg(test)]
 mod tests {
     use crate::navigation_course::{
-        V1Course, V1CourseApi, V1CourseNextPoint, V1CoursePreviousPoint,
+        V1Course, V1CourseApi, V1CourseCalculationsModel, V1CourseNextPoint, V1CoursePreviousPoint,
     };
 
     #[test]
@@ -700,6 +783,30 @@ mod tests {
         }"#;
         println!("{:?}", j);
         let course_with_point: V1CourseApi = serde_json::from_str(j).unwrap();
+        println!("{:?}", course_with_point);
+    }
+
+    #[test]
+    fn course_calc_values_valid() {
+        let j = r#"
+        {
+          "calcMethod": "Rhumbline",
+          "crossTrackError": 458.784,
+          "bearingTrackTrue": 4.58491,
+          "bearingTrackMagnetic": 4.51234,
+          "estimatedTimeOfArrival": "2022-04-22T05:02:56.484Z",
+          "distance": 10157,
+          "bearingTrue": 4.58491,
+          "bearingMagnetic": 4.51234,
+          "velocityMadeGood": 7.2653,
+          "timeToGo": 8491,
+          "targetSpeed": 2.2653,
+          "previousPoint": {
+            "distance": 10157
+          }
+        }"#;
+        println!("{:?}", j);
+        let course_with_point: V1CourseCalculationsModel = serde_json::from_str(j).unwrap();
         println!("{:?}", course_with_point);
     }
 }
