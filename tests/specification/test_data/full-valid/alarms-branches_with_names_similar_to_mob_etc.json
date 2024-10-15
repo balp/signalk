@@ -1,0 +1,26 @@
+{
+  "vessels": {
+    "urn:mrn:signalk:uuid:c0d79334-4e25-4245-8892-54e8ccc8021d": {
+      "uuid": "urn:mrn:signalk:uuid:c0d79334-4e25-4245-8892-54e8ccc8021d",
+      "notifications": {
+        "moba": {
+          "amob": {
+            "X": {
+              "value": {
+                "message": "Message",
+                "state": "alert",
+                "method": [
+                  "visual"
+                ]
+              },
+              "timestamp": "2017-01-23T14:22:17Z",
+              "$source": "sources.alarm"
+            }
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0.0",
+  "self": "urn:mrn:signalk:uuid:c0d79334-4e25-4245-8892-54e8ccc8021d"
+}

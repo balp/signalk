@@ -1,0 +1,79 @@
+{
+  "uuid": "urn:mrn:signalk:uuid:c0d79334-4e25-4245-8892-54e8ccc8021d",
+  "steering": {
+    "rudderAngle": {
+      "value": 0.001,
+      "$source": "foo.bar",
+      "timestamp": "2014-08-15T19:00:15.402Z"
+      },
+    "rudderAngleTarget": {
+      "value": 0.001,
+      "$source": "foo.bar",
+      "timestamp": "2014-08-15T19:00:15.402Z"
+      },
+    "autopilot": {
+      "state": {
+        "value" : "auto",
+        "$source": "foo.bar",
+        "timestamp": "2014-08-15T19:00:15.402Z"
+      },
+      "mode": {
+        "value": "normal",
+        "$source": "foo.bar",
+        "timestamp": "2014-08-15T19:00:15.402Z"
+      },
+      "target": {
+        "windAngleApparent": {
+          "value": 1.0472,
+          "$source": "foo.bar",
+          "timestamp": "2014-08-15T19:00:15.402Z"
+        },
+        "windAngleTrue": {
+          "value": 1.39626,
+          "$source": "foo.bar",
+          "timestamp": "2014-08-15T19:00:15.402Z"
+        },
+        "headingTrue": {
+          "value": 0.02,
+          "$source": "foo.bar",
+          "timestamp": "2014-08-15T19:00:15.402Z"
+        },
+        "headingMagnetic": {
+          "value": 0.02,
+          "$source": "foo.bar",
+          "timestamp": "2014-08-15T19:00:15.402Z"
+        }
+      },
+      "deadZone":{
+        "value": 0.02,
+        "$source": "foo.bar",
+        "timestamp": "2014-08-15T19:00:15.402Z"
+        },
+      "gain": {
+        "value": 0.02,
+        "$source": "foo.bar",
+        "timestamp": "2014-08-15T19:00:15.402Z"
+        },
+      "maxDriveCurrent": {
+        "value": 0.02,
+        "$source": "foo.bar",
+        "timestamp": "2014-08-15T19:00:15.402Z"
+        },
+      "maxDriveRate": {
+        "value": 0.02,
+        "$source": "foo.bar",
+        "timestamp": "2014-08-15T19:00:15.402Z"
+        },
+      "portLock": {
+        "value": 0.02,
+        "$source": "foo.bar",
+        "timestamp": "2014-08-15T19:00:15.402Z"
+        },
+      "starboardLock": {
+        "value": 0.02,
+        "$source": "foo.bar",
+        "timestamp": "2014-08-15T19:00:15.402Z"
+        }
+    }
+  }
+}

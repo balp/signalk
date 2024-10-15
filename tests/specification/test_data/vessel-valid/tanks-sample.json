@@ -1,0 +1,40 @@
+{
+  "uuid": "urn:mrn:signalk:uuid:c0d79334-4e25-4245-8892-54e8ccc8021d",
+  "tanks": {
+    "freshWater": {
+      "main": {
+        "capacity": {
+          "value": 31.7,
+          "$source": "foo.bar",
+          "timestamp": "2014-08-15T19:00:15.402Z"
+        },
+        "currentVolume": {
+          "value": 0.0887,
+          "$source": "foo.bar",
+          "timestamp": "2014-08-15T19:00:15.402Z"
+        }
+      }
+    },
+		"liveWell": {
+			"live1":{
+				"temperature": {
+					"value": 0,
+					"$source": ".36.0",
+					"timestamp": "2017-01-24T23:59:01Z",
+					"pgn": 130312
+				}
+			}
+		},
+		"liveWell": {
+			"bait1":{
+				"temperature": {
+					"value": 0,
+					"$source": ".36.0",
+					"timestamp": "2017-01-24T23:59:01Z",
+					"pgn": 130312
+				}
+			}
+		}
+    
+  }
+}
