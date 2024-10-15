@@ -5,7 +5,7 @@ use crate::definitions::V1NumberValue;
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct V1Propulsion {
-    pub label: String,
+    pub label: Option<String>,
     pub state: Option<V1PropulsionState>,
     pub revolutions: Option<V1NumberValue>,
     pub temperature: Option<V1NumberValue>,
@@ -30,7 +30,7 @@ impl V1Propulsion {
 
 #[derive(Default)]
 pub struct V1PropulsionBuilder {
-    label: String,
+    label: Option<String>,
     state: Option<V1PropulsionState>,
     revolutions: Option<V1NumberValue>,
     temperature: Option<V1NumberValue>,
@@ -48,7 +48,7 @@ pub struct V1PropulsionBuilder {
 
 impl V1PropulsionBuilder {
     pub fn label(mut self, label: String) -> V1PropulsionBuilder {
-        self.label = label;
+        self.label = Some(label);
         self
     }
     pub fn state(mut self, state: V1PropulsionState) -> V1PropulsionBuilder {

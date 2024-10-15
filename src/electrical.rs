@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-use crate::definitions::{V1CommonValueFields, V1NumberValue};
+use crate::definitions::{V1CommonValueFields, V1NumberValue, V2NumberValue};
 use crate::{helper_functions, SignalKGetError};
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
@@ -621,14 +621,14 @@ impl V1BatteryTemperature {
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct V1BatteryCapacity {
-    pub nominal: Option<V1NumberValue>,
-    pub actual: Option<V1NumberValue>,
-    pub remaining: Option<V1NumberValue>,
-    pub discharge_limit: Option<V1NumberValue>,
-    pub state_of_charge: Option<V1NumberValue>,
-    pub state_of_health: Option<V1NumberValue>,
-    pub discharge_since_full: Option<V1NumberValue>,
-    pub time_remaining: Option<V1NumberValue>,
+    pub nominal: Option<V2NumberValue>,
+    pub actual: Option<V2NumberValue>,
+    pub remaining: Option<V2NumberValue>,
+    pub discharge_limit: Option<V2NumberValue>,
+    pub state_of_charge: Option<V2NumberValue>,
+    pub state_of_health: Option<V2NumberValue>,
+    pub discharge_since_full: Option<V2NumberValue>,
+    pub time_remaining: Option<V2NumberValue>,
 }
 
 impl V1BatteryCapacity {
@@ -637,26 +637,14 @@ impl V1BatteryCapacity {
     }
     pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
         match path[0] {
-            "nominal" => self.nominal = Some(V1NumberValue::builder().json_value(value).build()),
-            "actual" => self.actual = Some(V1NumberValue::builder().json_value(value).build()),
-            "remaining" => {
-                self.remaining = Some(V1NumberValue::builder().json_value(value).build())
-            }
-            "dischargeLimit" => {
-                self.discharge_limit = Some(V1NumberValue::builder().json_value(value).build())
-            }
-            "stateOfCharge" => {
-                self.state_of_charge = Some(V1NumberValue::builder().json_value(value).build())
-            }
-            "stateOfHealth" => {
-                self.state_of_health = Some(V1NumberValue::builder().json_value(value).build())
-            }
-            "dischargeSinceFull" => {
-                self.discharge_since_full = Some(V1NumberValue::builder().json_value(value).build())
-            }
-            "timeRemaining" => {
-                self.time_remaining = Some(V1NumberValue::builder().json_value(value).build())
-            }
+            "nominal" => self.nominal = V2NumberValue::from_value(value),
+            "actual" => self.actual = V2NumberValue::from_value(value),
+            "remaining" => self.remaining = V2NumberValue::from_value(value),
+            "dischargeLimit" => self.discharge_limit = V2NumberValue::from_value(value),
+            "stateOfCharge" => self.state_of_charge = V2NumberValue::from_value(value),
+            "stateOfHealth" => self.state_of_health = V2NumberValue::from_value(value),
+            "dischargeSinceFull" => self.discharge_since_full = V2NumberValue::from_value(value),
+            "timeRemaining" => self.time_remaining = V2NumberValue::from_value(value),
             &_ => {
                 log::warn!(
                     "V1BatteryCapacity: Unknown value to update: {:?}::{:?}",
@@ -670,47 +658,47 @@ impl V1BatteryCapacity {
 
 #[derive(Default)]
 pub struct V1BatteryCapacityBuilder {
-    nominal: Option<V1NumberValue>,
-    actual: Option<V1NumberValue>,
-    remaining: Option<V1NumberValue>,
-    discharge_limit: Option<V1NumberValue>,
-    state_of_charge: Option<V1NumberValue>,
-    state_of_health: Option<V1NumberValue>,
-    discharge_since_full: Option<V1NumberValue>,
-    time_remaining: Option<V1NumberValue>,
+    nominal: Option<V2NumberValue>,
+    actual: Option<V2NumberValue>,
+    remaining: Option<V2NumberValue>,
+    discharge_limit: Option<V2NumberValue>,
+    state_of_charge: Option<V2NumberValue>,
+    state_of_health: Option<V2NumberValue>,
+    discharge_since_full: Option<V2NumberValue>,
+    time_remaining: Option<V2NumberValue>,
 }
 
 impl V1BatteryCapacityBuilder {
-    pub fn nominal(mut self, value: f64) -> V1BatteryCapacityBuilder {
-        self.nominal = Some(V1NumberValue::builder().value(value).build());
+    pub fn nominal(mut self, value: i64) -> V1BatteryCapacityBuilder {
+        self.nominal = Some(V2NumberValue::Int(value));
         self
     }
-    pub fn actual(mut self, value: f64) -> V1BatteryCapacityBuilder {
-        self.actual = Some(V1NumberValue::builder().value(value).build());
+    pub fn actual(mut self, value: i64) -> V1BatteryCapacityBuilder {
+        self.actual = Some(V2NumberValue::Int(value));
         self
     }
-    pub fn remaining(mut self, value: f64) -> V1BatteryCapacityBuilder {
-        self.remaining = Some(V1NumberValue::builder().value(value).build());
+    pub fn remaining(mut self, value: i64) -> V1BatteryCapacityBuilder {
+        self.remaining = Some(V2NumberValue::Int(value));
         self
     }
-    pub fn discharge_limit(mut self, value: f64) -> V1BatteryCapacityBuilder {
-        self.discharge_limit = Some(V1NumberValue::builder().value(value).build());
+    pub fn discharge_limit(mut self, value: i64) -> V1BatteryCapacityBuilder {
+        self.discharge_limit = Some(V2NumberValue::Int(value));
         self
     }
-    pub fn state_of_charge(mut self, value: f64) -> V1BatteryCapacityBuilder {
-        self.state_of_charge = Some(V1NumberValue::builder().value(value).build());
+    pub fn state_of_charge(mut self, value: i64) -> V1BatteryCapacityBuilder {
+        self.state_of_charge = Some(V2NumberValue::Int(value));
         self
     }
-    pub fn state_of_health(mut self, value: f64) -> V1BatteryCapacityBuilder {
-        self.state_of_health = Some(V1NumberValue::builder().value(value).build());
+    pub fn state_of_health(mut self, value: i64) -> V1BatteryCapacityBuilder {
+        self.state_of_health = Some(V2NumberValue::Int(value));
         self
     }
-    pub fn discharge_since_full(mut self, value: f64) -> V1BatteryCapacityBuilder {
-        self.discharge_since_full = Some(V1NumberValue::builder().value(value).build());
+    pub fn discharge_since_full(mut self, value: i64) -> V1BatteryCapacityBuilder {
+        self.discharge_since_full = Some(V2NumberValue::Int(value));
         self
     }
-    pub fn time_remaining(mut self, value: V1NumberValue) -> V1BatteryCapacityBuilder {
-        self.time_remaining = Some(value);
+    pub fn time_remaining(mut self, value: i64) -> V1BatteryCapacityBuilder {
+        self.time_remaining = Some(V2NumberValue::Int(value));
         self
     }
     pub fn build(self) -> V1BatteryCapacity {

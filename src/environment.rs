@@ -979,7 +979,7 @@ impl V1EnvironmentTimeBuilder {
 pub struct V1EnvironmentMode {
     pub value: Option<String>,
     pub timestamp: Option<String>,
-    pub source: Option<String>,
+    pub source: Option<V1Source>,
 }
 
 impl V1EnvironmentMode {

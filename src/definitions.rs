@@ -1,3 +1,4 @@
+use crate::definitions::V2NumberValue::Int;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -63,6 +64,43 @@ impl V1CommonValueFieldsBuilder {
             pgn: self.pgn,
             sentence: self.sentence,
         }
+    }
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+#[serde(untagged)]
+pub enum V2NumberValue {
+    ExpandedFloat(V2NumberExpandedFloatValue),
+    Float(f64),
+    Int(i64),
+}
+
+impl V2NumberValue {
+    pub fn from_value(value: &Value) -> Option<Self> {
+        if value.is_null() {
+            None
+        } else {
+            let ship_type_result: Result<Self, serde_json::Error> =
+                serde_json::from_value(value.clone());
+            if let Ok(ship_type_value) = ship_type_result {
+                Some(ship_type_value)
+            } else {
+                None
+            }
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+pub struct V2NumberExpandedFloatValue {
+    pub value: Option<f64>,
+    #[serde(flatten)]
+    pub common_value_fields: Option<V1CommonValueFields>,
+}
+
+impl Default for V2NumberValue {
+    fn default() -> Self {
+        Int(i64::default())
     }
 }
 
