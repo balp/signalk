@@ -1,4 +1,3 @@
-
 // #[test]
 // fn test_navigation_course_to_pos() {
 //     let path = Path::new("tests/demo_data/ongoing_navigation.json");

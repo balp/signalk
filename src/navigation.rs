@@ -596,7 +596,7 @@ impl V1PositionValue {
 
 #[cfg(test)]
 mod tests {
-    
+
     use crate::navigation::V1Navigation;
     use crate::navigation_course::V1Course;
     use serde_json::{Number, Value};
