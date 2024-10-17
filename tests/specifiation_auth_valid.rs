@@ -5,6 +5,7 @@ use std::path::Path;
 
 /* TODO: Auth messages not supported
 #[test]
+#[ignore = "not yet implemented"]
 fn login_request() {
     let path = Path::new("tests/specification/test_data/auth-valid/login-request.json");
     let file = File::open(path).unwrap();
