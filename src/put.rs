@@ -6,7 +6,7 @@ use serde_json::Value;
 pub struct V1Put {
     pub request_id: String,
     pub context: Option<String>,
-    pub put: V1PutValue,
+    pub put: OptionalArray<V1PutValue>,
 }
 
 impl V1Put {
@@ -19,7 +19,7 @@ impl V1Put {
 pub struct V1PutBuilder {
     request_id: String,
     context: Option<String>,
-    put: V1PutValue,
+    put: OptionalArray<V1PutValue>,
 }
 
 impl V1PutBuilder {
@@ -32,7 +32,7 @@ impl V1PutBuilder {
         self
     }
     pub fn put(mut self, value: V1PutValue) -> V1PutBuilder {
-        self.put = value;
+        self.put = OptionalArray::Value(value);
         self
     }
     pub fn build(self) -> V1Put {
@@ -41,6 +41,21 @@ impl V1PutBuilder {
             context: self.context,
             put: self.put,
         }
+    }
+}
+
+
+
+#[derive(Serialize, Deserialize, PartialEq, Debug)]
+#[serde(untagged)]
+pub enum OptionalArray<T: Default> {
+    Value(T),
+    Vector(Vec<T>),
+}
+
+impl<T: Default> Default for OptionalArray<T> {
+    fn default() -> Self {
+        Self::Value(T::default())
     }
 }
 
