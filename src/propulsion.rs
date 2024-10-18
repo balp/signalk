@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::definitions::V1NumberValue;
+use crate::V1CommonValueFields;
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -129,9 +130,24 @@ impl V1PropulsionBuilder {
     }
 }
 
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+#[serde(untagged)]
+pub enum V1PropulsionState {
+    Expanded(V1PropulsionExpandedState),
+    Value(V1PropulsionStateValue)
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct V1PropulsionExpandedState {
+    pub value: V1PropulsionStateValue,
+    #[serde(flatten)]
+    pub common_state: Option<V1CommonValueFields>,
+}
+
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 #[serde(rename_all = "lowercase")]
-pub enum V1PropulsionState {
+pub enum V1PropulsionStateValue {
     Stopped,
     Started,
     #[default]
