@@ -1,0 +1,2 @@
+window.ALL_CRATES = ["bytes","convert_case","derive_more","derive_more_impl","itoa","log","memchr","proc_macro2","quote","ryu","serde","serde_derive","serde_json","signalk","syn","unicode_ident","unicode_segmentation","unicode_xid"];
+//{"start":21,"fragment_lengths":[7,15,14,19,7,6,9,14,8,6,8,15,13,10,6,16,23,14]}

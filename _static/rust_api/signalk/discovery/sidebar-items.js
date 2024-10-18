@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["V1Discovery","V1DiscoveryBuilder","V1DiscoveryEndpoint","V1DiscoveryEndpointBuilder","V1DiscoveryServer"]};
