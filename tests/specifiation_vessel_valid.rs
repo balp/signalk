@@ -1,7 +1,7 @@
+use signalk::V1Vessel;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
-use signalk::V1Vessel;
 
 #[test]
 fn environment_sample() {
@@ -50,7 +50,8 @@ fn meta_with_with_display_scale() {
 
 #[test]
 fn meta_with_with_display_scale_type() {
-    let path = Path::new("tests/specification/test_data/vessel-valid/meta-with_displayScale_type.json");
+    let path =
+        Path::new("tests/specification/test_data/vessel-valid/meta-with_displayScale_type.json");
     let file = File::open(path).unwrap();
     let reader = BufReader::new(file);
     let sk_data: V1Vessel = serde_json::from_reader(reader).unwrap();
@@ -59,7 +60,9 @@ fn meta_with_with_display_scale_type() {
 
 #[test]
 fn meta_with_with_display_scale_type_power() {
-    let path = Path::new("tests/specification/test_data/vessel-valid/meta-with_displayScale_type_power.json");
+    let path = Path::new(
+        "tests/specification/test_data/vessel-valid/meta-with_displayScale_type_power.json",
+    );
     let file = File::open(path).unwrap();
     let reader = BufReader::new(file);
     let sk_data: V1Vessel = serde_json::from_reader(reader).unwrap();
@@ -113,7 +116,8 @@ fn tanks_sample() {
 
 #[test]
 fn vessel_just_mmsi_identifier() {
-    let path = Path::new("tests/specification/test_data/vessel-valid/vessel-just_mmsi_identifier.json");
+    let path =
+        Path::new("tests/specification/test_data/vessel-valid/vessel-just_mmsi_identifier.json");
     let file = File::open(path).unwrap();
     let reader = BufReader::new(file);
     let sk_data: V1Vessel = serde_json::from_reader(reader).unwrap();
@@ -122,7 +126,8 @@ fn vessel_just_mmsi_identifier() {
 
 #[test]
 fn vessel_just_uuid_identifier() {
-    let path = Path::new("tests/specification/test_data/vessel-valid/vessel-just_uuid_identifier.json");
+    let path =
+        Path::new("tests/specification/test_data/vessel-valid/vessel-just_uuid_identifier.json");
     let file = File::open(path).unwrap();
     let reader = BufReader::new(file);
     let sk_data: V1Vessel = serde_json::from_reader(reader).unwrap();
@@ -131,10 +136,11 @@ fn vessel_just_uuid_identifier() {
 
 #[test]
 fn vessel_uuid_and_mmsi_identifiers() {
-    let path = Path::new("tests/specification/test_data/vessel-valid/vessel-uuid_and_mmsi_identifiers.json");
+    let path = Path::new(
+        "tests/specification/test_data/vessel-valid/vessel-uuid_and_mmsi_identifiers.json",
+    );
     let file = File::open(path).unwrap();
     let reader = BufReader::new(file);
     let sk_data: V1Vessel = serde_json::from_reader(reader).unwrap();
     println!("{:?}", sk_data);
 }
-

@@ -134,7 +134,7 @@ impl V1PropulsionBuilder {
 #[serde(untagged)]
 pub enum V1PropulsionState {
     Expanded(V1PropulsionExpandedState),
-    Value(V1PropulsionStateValue)
+    Value(V1PropulsionStateValue),
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
