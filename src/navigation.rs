@@ -639,7 +639,7 @@ mod tests {
                 .bearing_track_true
                 .as_ref()
                 .unwrap()
-                .value
+                .as_f64()
                 .unwrap(),
             0.1234
         )

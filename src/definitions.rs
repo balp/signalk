@@ -89,6 +89,14 @@ impl V2NumberValue {
             }
         }
     }
+    
+    pub fn as_f64(&self) -> Option<f64> {
+        match self {
+            V2NumberValue::ExpandedFloat(v) => v.value,
+            V2NumberValue::Float(v) => Some(v.clone()),
+            Int(v) => Some(v.clone() as f64),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]

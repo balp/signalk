@@ -1,4 +1,4 @@
-use crate::definitions::{V1DateTime, V1StringValue};
+use crate::definitions::{V1DateTime, V1StringValue, V2NumberValue};
 use crate::{V1CommonValueFields, V1NumberValue, V1PositionType};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -92,16 +92,16 @@ impl V1CourseApiPointModel {
 #[serde(rename_all = "camelCase")]
 pub struct V1CourseCalculationsModel {
     pub calc_method: V1CourseCalculationsMethod,
-    pub cross_track_error: Option<f64>,
-    pub bearing_track_true: Option<f64>,
-    pub bearing_track_magnetic: Option<f64>,
+    pub cross_track_error: Option<V2NumberValue>,
+    pub bearing_track_true: Option<V2NumberValue>,
+    pub bearing_track_magnetic: Option<V2NumberValue>,
     pub estimated_time_of_arrival: Option<V1DateTime>,
-    pub distance: Option<i64>,
-    pub bearing_true: Option<f64>,
-    pub bearing_magnetic: Option<f64>,
-    pub velocity_made_good: Option<f64>,
-    pub time_to_go: Option<i64>,
-    pub target_speed: Option<f64>,
+    pub distance: Option<V2NumberValue>,
+    pub bearing_true: Option<V2NumberValue>,
+    pub bearing_magnetic: Option<V2NumberValue>,
+    pub velocity_made_good: Option<V2NumberValue>,
+    pub time_to_go: Option<V2NumberValue>,
+    pub target_speed: Option<V2NumberValue>,
     pub previous_point: Option<V1CourseCalculationsPreviousPoint>,
 }
 
@@ -124,7 +124,7 @@ impl V1CourseCalculationsModel {
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct V1CourseCalculationsPreviousPoint {
-    pub distance: Option<i64>,
+    pub distance: Option<V2NumberValue>,
 }
 
 impl V1CourseCalculationsPreviousPoint {
@@ -173,7 +173,7 @@ pub enum V1CourseCalculationsMethodValue {
 #[serde(rename_all = "camelCase")]
 pub struct V1Course {
     pub cross_track_error: Option<V1NumberValue>,
-    pub bearing_track_true: Option<V1NumberValue>,
+    pub bearing_track_true: Option<V2NumberValue>,
     pub bearing_track_magnetic: Option<V1NumberValue>,
     pub active_route: Option<V1ActiveRoute>,
     pub next_point: Option<V1CourseNextPoint>,
@@ -191,7 +191,7 @@ impl V1Course {
                 self.cross_track_error = Some(V1NumberValue::builder().json_value(value).build());
             }
             "bearingTrackTrue" => {
-                self.bearing_track_true = Some(V1NumberValue::builder().json_value(value).build());
+                self.bearing_track_true = V2NumberValue::from_value(value);
             }
             "bearingTrackMagnetic" => {
                 self.bearing_track_magnetic =
@@ -234,7 +234,7 @@ impl V1Course {
 #[derive(Default)]
 pub struct V1CourseBuilder {
     cross_track_error: Option<V1NumberValue>,
-    bearing_track_true: Option<V1NumberValue>,
+    bearing_track_true: Option<V2NumberValue>,
     bearing_track_magnetic: Option<V1NumberValue>,
     active_route: Option<V1ActiveRoute>,
     next_point: Option<V1CourseNextPoint>,
@@ -252,7 +252,7 @@ impl V1CourseBuilder {
                 self.cross_track_error = Some(V1NumberValue::builder().json_value(value).build());
             }
             "bearingTrackTrue" => {
-                self.bearing_track_true = Some(V1NumberValue::builder().json_value(value).build());
+                self.bearing_track_true = V2NumberValue::from_value(value);
             }
             "bearingTrackMagnetic" => {
                 self.bearing_track_magnetic =
@@ -275,7 +275,7 @@ impl V1CourseBuilder {
         self.cross_track_error = Some(value);
         self
     }
-    pub fn bearing_track_true(mut self, value: V1NumberValue) -> V1CourseBuilder {
+    pub fn bearing_track_true(mut self, value: V2NumberValue) -> V1CourseBuilder {
         self.bearing_track_true = Some(value);
         self
     }
