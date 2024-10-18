@@ -507,9 +507,10 @@ impl V1PositionTypeBuilder {
                     if let Some(val) = self.value.as_mut() {
                         val.longitude = lon;
                     } else {
-                        let mut pos_ = V1PositionValue::default();
-                        pos_.longitude = lon;
-                        self.value = Some(pos_);
+                        self.value = Some(V1PositionValue {
+                            longitude: lon,
+                            ..Default::default()
+                        });
                     }
                 }
             }
@@ -518,9 +519,10 @@ impl V1PositionTypeBuilder {
                     if let Some(val) = self.value.as_mut() {
                         val.latitude = lat;
                     } else {
-                        let mut pos_ = V1PositionValue::default();
-                        pos_.latitude = lat;
-                        self.value = Some(pos_);
+                        self.value = Some(V1PositionValue {
+                            latitude: lat,
+                            ..Default::default()
+                        });
                     }
                 }
             }
@@ -529,9 +531,10 @@ impl V1PositionTypeBuilder {
                     if let Some(val) = self.value.as_mut() {
                         val.altitude = Some(alt);
                     } else {
-                        let mut pos_ = V1PositionValue::default();
-                        pos_.altitude = Some(alt);
-                        self.value = Some(pos_);
+                        self.value = Some(V1PositionValue {
+                            altitude: Some(alt),
+                            ..Default::default()
+                        });
                     }
                 }
             }

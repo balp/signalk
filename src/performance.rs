@@ -1,4 +1,4 @@
-use crate::definitions::V1StringValue;
+use crate::definitions::{V1StringValue, V2NumberValue};
 use crate::{V1CommonValueFields, V1NumberValue, V1Source};
 use serde::{Deserialize, Serialize};
 
@@ -103,7 +103,7 @@ pub struct V1Polar {
     pub name: V1StringValue,
     // pub description: V1StringValue,
     pub source: Option<V1Source>,
-    // pub windData: V1SPolarWindData,
+    pub wind_data: Option<Vec<V1PolarWindData>>,
 }
 
 impl V1Polar {
@@ -121,24 +121,12 @@ impl V1Polar {
         }
     }
 }
+
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct V1PolarWindData {
-    pub true_wind_speed: V1NumberValue,
-}
-
-impl V1PolarWindData {
-    pub fn from_value(value: &serde_json::value::Value) -> Option<Self> {
-        if value.is_null() {
-            None
-        } else {
-            let ship_type_result: Result<Self, serde_json::Error> =
-                serde_json::from_value(value.clone());
-            if let Ok(ship_type_value) = ship_type_result {
-                Some(ship_type_value)
-            } else {
-                None
-            }
-        }
-    }
+    pub true_wind_speed: V2NumberValue,
+    pub optimal_beats: Option<Vec<Vec<V2NumberValue>>>,
+    pub optimal_gybes: Option<Vec<Vec<V2NumberValue>>>,
+    pub angle_data: Vec<Vec<V2NumberValue>>,
 }

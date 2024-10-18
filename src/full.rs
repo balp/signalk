@@ -120,7 +120,6 @@ impl V1FullFormat {
     pub fn get_self(&self) -> Option<&V1Vessel> {
         if let Some(vessels) = self.vessels.as_ref() {
             let v: Vec<&str> = self.self_.split('.').collect();
-            if v[0] == "vessels" {}
             return vessels.get(v[1]);
         };
         None

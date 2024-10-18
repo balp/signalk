@@ -93,8 +93,8 @@ impl V2NumberValue {
     pub fn as_f64(&self) -> Option<f64> {
         match self {
             V2NumberValue::ExpandedFloat(v) => v.value,
-            V2NumberValue::Float(v) => Some(v.clone()),
-            Int(v) => Some(v.clone() as f64),
+            V2NumberValue::Float(v) => Some(*v),
+            Int(v) => Some(*v as f64),
         }
     }
 }
@@ -761,12 +761,10 @@ impl V1StringValueBuilder {
                 value: self.value,
                 common_value_fields: self.common_value_fields,
             })
+        } else if let Some(value) = self.value {
+            V1StringValue::Value(value.clone())
         } else {
-            if let Some(value) = self.value {
-                V1StringValue::Value(value.clone())
-            } else {
-                V1StringValue::Value("".to_string())
-            }
+            V1StringValue::Value("".to_string())
         }
     }
 }

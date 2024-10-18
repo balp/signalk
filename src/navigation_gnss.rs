@@ -109,8 +109,10 @@ pub struct V1gnssExpandedType {
 pub enum V1gnssTypeValue {
     #[default]
     Undefined,
-    GPS,
-    GLONASS,
+    #[serde(rename = "GPS")]
+    Gps,
+    #[serde(rename = "GLONASS")]
+    Glonass,
     #[serde(rename = "Combined GPS/GLONASS")]
     CombinedGpsGlonass,
     #[serde(rename = "Loran-C")]
