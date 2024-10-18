@@ -89,7 +89,7 @@ impl V2NumberValue {
             }
         }
     }
-    
+
     pub fn as_f64(&self) -> Option<f64> {
         match self {
             V2NumberValue::ExpandedFloat(v) => v.value,
