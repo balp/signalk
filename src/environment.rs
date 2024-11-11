@@ -2,8 +2,8 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-use crate::definitions::{V1CommonValueFields, V1NumberValue};
-use crate::helper_functions::get_f64_value;
+use crate::definitions::{V1CommonValueFields, V1NumberValue, V2NumberValue};
+use crate::helper_functions::{get_f64_value, get_f64_value_for_path, F64CompatiblePath};
 use crate::sources::V1Source;
 use crate::SignalKGetError;
 
@@ -160,14 +160,7 @@ impl V1Environment {
                     Err(SignalKGetError::NoSuchPath)
                 }
             }
-            "current" => {
-                if let Some(ref value) = self.current {
-                    path.remove(0);
-                    value.get_f64_for_path(path)
-                } else {
-                    Err(SignalKGetError::NoSuchPath)
-                }
-            }
+            "current" => get_f64_value_for_path(path, &self.current),
             "tide" => {
                 if let Some(ref value) = self.tide {
                     path.remove(0);
@@ -717,6 +710,28 @@ pub struct V1EnvironmentCurrent {
     pub values: Option<HashMap<String, V1EnvironmentCurrentType>>,
 }
 
+impl F64CompatiblePath for V1EnvironmentCurrent {
+    fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+        match path[0] {
+            "setTrue" => {
+                if let Some(ref val) = &self.value {
+                    val.get_f64_for_path(path)
+                } else { 
+                    Err(SignalKGetError::ValueNotSet)
+                }
+            }
+            "drift" => {
+                if let Some(ref val) = &self.value {
+                    val.get_f64_for_path(path)
+                } else {
+                    Err(SignalKGetError::ValueNotSet)
+                }
+            }
+            &_ => Err(SignalKGetError::NoSuchPath),
+        }
+    }
+}
+
 impl V1EnvironmentCurrent {
     pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
         log::debug!("V1EnvironmentCurrent update: {:?} -> {:?}", path, value);
@@ -763,16 +778,27 @@ impl V1EnvironmentCurrentType {
 
 impl F64Gettable for V1EnvironmentCurrentType {
     fn get_f64_for_path(&self, _path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
-        Err(SignalKGetError::TBD)
+        Err(SignalKGetError::WrongDataType)
     }
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct V1EnvironmentCurrentValue {
-    pub drift: Option<f64>,
-    pub set_true: Option<f64>,
-    pub set_magnetic: Option<f64>,
+    pub drift: Option<V2NumberValue>,
+    pub set_true: Option<V2NumberValue>,
+    pub set_magnetic: Option<V2NumberValue>,
+}
+
+impl F64CompatiblePath for V1EnvironmentCurrentValue {
+    fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+        match path[0] { 
+            "drift" => get_f64_value(&self.drift),
+            "setTrue" => get_f64_value(&self.set_true),
+            "setMagnetic" => get_f64_value(&self.set_magnetic),
+            &_ => Err(SignalKGetError::NoSuchPath),
+        }
+    }
 }
 
 impl V1EnvironmentCurrentValue {
@@ -787,12 +813,6 @@ impl V1EnvironmentCurrentValue {
             path,
             value
         );
-    }
-}
-
-impl F64Gettable for V1EnvironmentCurrentValue {
-    fn get_f64_for_path(&self, _path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
-        Err(SignalKGetError::TBD)
     }
 }
 
