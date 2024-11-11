@@ -1,5 +1,5 @@
-use crate::definitions::{F64Compatible, V2NumberValue};
-use crate::{SignalKGetError, V1NumberValue};
+use crate::definitions::F64Compatible;
+use crate::SignalKGetError;
 use serde_json::Value;
 
 pub fn json_as_optional_string(value: &Value) -> Option<String> {
@@ -17,6 +17,22 @@ pub fn get_f64_value(value: &Option<impl F64Compatible>) -> Result<f64, SignalKG
         } else {
             Err(SignalKGetError::ValueNotSet)
         }
+    } else {
+        Err(SignalKGetError::ValueNotSet)
+    }
+}
+
+pub trait F64CompatiblePath {
+    fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError>;
+}
+
+pub fn get_f64_value_for_path(
+    path: &mut Vec<&str>,
+    value: &Option<impl F64CompatiblePath>,
+) -> Result<f64, SignalKGetError> {
+    if let Some(ref course) = value {
+        path.remove(0);
+        course.get_f64_for_path(path)
     } else {
         Err(SignalKGetError::ValueNotSet)
     }

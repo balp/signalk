@@ -1,5 +1,5 @@
 use crate::definitions::{V1DateTime, V1NumberValue, V1StringValue};
-use crate::helper_functions::get_f64_value;
+use crate::helper_functions::{get_f64_value, get_f64_value_for_path, F64CompatiblePath};
 use crate::navigation_course::{V1Course, V1CourseApi};
 use crate::navigation_gnss::V1gnss;
 use crate::SignalKGetError;
@@ -181,74 +181,54 @@ impl V1Navigation {
                 }
             }
             "lights" => Err(SignalKGetError::TBD),
-            "courseOverGroundMagnetic" => {
-                let value = &self.course_over_ground_magnetic;
-                get_f64_value(value)
+            "courseOverGroundMagnetic" => get_f64_value(&self.course_over_ground_magnetic),
+            "courseOverGroundTrue" => get_f64_value(&self.course_over_ground_true),
+            "courseRhumbline" => {
+                if let Some(ref course) = self.course_rhumbline {
+                    path.remove(0);
+                    course.get_f64_for_path(path)
+                } else {
+                    Err(SignalKGetError::ValueNotSet)
+                }
             }
-            "courseOverGroundTrue" => {
-                let value = &self.course_over_ground_true;
-                get_f64_value(value)
+            "courseGreatCircle" => {
+                if let Some(ref course) = self.course_great_circle {
+                    path.remove(0);
+                    course.get_f64_for_path(path)
+                } else {
+                    Err(SignalKGetError::ValueNotSet)
+                }
             }
-            "courseRhumbline" => Err(SignalKGetError::WrongDataType),
-            "courseGreatCircle" => Err(SignalKGetError::WrongDataType),
             "closestApproach" => Err(SignalKGetError::TBD),
             "racing" => Err(SignalKGetError::TBD),
-            "magneticVariation" => {
-                let value = &self.magnetic_variation;
-                get_f64_value(value)
-            }
+            "magneticVariation" => get_f64_value(&self.magnetic_variation),
             "magneticVariationAgeOfService" => {
-                let value = &self.magnetic_variation_age_of_service;
-                get_f64_value(value)
+                get_f64_value(&self.magnetic_variation_age_of_service)
             }
             "destination" => Err(SignalKGetError::TBD),
-            "gnss" => Err(SignalKGetError::TBD),
-            "headingMagnetic" => {
-                let value = &self.heading_magnetic;
-                get_f64_value(value)
+            "gnss" => {
+                if let Some(ref value) = self.gnss {
+                    path.remove(0);
+                    value.get_f64_for_path(path)
+                } else {
+                    Err(SignalKGetError::ValueNotSet)
+                }
             }
-            "magneticDeviation" => {
-                let value = &self.magnetic_deviation;
-                get_f64_value(value)
-            }
-            "headingCompass" => {
-                let value = &self.heading_compass;
-                get_f64_value(value)
-            }
-            "headingTrue" => {
-                let value = &self.heading_true;
-                get_f64_value(value)
-            }
-            "position" => Err(SignalKGetError::TBD),
-            "rateOfTurn" => {
-                let value = &self.rate_of_turn;
-                get_f64_value(value)
-            }
-            "speedOverGround" => {
-                let value = &self.speed_over_ground;
-                get_f64_value(value)
-            }
-            "speedThroughWater" => {
-                let value = &self.speed_through_water;
-                get_f64_value(value)
-            }
-            "speedThroughWaterTransverse" => {
-                let value = &self.speed_through_water_transverse;
-                get_f64_value(value)
-            }
+            "headingMagnetic" => get_f64_value(&self.heading_magnetic),
+            "magneticDeviation" => get_f64_value(&self.magnetic_deviation),
+            "headingCompass" => get_f64_value(&self.heading_compass),
+            "headingTrue" => get_f64_value(&self.heading_true),
+            "position" => get_f64_value_for_path(path, &self.position),
+            "rateOfTurn" => get_f64_value(&self.rate_of_turn),
+            "speedOverGround" => get_f64_value(&self.speed_over_ground),
+            "speedThroughWater" => get_f64_value(&self.speed_through_water),
+            "speedThroughWaterTransverse" => get_f64_value(&self.speed_through_water_transverse),
             "speedThroughWaterLongitudinal" => {
-                let value = &self.speed_through_water_longitudinal;
-                get_f64_value(value)
+                get_f64_value(&self.speed_through_water_longitudinal)
             }
-            "leewayAngle" => {
-                let value = &self.leeway_angle;
-                get_f64_value(value)
-            }
-            "log" => {
-                let value = &self.log;
-                get_f64_value(value)
-            }
-            "trip" => Err(SignalKGetError::TBD),
+            "leewayAngle" => get_f64_value(&self.leeway_angle),
+            "log" => get_f64_value(&self.log),
+            "trip" => get_f64_value_for_path(path, &self.trip),
             "state" => Err(SignalKGetError::TBD),
             "anchor" => Err(SignalKGetError::TBD),
             "datetime" => Err(SignalKGetError::TBD),
@@ -411,6 +391,17 @@ pub struct V1Trip {
     pub log: Option<V1NumberValue>,
     pub last_reset: Option<V1DateTime>,
 }
+
+impl F64CompatiblePath for V1Trip {
+    fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+        match path[0] {
+            "log" => get_f64_value(&self.log),
+            "lastReset" => Err(SignalKGetError::WrongDataType),
+            &_ => Err(SignalKGetError::NoSuchPath),
+        }
+    }
+}
+
 impl V1Trip {
     pub fn builder() -> V1TripBuilder {
         V1TripBuilder::default()
@@ -464,6 +455,20 @@ pub struct V1PositionType {
     pub source: Option<String>,
     pub pgn: Option<f64>,
     pub sentence: Option<String>,
+}
+
+impl F64CompatiblePath for V1PositionType {
+    fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+        if path.is_empty() {
+            Err(SignalKGetError::NoSuchPath)
+        } else {
+            match path[0] {
+                "longitude" => Err(SignalKGetError::TBD),
+                "latitude" => Err(SignalKGetError::TBD),
+                &_ => Err(SignalKGetError::NoSuchPath),
+            }
+        }
+    }
 }
 
 impl V1PositionType {

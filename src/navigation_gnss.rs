@@ -1,4 +1,5 @@
-use crate::{V1CommonValueFields, V1NumberValue};
+use crate::helper_functions::{get_f64_value, get_f64_value_for_path, F64CompatiblePath};
+use crate::{SignalKGetError, V1CommonValueFields, V1NumberValue};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
@@ -87,6 +88,21 @@ impl V1gnss {
             &_ => {
                 log::warn!("V1gnss: Unknown value to update: {:?}::{:?}", path, value);
             }
+        }
+    }
+    pub fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+        match path[0] {
+            "type" => Err(SignalKGetError::WrongDataType),
+            "methodQuality" => Err(SignalKGetError::WrongDataType),
+            "integrity" => Err(SignalKGetError::WrongDataType),
+            "satellites" => get_f64_value(&self.satellites),
+            "antennaAltitude" => get_f64_value(&self.antenna_altitude),
+            "horizontalDilution" => get_f64_value(&self.horizontal_dilution),
+            "positionDilution" => get_f64_value(&self.position_dilution),
+            "geoidalSeparation" => get_f64_value(&self.geoidal_separation),
+            "differentialAge" => get_f64_value(&self.differential_age),
+            "satellitesInView" => get_f64_value_for_path(path, &self.satellites_in_view),
+            &_ => Err(SignalKGetError::NoSuchPath),
         }
     }
 }
@@ -194,6 +210,15 @@ pub enum V1gnssSatellitesInView {
     Value(V1gnssSatellitesInViewValue),
 }
 
+impl F64CompatiblePath for V1gnssSatellitesInView {
+    fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+        match self {
+            V1gnssSatellitesInView::Expanded(val) => val.get_f64_for_path(path),
+            V1gnssSatellitesInView::Value(val) => val.get_f64_for_path(path),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 pub struct V1gnssExpandedSatellitesInView {
     value: V1gnssSatellitesInViewValue,
@@ -201,10 +226,26 @@ pub struct V1gnssExpandedSatellitesInView {
     pub common_value_fields: Option<V1CommonValueFields>,
 }
 
+impl F64CompatiblePath for V1gnssExpandedSatellitesInView {
+    fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+        self.value.get_f64_for_path(path)
+    }
+}
+
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 pub struct V1gnssSatellitesInViewValue {
     count: i64,
     satellites: Option<Vec<V1gnssSatellite>>,
+}
+
+impl F64CompatiblePath for V1gnssSatellitesInViewValue {
+    fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+        match path[0] {
+            "count" => Err(SignalKGetError::WrongDataType),
+            "satellites" => Err(SignalKGetError::TBD),
+            &_ => Err(SignalKGetError::NoSuchPath),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
