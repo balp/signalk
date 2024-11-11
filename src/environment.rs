@@ -716,7 +716,7 @@ impl F64CompatiblePath for V1EnvironmentCurrent {
             "setTrue" => {
                 if let Some(ref val) = &self.value {
                     val.get_f64_for_path(path)
-                } else { 
+                } else {
                     Err(SignalKGetError::ValueNotSet)
                 }
             }
@@ -792,7 +792,7 @@ pub struct V1EnvironmentCurrentValue {
 
 impl F64CompatiblePath for V1EnvironmentCurrentValue {
     fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
-        match path[0] { 
+        match path[0] {
             "drift" => get_f64_value(&self.drift),
             "setTrue" => get_f64_value(&self.set_true),
             "setMagnetic" => get_f64_value(&self.set_magnetic),
