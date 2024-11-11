@@ -1,5 +1,6 @@
 use crate::definitions::{V1DateTime, V1StringValue, V2NumberValue};
-use crate::{V1CommonValueFields, V1NumberValue, V1PositionType};
+use crate::helper_functions::get_f64_value;
+use crate::{SignalKGetError, V1CommonValueFields, V1NumberValue, V1PositionType};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -24,8 +25,15 @@ impl V1CourseApi {
             "startTime" => self.start_time = V1DateTime::from_value(value),
             "targetArrivalTime" => self.target_arrival_time = V1DateTime::from_value(value),
             "arrivalCircle" => self.arrival_circle = value.as_i64(),
-            "calcValues" => self.calc_values = V1CourseCalculationsModel::from_value(value),
-
+            "calcValues" => {
+                if self.calc_values.is_none() {
+                    self.calc_values = Some(V1CourseCalculationsModel::default());
+                }
+                if let Some(ref mut calc_values) = self.calc_values {
+                    path.remove(0);
+                    calc_values.update(path, value);
+                }
+            }
             &_ => {
                 log::warn!(
                     "V1CourseApi: Unknown value to update {:?}::{:?}",
@@ -33,6 +41,33 @@ impl V1CourseApi {
                     value
                 );
             }
+        }
+    }
+    pub fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+        match path[0] {
+            "activeRoute" => {
+                if let Some(ref course) = self.active_route {
+                    path.remove(0);
+                    course.get_f64_for_path(path)
+                } else {
+                    Err(SignalKGetError::ValueNotSet)
+                }
+            }
+            "nextPoint" => Err(SignalKGetError::TBD),
+            "previousPoint" => Err(SignalKGetError::TBD),
+            "startTime" => Err(SignalKGetError::TBD),
+            "targetArrivalTime" => Err(SignalKGetError::TBD),
+            "arrivalCircle" => Err(SignalKGetError::TBD),
+            "calcValues" => {
+                if let Some(ref calc_values) = self.calc_values {
+                    path.remove(0);
+                    calc_values.get_f64_for_path(path)
+                } else {
+                    Err(SignalKGetError::ValueNotSet)
+                }
+            }
+
+            &_ => Err(SignalKGetError::TBD),
         }
     }
 }
@@ -60,6 +95,9 @@ impl V1CourseApiActiveRouteModel {
                 None
             }
         }
+    }
+    pub fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+        Err(SignalKGetError::TBD)
     }
 }
 
@@ -117,6 +155,55 @@ impl V1CourseCalculationsModel {
             } else {
                 None
             }
+        }
+    }
+    pub fn update(&mut self, path: &mut Vec<&str>, value: &Value) {
+        match path[0] {
+            // "activeRoute" => self.calc_method = V1CourseCalculationsMethod::from_value(value),
+            "crossTrackError" => self.cross_track_error = V2NumberValue::from_value(value),
+            "bearingTrackTrue" => self.bearing_track_true = V2NumberValue::from_value(value),
+            "bearingTrackMagnetic" => {
+                self.bearing_track_magnetic = V2NumberValue::from_value(value)
+            }
+            "estimatedTimeOfArrival" => {
+                self.estimated_time_of_arrival = V1DateTime::from_value(value)
+            }
+            "distance" => self.distance = V2NumberValue::from_value(value),
+            "bearingTrue" => self.bearing_true = V2NumberValue::from_value(value),
+            "bearingMagnetic" => self.bearing_magnetic = V2NumberValue::from_value(value),
+            "velocityMadeGood" => self.velocity_made_good = V2NumberValue::from_value(value),
+            "timeToGo" => self.time_to_go = V2NumberValue::from_value(value),
+            "targetSpeed" => self.target_speed = V2NumberValue::from_value(value),
+            "previousPoint" => {
+                self.previous_point = V1CourseCalculationsPreviousPoint::from_value(value)
+            }
+
+            &_ => {
+                log::warn!(
+                    "V1CourseApi: Unknown value to update {:?}::{:?}",
+                    path,
+                    value
+                );
+            }
+        }
+    }
+
+    pub fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+        match path[0] {
+            "calc_method" => Err(SignalKGetError::WrongDataType),
+            "crossTrackError" => get_f64_value(&self.cross_track_error),
+            "bearingTrackTrue" => get_f64_value(&self.bearing_track_true),
+            "bearingTrackMagnetic" => get_f64_value(&self.bearing_track_magnetic),
+            "estimatedTimeOfArrival" => Err(SignalKGetError::WrongDataType),
+            "distance" => get_f64_value(&self.distance),
+            "bearingTrue" => get_f64_value(&self.bearing_true),
+            "bearingMagnetic" => get_f64_value(&self.bearing_magnetic),
+            "velocityMadeGood" => get_f64_value(&self.velocity_made_good),
+            "timeToGo" => get_f64_value(&self.time_to_go),
+            "targetSpeed" => get_f64_value(&self.target_speed),
+            "previousPoint" => Err(SignalKGetError::TBD),
+
+            &_ => Err(SignalKGetError::TBD),
         }
     }
 }

@@ -1,3 +1,4 @@
+use crate::definitions::{F64Compatible, V2NumberValue};
 use crate::{SignalKGetError, V1NumberValue};
 use serde_json::Value;
 
@@ -9,9 +10,9 @@ pub fn json_as_optional_string(value: &Value) -> Option<String> {
     }
 }
 
-pub fn get_f64_value(value: &Option<V1NumberValue>) -> Result<f64, SignalKGetError> {
+pub fn get_f64_value(value: &Option<impl F64Compatible>) -> Result<f64, SignalKGetError> {
     if let Some(ref number_value) = value {
-        if let Some(value) = number_value.value {
+        if let Some(value) = number_value.as_f64() {
             Ok(value)
         } else {
             Err(SignalKGetError::ValueNotSet)

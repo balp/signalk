@@ -170,9 +170,16 @@ impl V1Navigation {
         }
     }
 
-    pub fn get_f64_for_path(&self, path: &mut [&str]) -> Result<f64, SignalKGetError> {
+    pub fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
         match path[0] {
-            "course" => Err(SignalKGetError::TBD),
+            "course" => {
+                if let Some(ref course) = self.course {
+                    path.remove(0);
+                    course.get_f64_for_path(path)
+                } else {
+                    Err(SignalKGetError::ValueNotSet)
+                }
+            }
             "lights" => Err(SignalKGetError::TBD),
             "courseOverGroundMagnetic" => {
                 let value = &self.course_over_ground_magnetic;
@@ -600,6 +607,7 @@ impl V1PositionValue {
 #[cfg(test)]
 mod tests {
 
+    use crate::definitions::F64Compatible;
     use crate::navigation::V1Navigation;
     use crate::navigation_course::V1Course;
     use serde_json::{Number, Value};

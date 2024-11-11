@@ -898,8 +898,19 @@ impl V1EnvironmentWind {
 }
 
 impl F64Gettable for V1EnvironmentWind {
-    fn get_f64_for_path(&self, _path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
-        Err(SignalKGetError::TBD)
+    fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+        match path[0] {
+            "angleApparent" => get_f64_value(&self.angle_apparent),
+            "angleTrueGround" => get_f64_value(&self.angle_true_ground),
+            "angleTrueWater" => get_f64_value(&self.angle_true_water),
+            "directionChangeAlarm" => get_f64_value(&self.direction_change_alarm),
+            "directionTrue" => get_f64_value(&self.direction_true),
+            "directionMagnetic" => get_f64_value(&self.direction_magnetic),
+            "speedTrue" => get_f64_value(&self.speed_true),
+            "speedOverGround" => get_f64_value(&self.speed_over_ground),
+            "speedApparent" => get_f64_value(&self.speed_apparent),
+            &_ => Err(SignalKGetError::NoSuchPath),
+        }
     }
 }
 

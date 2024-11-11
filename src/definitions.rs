@@ -67,6 +67,10 @@ impl V1CommonValueFieldsBuilder {
     }
 }
 
+pub trait F64Compatible {
+    fn as_f64(&self) -> Option<f64>;
+}
+
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 #[serde(untagged)]
 pub enum V2NumberValue {
@@ -89,8 +93,9 @@ impl V2NumberValue {
             }
         }
     }
-
-    pub fn as_f64(&self) -> Option<f64> {
+}
+impl F64Compatible for V2NumberValue {
+    fn as_f64(&self) -> Option<f64> {
         match self {
             V2NumberValue::ExpandedFloat(v) => v.value,
             V2NumberValue::Float(v) => Some(*v),
@@ -140,6 +145,12 @@ impl V1NumberValue {
                 None
             }
         }
+    }
+}
+
+impl F64Compatible for V1NumberValue {
+    fn as_f64(&self) -> Option<f64> {
+        self.value
     }
 }
 
