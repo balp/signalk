@@ -44,6 +44,7 @@ mod performance;
 pub mod propulsion;
 pub mod put;
 pub mod sources;
+mod steering;
 pub mod subscribe;
 pub mod unsubscribe;
 pub mod vessel;

@@ -9,6 +9,7 @@ use crate::environment::V1Environment;
 use crate::full::Updatable;
 use crate::notification::V1Notification;
 use crate::performance::V1Performance;
+use crate::steering::V1Steering;
 use crate::{SignalKGetError, V1Navigation, V1Propulsion, V1UpdateType};
 
 /// An object describing an individual vessel. It should be an object in vessels,
@@ -50,8 +51,7 @@ pub struct V1Vessel {
 
     /// Notifications currently raised. Major categories have well-defined names, but the tree can be extended by any hierarchical structure
     // pub notifications: Option<V1Notification>,
-
-    // pub steering: Option<V1Steering>,
+    pub steering: Option<V1Steering>,
     // pub tanks: Option<V1Tanks>,
     pub design: Option<V1Design>,
     // pub sails: Option<V1Sails>,
@@ -277,6 +277,7 @@ pub struct V1VesselBuilder {
     electrical: Option<V1Electrical>,
     notifications: Option<V1Notification>,
     propulsion: Option<HashMap<String, V1Propulsion>>,
+    steering: Option<V1Steering>,
     design: Option<V1Design>,
     performance: Option<V1Performance>,
 }
@@ -355,6 +356,7 @@ impl V1VesselBuilder {
             environment: self.environment,
             electrical: self.electrical,
             // notifications: self.notifications,
+            steering: self.steering,
             design: self.design,
             propulsion: self.propulsion,
             url: self.url,
