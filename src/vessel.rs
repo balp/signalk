@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-
+use log::debug;
 use serde::{Deserialize, Serialize};
 
 use crate::communication::V1Communication;
@@ -216,6 +216,7 @@ impl V1Vessel {
     }
 
     pub fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+        debug!("get_f64_for_path({:?})", path);
         match path[0] {
             "mmsi" => Err(SignalKGetError::WrongDataType),
             "url" => Err(SignalKGetError::WrongDataType),
@@ -255,7 +256,7 @@ impl V1Vessel {
             "design" => Err(SignalKGetError::TBD),
             "sails" => Err(SignalKGetError::TBD),
             "sensors" => Err(SignalKGetError::TBD),
-            "performance" => Err(SignalKGetError::TBD),
+            "performance" => get_f64_value_for_path(path, &self.performance),
             "propulsion" => Err(SignalKGetError::TBD),
             &_ => Err(SignalKGetError::NoSuchPath),
         }

@@ -167,6 +167,15 @@ impl V1CourseCalculationsModel {
     pub fn update(&mut self, path: &mut Vec<&str>, value: &Value) {
         match path[0] {
             // "activeRoute" => self.calc_method = V1CourseCalculationsMethod::from_value(value),
+            "calcMethod" => {
+                let val: Result<V1CourseCalculationsMethod, serde_json::Error> =
+                    serde_json::from_value(value.clone());
+                if let Ok(val) = val {
+                    self.calc_method = val;
+                } else {
+                    log::warn!("V1Trip: Invalid last reset value");
+                }
+            },
             "crossTrackError" => self.cross_track_error = V2NumberValue::from_value(value),
             "bearingTrackTrue" => self.bearing_track_true = V2NumberValue::from_value(value),
             "bearingTrackMagnetic" => {
@@ -197,7 +206,7 @@ impl V1CourseCalculationsModel {
 
     pub fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
         match path[0] {
-            "calc_method" => Err(SignalKGetError::WrongDataType),
+            "calcMethod" => Err(SignalKGetError::WrongDataType),
             "crossTrackError" => get_f64_value(&self.cross_track_error),
             "bearingTrackTrue" => get_f64_value(&self.bearing_track_true),
             "bearingTrackMagnetic" => get_f64_value(&self.bearing_track_magnetic),

@@ -1,6 +1,7 @@
 use crate::definitions::{V1StringValue, V2NumberValue};
-use crate::{V1CommonValueFields, V1NumberValue, V1Source};
+use crate::{SignalKGetError, V1CommonValueFields, V1NumberValue, V1Source};
 use serde::{Deserialize, Serialize};
+use crate::helper_functions::{get_f64_value, F64CompatiblePath};
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -23,6 +24,32 @@ pub struct V1Performance {
     pub leeway: Option<V1NumberValue>,
     pub tack_magnetic: Option<V1NumberValue>,
     pub tack_true: Option<V1NumberValue>,
+}
+
+impl F64CompatiblePath for V1Performance {
+    fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+        match path[0] {
+            "polars" => Err(SignalKGetError::WrongDataType),
+            "activePolar" => Err(SignalKGetError::WrongDataType),
+            "activePolarData" => Err(SignalKGetError::WrongDataType),
+            "polarSpeed" => get_f64_value(&self.polar_speed),
+            "polarSpeedRatio" => get_f64_value(&self.polar_speed_ratio),
+            "velocityMadeGood" => get_f64_value(&self.velocity_made_good),
+            "velocityMadeGoodToWaypoint" => get_f64_value(&self.velocity_made_good_to_waypoint),
+            "beatAngle" => get_f64_value(&self.beat_angle),
+            "beatAngleVelocityMadeGood" => get_f64_value(&self.beat_angle_velocity_made_good),
+            "beatAngleTargetSpeed" => get_f64_value(&self.beat_angle_target_speed),
+            "gybeAngle" => get_f64_value(&self.gybe_angle),
+            "gybeAngleVelocityMadeGood" => get_f64_value(&self.gybe_angle_velocity_made_good),
+            "gybeAngleTargetSpeed" => get_f64_value(&self.gybe_angle_target_speed),
+            "targetAngle" => get_f64_value(&self.target_angle),
+            "targetSpeed" => get_f64_value(&self.target_speed),
+            "leeway" => get_f64_value(&self.leeway),
+            "tackMagnetic" => get_f64_value(&self.tack_magnetic),
+            "tackTrue" => get_f64_value(&self.tack_true),
+            &_ => Err(SignalKGetError::NoSuchPath)
+        }
+    }
 }
 
 impl V1Performance {
