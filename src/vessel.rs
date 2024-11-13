@@ -7,6 +7,7 @@ use crate::design::V1Design;
 use crate::electrical::V1Electrical;
 use crate::environment::V1Environment;
 use crate::full::Updatable;
+use crate::helper_functions::get_f64_value_for_path;
 use crate::notification::V1Notification;
 use crate::performance::V1Performance;
 use crate::steering::V1Steering;
@@ -249,7 +250,7 @@ impl V1Vessel {
                 }
             }
             "notifications" => Err(SignalKGetError::TBD),
-            "steering" => Err(SignalKGetError::TBD),
+            "steering" => get_f64_value_for_path(path, &self.steering),
             "tanks" => Err(SignalKGetError::TBD),
             "design" => Err(SignalKGetError::TBD),
             "sails" => Err(SignalKGetError::TBD),

@@ -1,5 +1,5 @@
 use crate::definitions::V2NumberValue;
-use crate::helper_functions::{get_f64_value, F64CompatiblePath};
+use crate::helper_functions::{get_f64_value, get_f64_value_for_path, F64CompatiblePath};
 use crate::{SignalKGetError, V1CommonValueFields};
 use serde::{Deserialize, Serialize};
 
@@ -9,6 +9,17 @@ pub struct V1Steering {
     pub rudder_angle: Option<V2NumberValue>,
     pub rudder_angle_target: Option<V2NumberValue>,
     pub autopilot: Option<V1SteeringAutopilot>,
+}
+
+impl F64CompatiblePath for V1Steering {
+    fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+        match path[0] {
+            "rudderAngle" => get_f64_value(&self.rudder_angle),
+            "rudderAngleTarget" => get_f64_value(&self.rudder_angle_target),
+            "autopilot" => get_f64_value_for_path(path, &self.autopilot),
+            &_ => Err(SignalKGetError::NoSuchPath),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
@@ -24,6 +35,14 @@ pub struct V1SteeringAutopilot {
     pub max_drive_rate: Option<V2NumberValue>,
     pub port_lock: Option<V2NumberValue>,
     pub starboard_lock: Option<V2NumberValue>,
+}
+
+impl F64CompatiblePath for V1SteeringAutopilot {
+    fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+        match path[0] {
+            &_ => Err(SignalKGetError::NoSuchPath),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]

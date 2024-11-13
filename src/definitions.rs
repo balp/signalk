@@ -1,6 +1,8 @@
 use crate::definitions::V2NumberValue::Int;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use time::format_description::well_known::Rfc3339;
+use time::OffsetDateTime;
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 pub struct V1CommonValueFields {
@@ -665,7 +667,45 @@ impl V1DateTime {
             }
         }
     }
+    fn get_value(&self) -> &str {
+        match self {
+            V1DateTime::None => "",
+            V1DateTime::String(val) => val,
+            V1DateTime::Object(ref o) => match o.value {
+                None => "",
+                Some(ref value) => value,
+            },
+        }
+    }
+    pub fn get_hour(&self) -> u8 {
+        let value = self.get_value();
+        let time = OffsetDateTime::parse(value, &Rfc3339);
+        if let Ok(time) = time {
+            time.hour()
+        } else {
+            0
+        }
+    }
+    pub fn get_minute(&self) -> u8 {
+        let value = self.get_value();
+        let time = OffsetDateTime::parse(value, &Rfc3339);
+        if let Ok(time) = time {
+            time.minute()
+        } else {
+            0
+        }
+    }
+    pub fn get_second(&self) -> u8 {
+        let value = self.get_value();
+        let time = OffsetDateTime::parse(value, &Rfc3339);
+        if let Ok(time) = time {
+            time.second()
+        } else {
+            0
+        }
+    }
 }
+
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 pub struct V1DateTimeValue {
     value: Option<String>,
