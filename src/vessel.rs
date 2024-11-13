@@ -1,6 +1,6 @@
-use std::collections::HashMap;
 use log::debug;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 use crate::communication::V1Communication;
 use crate::design::V1Design;

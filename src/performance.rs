@@ -1,7 +1,7 @@
 use crate::definitions::{V1StringValue, V2NumberValue};
+use crate::helper_functions::{get_f64_value, F64CompatiblePath};
 use crate::{SignalKGetError, V1CommonValueFields, V1NumberValue, V1Source};
 use serde::{Deserialize, Serialize};
-use crate::helper_functions::{get_f64_value, F64CompatiblePath};
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -47,7 +47,7 @@ impl F64CompatiblePath for V1Performance {
             "leeway" => get_f64_value(&self.leeway),
             "tackMagnetic" => get_f64_value(&self.tack_magnetic),
             "tackTrue" => get_f64_value(&self.tack_true),
-            &_ => Err(SignalKGetError::NoSuchPath)
+            &_ => Err(SignalKGetError::NoSuchPath),
         }
     }
 }

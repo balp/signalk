@@ -175,7 +175,7 @@ impl V1CourseCalculationsModel {
                 } else {
                     log::warn!("V1Trip: Invalid last reset value");
                 }
-            },
+            }
             "crossTrackError" => self.cross_track_error = V2NumberValue::from_value(value),
             "bearingTrackTrue" => self.bearing_track_true = V2NumberValue::from_value(value),
             "bearingTrackMagnetic" => {

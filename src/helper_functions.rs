@@ -1,6 +1,6 @@
-use log::debug;
 use crate::definitions::F64Compatible;
 use crate::SignalKGetError;
+use log::debug;
 use serde_json::Value;
 
 pub fn json_as_optional_string(value: &Value) -> Option<String> {
@@ -30,7 +30,7 @@ pub trait F64CompatiblePath {
 pub fn get_f64_value_for_path(
     path: &mut Vec<&str>,
     value: &Option<impl F64CompatiblePath>,
-) -> Result<f64, SignalKGetError> { 
+) -> Result<f64, SignalKGetError> {
     debug!("get_f64_value_for_path({:?}, ...)", path);
     if let Some(ref item) = value {
         path.remove(0);
