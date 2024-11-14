@@ -667,7 +667,7 @@ impl V1DateTime {
             }
         }
     }
-    
+
     #[allow(clippy::manual_unwrap_or_default)]
     fn get_value(&self) -> &str {
         match self {
