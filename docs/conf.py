@@ -15,7 +15,6 @@ author = 'Anders Arnholm'
 
 extensions = [
     'myst_parser',
-    'sphinxcontrib.kroki',
 ]
 
 templates_path = ['_templates']
