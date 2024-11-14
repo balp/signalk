@@ -1,4 +1,3 @@
-use signalk::full::V1FullFormat;
 use signalk::V1DeltaFormat;
 use std::fs::File;
 use std::io::BufReader;

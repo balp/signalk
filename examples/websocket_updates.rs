@@ -1,4 +1,3 @@
-use serde_json;
 use signalk::{V1DeltaFormat, V1FullFormat, V1Hello};
 use tungstenite::connect;
 

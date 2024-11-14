@@ -10,18 +10,6 @@ use signalk::{
     V1SourceProperty, V1Sources, V1Vessel,
 };
 
-trait OptionExt {
-    type Value;
-    fn unwrap_ref(&self) -> &Self::Value;
-}
-
-impl<T> OptionExt for Option<T> {
-    type Value = T;
-    fn unwrap_ref(&self) -> &T {
-        self.as_ref().unwrap()
-    }
-}
-
 fn read_signalk_from_file(path: PathBuf) -> V1FullFormat {
     let file = File::open(path).unwrap();
     let reader = BufReader::new(file);
@@ -207,7 +195,7 @@ fn test_sample_full_0183_rmc_full() {
     assert_eq!(sk_data, expected);
 }
 
-// #[test]
+#[test]
 fn test_sample_docs_data_model() {
     let expected = V1FullFormat::builder()
         .version("1.0.0".into())

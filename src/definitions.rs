@@ -667,6 +667,8 @@ impl V1DateTime {
             }
         }
     }
+    
+    #[allow(clippy::manual_unwrap_or_default)]
     fn get_value(&self) -> &str {
         match self {
             V1DateTime::None => "",
@@ -841,6 +843,7 @@ mod tests {
           "$source": "foo.bar"
         }"#;
         let datetime: V1DateTime = serde_json::from_str(j).unwrap();
+        assert_eq!(datetime.get_value(), "2015-12-05T13:11:59Z")
     }
 
     #[test]
@@ -853,6 +856,7 @@ mod tests {
           "$source": "foo.bar"
         }"#;
         let datetime: V1DateTimeValue = serde_json::from_str(j).unwrap();
+        assert_eq!(datetime.value.unwrap(), "2015-12-05T13:11:59Z")
     }
     #[test]
     fn datetime_value_null_value_object_() {
@@ -864,17 +868,20 @@ mod tests {
           "$source": "foo.bar"
         }"#;
         let datetime: V1DateTimeValue = serde_json::from_str(j).unwrap();
+        assert_eq!(datetime.value, None)
     }
 
     #[test]
     fn datetime_string_json() {
         let j = r#""2014-08-15T19:05:29.57200Z""#;
         let datetime: V1DateTime = serde_json::from_str(j).unwrap();
+        assert_eq!(datetime.get_value(), "2014-08-15T19:05:29.57200Z")
     }
     #[test]
     fn datetime_string_2022_json() {
         let j = r#""2022-04-22T05:02:56.484Z""#;
         let datetime: V1DateTime = serde_json::from_str(j).unwrap();
+        assert_eq!(datetime.get_value(), "2022-04-22T05:02:56.484Z")
     }
 
     #[test]
@@ -882,6 +889,5 @@ mod tests {
         let date_time = V1DateTime::String("2015-12-05T13:11:59Z".into());
         println!("{:?}", date_time);
         assert!(matches!(date_time, V1DateTime::String(_)));
-        //assert_eq!(date_time.value.unwrap(), "2015-09-03T09:30:09Z");
     }
 }

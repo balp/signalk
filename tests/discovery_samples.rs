@@ -4,18 +4,6 @@ use std::path::{Path, PathBuf};
 
 use signalk::{V1Discovery, V1DiscoveryEndpoint, V1DiscoveryServer};
 
-trait OptionExt {
-    type Value;
-    fn unwrap_ref(&self) -> &Self::Value;
-}
-
-impl<T> OptionExt for Option<T> {
-    type Value = T;
-    fn unwrap_ref(&self) -> &T {
-        self.as_ref().unwrap()
-    }
-}
-
 fn read_signalk_from_file(path: PathBuf) -> V1Discovery {
     let file = File::open(path).unwrap();
     let reader = BufReader::new(file);

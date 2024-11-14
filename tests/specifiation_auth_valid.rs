@@ -1,7 +1,3 @@
-use signalk::full::V1FullFormat;
-use std::fs::File;
-use std::io::BufReader;
-use std::path::Path;
 
 /* TODO: Auth messages not supported
 #[test]

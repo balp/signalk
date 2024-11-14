@@ -1,4 +1,3 @@
-use serde_json;
 use tungstenite::{connect, Message};
 
 use signalk::{V1DeltaFormat, V1FullFormat, V1Hello, V1Subscribe, V1Subscription};
@@ -25,7 +24,7 @@ fn main() {
         )
         .build();
     if let Ok(s) = serde_json::to_string(&subscribe) {
-        socket.send(Message::Text(s.into())).unwrap();
+        socket.send(Message::Text(s)).unwrap();
     }
 
     // Loop forever, handling parsing each message

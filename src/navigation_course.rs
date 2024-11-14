@@ -96,7 +96,7 @@ impl V1CourseApiActiveRouteModel {
             }
         }
     }
-    pub fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+    pub fn get_f64_for_path(&self, path: &mut [&str]) -> Result<f64, SignalKGetError> {
         match path[0] {
             "href" => Err(SignalKGetError::WrongDataType),
             "name" => Err(SignalKGetError::WrongDataType),
@@ -204,7 +204,7 @@ impl V1CourseCalculationsModel {
         }
     }
 
-    pub fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+    pub fn get_f64_for_path(&self, path: &mut [&str]) -> Result<f64, SignalKGetError> {
         match path[0] {
             "calcMethod" => Err(SignalKGetError::WrongDataType),
             "crossTrackError" => get_f64_value(&self.cross_track_error),
@@ -613,7 +613,7 @@ impl V1CourseNextPoint {
         }
     }
 
-    pub fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+    pub fn get_f64_for_path(&self, path: &mut [&str]) -> Result<f64, SignalKGetError> {
         match path[0] {
             "value" => Err(SignalKGetError::WrongDataType),
             "distance" => get_f64_value(&self.distance),
@@ -700,7 +700,7 @@ impl V1CoursePreviousPoint {
             }
         }
     }
-    pub fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
+    pub fn get_f64_for_path(&self, path: &mut [&str]) -> Result<f64, SignalKGetError> {
         match path[0] {
             "value" => Err(SignalKGetError::WrongDataType),
             "distance" => get_f64_value(&self.distance),

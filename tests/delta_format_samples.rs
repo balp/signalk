@@ -7,18 +7,6 @@ use serde_json::{json, Number, Value};
 use signalk::delta::{V1DeltaFormat, V1UpdateMeta, V1UpdateType, V1UpdateValue};
 use signalk::{V1DefSource, V1Meta, V1MetaZone};
 
-trait OptionExt {
-    type Value;
-    fn unwrap_ref(&self) -> &Self::Value;
-}
-
-impl<T> OptionExt for Option<T> {
-    type Value = T;
-    fn unwrap_ref(&self) -> &T {
-        self.as_ref().unwrap()
-    }
-}
-
 fn read_signalk_from_file(path: PathBuf) -> V1DeltaFormat {
     let file = File::open(path).unwrap();
     let reader = BufReader::new(file);
@@ -218,7 +206,7 @@ fn test_docs_data_model_multiple_values() {
                 )
                 .add_update(V1UpdateValue::new(
                     "navigation.courseOverGroundTrue".into(),
-                    Value::Number(Number::from_f64(3.615624078431440).unwrap()),
+                    Value::Number(Number::from_f64(3.615_624_078_431_44).unwrap()),
                 ))
                 .build(),
         )

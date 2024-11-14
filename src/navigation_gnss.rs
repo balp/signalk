@@ -274,6 +274,7 @@ mod tests {
           "SNR": 39
         }"#;
         let satellite: V1gnssSatellite = serde_json::from_str(j).unwrap();
+        assert_eq!(satellite.id.unwrap(), 17);
     }
     #[test]
     fn satellites_in_view_value_object_json() {
@@ -296,5 +297,6 @@ mod tests {
             "pgn": 129540
         }"#;
         let satellites_in_view: V1gnssExpandedSatellitesInView = serde_json::from_str(j).unwrap();
+        assert_eq!(satellites_in_view.value.count, 11)
     }
 }

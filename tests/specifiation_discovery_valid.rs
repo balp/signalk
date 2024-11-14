@@ -1,5 +1,4 @@
-use signalk::full::V1FullFormat;
-use signalk::{V1DeltaFormat, V1Discovery};
+use signalk::V1Discovery;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
