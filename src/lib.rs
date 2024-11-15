@@ -60,6 +60,7 @@ pub enum SignalKStreamMessage {
     BadData,
 }
 
+/// Possible Errors gen getting data from SignalK storage
 #[derive(Debug, PartialEq)]
 pub enum SignalKGetError {
     NoSuchPath,
@@ -68,26 +69,135 @@ pub enum SignalKGetError {
     TBD,
 }
 
+/// Keep data from Signal-K
+///
+/// This struct keeps data for a signalk environment, it can be reviced by a full
+/// message and update with a delta message.
+///
+/// # Examples
+///
+/// ```
+/// use signalk::{Storage, V1FullFormat};
+/// let j = r#"
+///         { "self":"vessels.urn:mrn:imo:mmsi:366982330",
+///           "vessels": {
+///              "urn:mrn:imo:mmsi:366982330": {
+///                "mmsi": "366982330"
+///              }
+///           },
+///           "version": "1.0.0"
+///         }"#;
+/// let full_data: V1FullFormat = serde_json::from_str(j).unwrap();
+/// let storage = Storage::new(full_data);
+/// assert_eq!(
+///    storage.data().get_self().unwrap().mmsi.clone().unwrap(),
+///    "366982330".to_string())
+/// ```
+///
 #[derive(Debug, Default)]
 pub struct Storage {
     data: V1FullFormat,
 }
 
 impl Storage {
+    /// Set the id of the self vessel.
     pub fn set_self(&mut self, value: &str) {
         self.data.self_ = value.to_string();
     }
+
+    /// Apply a Delta change to the structure
+    ///
+    /// # Examples
+    /// ```
+    /// use signalk::{Storage, V1DeltaFormat, V1FullFormat};
+    /// let mut storage = Storage::new(V1FullFormat::default());
+    /// let j = r#"{"updates": [
+    ///                {"values": [{"path": "navigation.courseOverGroundTrue", "value": 123.45 }]}
+    ///             ],
+    ///             "context": "vessels.urn:mrn:signalk:uuid:7980c650-6871-45d5-be0f-205d2efadacc"
+    /// }"#;
+    /// let delta_message: V1DeltaFormat = serde_json::from_str(j).unwrap();
+    /// storage.update(&delta_message);
+    /// println!("{:?}", storage);
+    /// assert_eq!(
+    ///   storage.get_f64_for_path(
+    ///     "vessels.urn:mrn:signalk:uuid:7980c650-6871-45d5-be0f-205d2efadacc.navigation.courseOverGroundTrue".to_string())
+    ///     .unwrap(),
+    ///   123.45)
+    /// ```
     pub fn update(&mut self, delta: &V1DeltaFormat) {
         self.data.apply_delta(delta);
     }
+
+    /// Get a clone of the stored data
+    ///
+    /// # Examples
+    /// ```
+    /// use signalk::{Storage, V1FullFormat};
+    /// let data = V1FullFormat::default();
+    /// let storage = Storage::new(data.clone());
+    ///
+    /// assert_eq!(data, storage.get());
+    /// ```
     pub fn get(&self) -> V1FullFormat {
-        // TODO: Implement this
         (self.data).clone()
     }
+
+    /// Get a reference to the stored data
+    ///
+    /// # Examples
+    /// ```
+    /// use signalk::{Storage, V1FullFormat};
+    /// let data = V1FullFormat::default();
+    /// let storage = Storage::new(data.clone());
+    ///
+    /// assert_eq!(&data, storage.data());
+    /// ```
+    pub fn data(&self) -> &V1FullFormat {
+        &self.data
+    }
+
+    /// Create a new structure with data.
+    ///
+    /// # Examples
+    /// ```
+    /// use signalk::{Storage, V1FullFormat};
+    /// let data = V1FullFormat::default();
+    /// let storage = Storage::new(data.clone());
+    ///
+    /// assert_eq!(data, storage.get());
+    /// ```
     pub fn new(data: V1FullFormat) -> Self {
         Self { data }
     }
 
+    /// Return the f64 value stored for a SignalK path
+    ///
+    /// # Examples
+    /// ```
+    /// use signalk::{Storage, V1FullFormat};
+    /// let j = r#"
+    ///         { "self":"vessels.urn:mrn:imo:mmsi:366982330",
+    ///           "vessels": {
+    ///              "urn:mrn:imo:mmsi:366982330": {
+    ///                "navigation": {
+    ///                  "courseOverGroundTrue": {
+    ///                    "value": 245.69,
+    ///                    "timestamp": "2015-01-25T12:01:01Z",
+    ///                    "$source": "a.suitable.path"
+    ///                  }
+    ///                }
+    ///              }
+    ///           },
+    ///           "version": "1.0.0"
+    ///         }"#;
+    /// let storage = Storage::new(serde_json::from_str(j).unwrap());
+    ///
+    /// assert_eq!(
+    ///   storage.get_f64_for_path("self.navigation.courseOverGroundTrue".to_string())
+    ///     .unwrap(),
+    ///   245.69)
+    /// ```
     pub fn get_f64_for_path(&self, path: String) -> Result<f64, SignalKGetError> {
         self.data.get_f64_for_path(path)
     }

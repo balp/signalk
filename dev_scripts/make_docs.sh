@@ -1,5 +1,6 @@
 #!/usr/bin/env zsh
 cargo doc --verbose
+rm -rf docs/_static
 mkdir -p docs/_static
 mv target/doc docs/_static/rust_api
 python3.13 -m venv .venv-3.13

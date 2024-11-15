@@ -112,7 +112,19 @@ impl V1FullFormat {
                     Err(SignalKGetError::NoSuchPath)
                 }
             }
-            "vessels" => Err(SignalKGetError::NoSuchPath),
+            "vessels" => {
+                if let Some(ref vessels) = self.vessels {
+                    if let Some(vessel) = vessels.get(path_que[1]) {
+                        path_que.remove(0);
+                        path_que.remove(0);
+                        vessel.get_f64_for_path(&mut path_que)
+                    } else {
+                        Err(SignalKGetError::NoSuchPath)
+                    }
+                } else {
+                    Err(SignalKGetError::NoSuchPath)
+                }
+            }
             &_ => Err(SignalKGetError::NoSuchPath),
         }
     }
