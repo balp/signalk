@@ -1,8 +1,9 @@
 use crate::definitions::{V1DateTime, V1NumberValue, V1StringValue};
-use crate::helper_functions::{get_f64_value, get_f64_value_for_path, F64CompatiblePath};
+use crate::helper_functions::{get_f64_value, get_path, F64CompatiblePath, Path};
 use crate::navigation_course::{V1Course, V1CourseApi};
 use crate::navigation_gnss::V1gnss;
 use crate::SignalKGetError;
+use log::debug;
 use serde::{Deserialize, Serialize};
 use serde_json::value::Value;
 
@@ -40,6 +41,51 @@ pub struct V1Navigation {
     // pub state: Option<V1State>,
     // pub anchor: Option<V1Anchor>,
     pub datetime: Option<V1DateTime>,
+}
+
+impl Path<f64> for V1Navigation {
+    fn get_path(&self, path: &[&str]) -> Result<f64, SignalKGetError> {
+        debug!("get_path({:?}): ...", path);
+        match path[0] {
+            "lights" => Err(SignalKGetError::TBD),
+            "courseOverGroundMagnetic" => get_f64_value(&self.course_over_ground_magnetic),
+            "courseOverGroundTrue" => get_f64_value(&self.course_over_ground_true),
+            "course" => get_path(path, &(self.course.as_ref())),
+            "courseRhumbline" => get_path(path, &(self.course_rhumbline.as_ref())),
+            "courseGreatCircle" => get_path(path, &(self.course_great_circle.as_ref())),
+            "closestApproach" => Err(SignalKGetError::TBD),
+            "racing" => Err(SignalKGetError::TBD),
+            "magneticVariation" => get_f64_value(&self.magnetic_variation),
+            "magneticVariationAgeOfService" => {
+                get_f64_value(&self.magnetic_variation_age_of_service)
+            }
+            "destination" => Err(SignalKGetError::TBD),
+            "gnss" => get_path(path, &(self.gnss.as_ref())),
+            "headingMagnetic" => get_f64_value(&self.heading_magnetic),
+            "magneticDeviation" => get_f64_value(&self.magnetic_deviation),
+            "headingCompass" => get_f64_value(&self.heading_compass),
+            "headingTrue" => get_f64_value(&self.heading_true),
+            "position" => get_path(path, &(self.position.as_ref())),
+            "attitude" => Err(SignalKGetError::TBD),
+            "maneuver" => Err(SignalKGetError::TBD),
+            "rateOfTurn" => get_f64_value(&self.rate_of_turn),
+            "speedOverGround" => get_f64_value(&self.speed_over_ground),
+            "speedThroughWater" => get_f64_value(&self.speed_through_water),
+            "speedThroughWaterReferenceType" => Err(SignalKGetError::WrongDataType),
+            "speedThroughWaterTransverse" => get_f64_value(&self.speed_through_water_transverse),
+            "speedThroughWaterLongitudinal" => {
+                get_f64_value(&self.speed_through_water_longitudinal)
+            }
+            "leewayAngle" => get_f64_value(&self.speed_through_water_longitudinal),
+            "log" => get_f64_value(&self.speed_through_water_longitudinal),
+            "trip" => Err(SignalKGetError::TBD), // get_path(path, &(self.trip.as_ref())),
+            "state" => Err(SignalKGetError::TBD),
+            "anchor" => Err(SignalKGetError::TBD),
+            "datetime" => Err(SignalKGetError::WrongDataType),
+
+            &_ => Err(SignalKGetError::NoSuchPath),
+        }
+    }
 }
 
 impl V1Navigation {
@@ -171,69 +217,7 @@ impl V1Navigation {
     }
 
     pub fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
-        match path[0] {
-            "course" => {
-                if let Some(ref course) = self.course {
-                    path.remove(0);
-                    course.get_f64_for_path(path)
-                } else {
-                    Err(SignalKGetError::ValueNotSet)
-                }
-            }
-            "lights" => Err(SignalKGetError::TBD),
-            "courseOverGroundMagnetic" => get_f64_value(&self.course_over_ground_magnetic),
-            "courseOverGroundTrue" => get_f64_value(&self.course_over_ground_true),
-            "courseRhumbline" => {
-                if let Some(ref course) = self.course_rhumbline {
-                    path.remove(0);
-                    course.get_f64_for_path(path)
-                } else {
-                    Err(SignalKGetError::ValueNotSet)
-                }
-            }
-            "courseGreatCircle" => {
-                if let Some(ref course) = self.course_great_circle {
-                    path.remove(0);
-                    course.get_f64_for_path(path)
-                } else {
-                    Err(SignalKGetError::ValueNotSet)
-                }
-            }
-            "closestApproach" => Err(SignalKGetError::TBD),
-            "racing" => Err(SignalKGetError::TBD),
-            "magneticVariation" => get_f64_value(&self.magnetic_variation),
-            "magneticVariationAgeOfService" => {
-                get_f64_value(&self.magnetic_variation_age_of_service)
-            }
-            "destination" => Err(SignalKGetError::TBD),
-            "gnss" => {
-                if let Some(ref value) = self.gnss {
-                    path.remove(0);
-                    value.get_f64_for_path(path)
-                } else {
-                    Err(SignalKGetError::ValueNotSet)
-                }
-            }
-            "headingMagnetic" => get_f64_value(&self.heading_magnetic),
-            "magneticDeviation" => get_f64_value(&self.magnetic_deviation),
-            "headingCompass" => get_f64_value(&self.heading_compass),
-            "headingTrue" => get_f64_value(&self.heading_true),
-            "position" => get_f64_value_for_path(path, &self.position),
-            "rateOfTurn" => get_f64_value(&self.rate_of_turn),
-            "speedOverGround" => get_f64_value(&self.speed_over_ground),
-            "speedThroughWater" => get_f64_value(&self.speed_through_water),
-            "speedThroughWaterTransverse" => get_f64_value(&self.speed_through_water_transverse),
-            "speedThroughWaterLongitudinal" => {
-                get_f64_value(&self.speed_through_water_longitudinal)
-            }
-            "leewayAngle" => get_f64_value(&self.leeway_angle),
-            "log" => get_f64_value(&self.log),
-            "trip" => get_f64_value_for_path(path, &self.trip),
-            "state" => Err(SignalKGetError::TBD),
-            "anchor" => Err(SignalKGetError::TBD),
-            "datetime" => Err(SignalKGetError::TBD),
-            &_ => Err(SignalKGetError::NoSuchPath),
-        }
+        self.get_path(path)
     }
 }
 
@@ -457,6 +441,44 @@ pub struct V1PositionType {
     pub sentence: Option<String>,
 }
 
+impl Path<f64> for V1PositionType {
+    fn get_path(&self, path: &[&str]) -> Result<f64, SignalKGetError> {
+        debug!("V1PositionType::get_path({:?}) {:?}", path, self);
+        match path[0] {
+            "longitude" => {
+                if let Some(ref position) = self.value {
+                    Ok(position.longitude)
+                } else {
+                    Err(SignalKGetError::ValueNotSet)
+                }
+            }
+            "latitude" => {
+                if let Some(ref position) = self.value {
+                    Ok(position.latitude)
+                } else {
+                    Err(SignalKGetError::ValueNotSet)
+                }
+            }
+            "altitude" => {
+                if let Some(ref position) = self.value {
+                    if let Some(altitude) = position.altitude {
+                        Ok(altitude)
+                    } else {
+                        Err(SignalKGetError::ValueNotSet)
+                    }
+                } else {
+                    Err(SignalKGetError::ValueNotSet)
+                }
+            }
+            "timestamp" => Err(SignalKGetError::WrongDataType),
+            "source" => Err(SignalKGetError::WrongDataType),
+            "pgn" => Err(SignalKGetError::WrongDataType),
+            "sentence" => Err(SignalKGetError::WrongDataType),
+            &_ => Err(SignalKGetError::NoSuchPath),
+        }
+    }
+}
+
 impl F64CompatiblePath for V1PositionType {
     fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
         if path.is_empty() {
@@ -592,6 +614,24 @@ pub struct V1PositionValue {
     pub altitude: Option<f64>,
 }
 
+impl Path<f64> for V1PositionValue {
+    fn get_path(&self, path: &[&str]) -> Result<f64, SignalKGetError> {
+        debug!("get_path({:?}) {:?}", path, self);
+        match path[0] {
+            "longitude" => Ok(self.longitude),
+            "latitude" => Ok(self.latitude),
+            "altitude" => {
+                if let Some(altitude) = self.altitude {
+                    Ok(altitude)
+                } else {
+                    Err(SignalKGetError::ValueNotSet)
+                }
+            }
+            &_ => Err(SignalKGetError::NoSuchPath),
+        }
+    }
+}
+
 impl V1PositionValue {
     pub fn new_2d(latitude: f64, longitude: f64) -> V1PositionValue {
         V1PositionValue {
@@ -611,14 +651,23 @@ impl V1PositionValue {
 
 #[cfg(test)]
 mod tests {
-
     use crate::definitions::F64Compatible;
+    use crate::helper_functions::get_path;
     use crate::navigation::V1Navigation;
     use crate::navigation_course::V1Course;
+    use crate::SignalKGetError;
     use serde_json::{Number, Value};
+    use std::fs::File;
+    use std::io::BufReader;
+    use std::path::Path;
+
+    fn init() {
+        let _ = env_logger::builder().is_test(true).try_init();
+    }
 
     #[test]
     fn update_navigation_course_rl_xte() {
+        init();
         let mut navigation = V1Navigation::builder()
             .course_rhumbline(V1Course::builder().build())
             .build();
@@ -680,5 +729,330 @@ mod tests {
                 .unwrap(),
             1.2345
         )
+    }
+
+    #[test]
+    fn get_position_longitude_from_navigation() {
+        assert_eq!(
+            get_path_from_navigation_file(".position.longitude", "tests/test_data/navigation.json"),
+            Ok(24.7354072)
+        )
+    }
+
+    #[test]
+    fn get_position_latitude_from_navigation() {
+        assert_eq!(
+            get_path_from_navigation_file(".position.latitude", "tests/test_data/navigation.json"),
+            Ok(59.722222)
+        )
+    }
+    #[test]
+    fn get_datetime_from_navigation() {
+        assert_eq!(
+            get_path_from_navigation_file(".datetime", "tests/test_data/navigation.json"),
+            Err(SignalKGetError::WrongDataType)
+        )
+    }
+    #[test]
+    fn get_gnss_antenna_altitude_from_navigation() {
+        assert_eq!(
+            get_path_from_navigation_file(
+                ".gnss.antennaAltitude",
+                "tests/test_data/navigation.json"
+            ),
+            Ok(2.17)
+        )
+    }
+    #[test]
+    fn get_gnss_satellites_from_navigation() {
+        assert_eq!(
+            get_path_from_navigation_file(".gnss.satellites", "tests/test_data/navigation.json"),
+            Ok(11.0)
+        )
+    }
+    #[test]
+    fn get_gnss_horizontal_dilution_from_navigation() {
+        assert_eq!(
+            get_path_from_navigation_file(
+                ".gnss.horizontalDilution",
+                "tests/test_data/navigation.json"
+            ),
+            Ok(0.8)
+        )
+    }
+    #[test]
+    fn get_gnss_type_from_navigation() {
+        assert_eq!(
+            get_path_from_navigation_file(".gnss.type", "tests/test_data/navigation.json"),
+            Err(SignalKGetError::WrongDataType)
+        )
+    }
+    #[test]
+    fn get_gnss_method_quality_from_navigation() {
+        assert_eq!(
+            get_path_from_navigation_file(".gnss.methodQuality", "tests/test_data/navigation.json"),
+            Err(SignalKGetError::WrongDataType)
+        )
+    }
+    #[test]
+    fn get_gnss_integrity_from_navigation() {
+        assert_eq!(
+            get_path_from_navigation_file(".gnss.integrity", "tests/test_data/navigation.json"),
+            Err(SignalKGetError::WrongDataType)
+        )
+    }
+    #[test]
+    fn get_gnss_satellites_in_view_from_navigation() {
+        assert_eq!(
+            get_path_from_navigation_file(
+                ".gnss.satellitesInView",
+                "tests/test_data/navigation.json"
+            ),
+            Err(SignalKGetError::WrongDataType)
+        )
+    }
+    #[test]
+    fn get_speed_through_water_from_navigation() {
+        assert_eq!(
+            get_path_from_navigation_file(".speedThroughWater", "tests/test_data/navigation.json"),
+            Ok(3.34)
+        )
+    }
+    #[test]
+    fn get_speed_through_water_reference_type_from_navigation() {
+        assert_eq!(
+            get_path_from_navigation_file(
+                ".speedThroughWaterReferenceType",
+                "tests/test_data/navigation.json"
+            ),
+            Err(SignalKGetError::WrongDataType)
+        )
+    }
+    #[test]
+    fn get_heading_true_from_navigation() {
+        assert_eq!(
+            get_path_from_navigation_file(".headingTrue", "tests/test_data/navigation.json"),
+            Ok(3.5535)
+        )
+    }
+    #[test]
+    fn get_magnetic_variation_from_navigation() {
+        assert_eq!(
+            get_path_from_navigation_file(".magneticVariation", "tests/test_data/navigation.json"),
+            Ok(0.1414)
+        )
+    }
+    #[test]
+    fn get_course_great_circle_active_route_href_from_navigation() {
+        assert_eq!(
+            get_path_from_navigation_file(
+                ".courseGreatCircle.activeRoute.href",
+                "tests/test_data/navigation.json"
+            ),
+            Err(SignalKGetError::WrongDataType)
+        )
+    }
+    #[test]
+    fn get_course_great_circle_active_route_start_time_from_navigation() {
+        assert_eq!(
+            get_path_from_navigation_file(
+                ".courseGreatCircle.activeRoute.startTime",
+                "tests/test_data/navigation.json"
+            ),
+            Err(SignalKGetError::WrongDataType)
+        )
+    }
+    #[test]
+    fn get_course_great_circle_active_next_point_position_longitude_from_navigation() {
+        assert_eq!(
+            get_path_from_navigation_file(
+                ".courseGreatCircle.nextPoint.position.longitude",
+                "tests/test_data/navigation.json"
+            ),
+            Ok(24.69305084158094)
+        )
+    }
+    #[test]
+    fn get_course_great_circle_active_next_point_position_latitude_from_navigation() {
+        assert_eq!(
+            get_path_from_navigation_file(
+                ".courseGreatCircle.nextPoint.position.latitude",
+                "tests/test_data/navigation.json"
+            ),
+            Ok(59.67512773750016)
+        )
+    }
+    #[test]
+    fn get_course_great_circle_active_next_point_arrival_circle_from_navigation() {
+        assert_eq!(
+            get_path_from_navigation_file(
+                ".courseGreatCircle.nextPoint.arrivalCircle",
+                "tests/test_data/navigation.json"
+            ),
+            Ok(0.0)
+        )
+    }
+    #[test]
+    fn get_course_great_circle_active_previous_point_position_longitude_from_navigation() {
+        assert_eq!(
+            get_path_from_navigation_file(
+                ".courseGreatCircle.previousPoint.position.longitude",
+                "tests/test_data/navigation.json"
+            ),
+            Ok(24.7351314)
+        )
+    }
+    #[test]
+    fn get_course_great_circle_active_previous_point_position_latitude_from_navigation() {
+        assert_eq!(
+            get_path_from_navigation_file(
+                ".courseGreatCircle.previousPoint.position.latitude",
+                "tests/test_data/navigation.json"
+            ),
+            Ok(59.7217554)
+        )
+    }
+    #[test]
+    fn get_course_rhumbline_active_route_href_from_navigation() {
+        assert_eq!(
+            get_path_from_navigation_file(
+                ".courseRhumbline.activeRoute.href",
+                "tests/test_data/navigation.json"
+            ),
+            Err(SignalKGetError::WrongDataType)
+        )
+    }
+    #[test]
+    fn get_course_rhumbline_active_route_start_time_from_navigation() {
+        assert_eq!(
+            get_path_from_navigation_file(
+                ".courseRhumbline.activeRoute.startTime",
+                "tests/test_data/navigation.json"
+            ),
+            Err(SignalKGetError::WrongDataType)
+        )
+    }
+    #[test]
+    fn get_course_rhumbline_active_next_point_position_longitude_from_navigation() {
+        assert_eq!(
+            get_path_from_navigation_file(
+                ".courseRhumbline.nextPoint.position.longitude",
+                "tests/test_data/navigation.json"
+            ),
+            Ok(24.69305084158094)
+        )
+    }
+    #[test]
+    fn get_course_rhumbline_active_next_point_position_latitude_from_navigation() {
+        assert_eq!(
+            get_path_from_navigation_file(
+                ".courseRhumbline.nextPoint.position.latitude",
+                "tests/test_data/navigation.json"
+            ),
+            Ok(59.67512773750016)
+        )
+    }
+    #[test]
+    fn get_course_rhumbline_active_next_point_arrival_circle_from_navigation() {
+        assert_eq!(
+            get_path_from_navigation_file(
+                ".courseRhumbline.nextPoint.arrivalCircle",
+                "tests/test_data/navigation.json"
+            ),
+            Ok(0.0)
+        )
+    }
+    #[test]
+    fn get_course_rhumbline_active_previous_point_position_longitude_from_navigation() {
+        assert_eq!(
+            get_path_from_navigation_file(
+                ".courseRhumbline.previousPoint.position.longitude",
+                "tests/test_data/navigation.json"
+            ),
+            Ok(24.7351314)
+        )
+    }
+    #[test]
+    fn get_course_rhumbline_active_previous_point_position_latitude_from_navigation() {
+        assert_eq!(
+            get_path_from_navigation_file(
+                ".courseRhumbline.previousPoint.position.latitude",
+                "tests/test_data/navigation.json"
+            ),
+            Ok(59.7217554)
+        )
+    }
+    #[test]
+    fn get_course_calc_values_calc_method_from_navigation() {
+        assert_eq!(
+            get_path_from_navigation_file(
+                ".course.calcValues.calcMethod",
+                "tests/test_data/navigation.json"
+            ),
+            Err(SignalKGetError::WrongDataType)
+        )
+    }
+    #[test]
+    fn get_course_calc_values_bearing_track_true_from_navigation() {
+        assert_eq!(
+            get_path_from_navigation_file(
+                ".course.calcValues.bearingTrackTrue",
+                "tests/test_data/navigation.json"
+            ),
+            Ok(3.5692017850905313)
+        )
+    }
+    #[test]
+    fn get_course_calc_values_bearing_track_magnetic_from_navigation() {
+        assert_eq!(
+            get_path_from_navigation_file(
+                ".course.calcValues.bearingTrackMagnetic",
+                "tests/test_data/navigation.json"
+            ),
+            Ok(3.7106017850905313)
+        )
+    }
+    #[test]
+    fn get_course_calc_values_xte_from_navigation() {
+        assert_eq!(
+            get_path_from_navigation_file(
+                ".course.calcValues.crossTrackError",
+                "tests/test_data/navigation.json"
+            ),
+            Ok(7.445808293426564)
+        )
+    }
+    #[test]
+    fn get_course_calc_values_previous_point_distance_from_navigation() {
+        assert_eq!(
+            get_path_from_navigation_file(
+                ".course.calcValues.previousPoint.distance",
+                "tests/test_data/navigation.json"
+            ),
+            Ok(54.13862750114139)
+        )
+    }
+    #[test]
+    fn get_course_calc_values_distance_from_navigation() {
+        assert_eq!(
+            get_path_from_navigation_file(
+                ".course.calcValues.distance",
+                "tests/test_data/navigation.json"
+            ),
+            Ok(5750.5951760268945)
+        )
+    }
+
+    fn get_path_from_navigation_file(
+        path_string: &str,
+        file_name: &str,
+    ) -> Result<f64, SignalKGetError> {
+        let path = Path::new(file_name);
+        let file = File::open(path).unwrap();
+        let reader = BufReader::new(file);
+        let course_with_point: V1Navigation = serde_json::from_reader(reader).unwrap();
+        let path: Vec<&str> = path_string.split('.').collect();
+        let result = get_path(&path, &Some(&course_with_point));
+        result
     }
 }

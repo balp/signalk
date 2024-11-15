@@ -7,7 +7,7 @@ use crate::design::V1Design;
 use crate::electrical::V1Electrical;
 use crate::environment::V1Environment;
 use crate::full::Updatable;
-use crate::helper_functions::get_f64_value_for_path;
+use crate::helper_functions::{get_f64_value_for_path, get_path, Path};
 use crate::notification::V1Notification;
 use crate::performance::V1Performance;
 use crate::steering::V1Steering;
@@ -60,6 +60,35 @@ pub struct V1Vessel {
     pub performance: Option<V1Performance>,
     /// Engine data, each engine identified by a unique name i.e. Port_Engine
     pub propulsion: Option<HashMap<String, V1Propulsion>>,
+}
+
+impl Path<f64> for V1Vessel {
+    fn get_path(&self, path: &[&str]) -> Result<f64, SignalKGetError> {
+        debug!("get_path({:?})", path);
+        match path[0] {
+            "mmsi" => Err(SignalKGetError::WrongDataType),
+            "url" => Err(SignalKGetError::WrongDataType),
+            "uuid" => Err(SignalKGetError::WrongDataType),
+            "mothershipMmsi" => Err(SignalKGetError::WrongDataType),
+            "name" => Err(SignalKGetError::WrongDataType),
+            "port" => Err(SignalKGetError::WrongDataType),
+            "flag" => Err(SignalKGetError::WrongDataType),
+            "navigation" => get_path(path, &(self.navigation.as_ref())),
+            "communication" => Err(SignalKGetError::TBD),
+            "environment" => Err(SignalKGetError::TBD),
+            "notifications" => Err(SignalKGetError::TBD),
+            "electrical" => Err(SignalKGetError::TBD),
+            "steering" => Err(SignalKGetError::TBD),
+            "tanks" => Err(SignalKGetError::TBD),
+            "design" => Err(SignalKGetError::TBD),
+            "sails" => Err(SignalKGetError::TBD),
+            "sensors" => Err(SignalKGetError::TBD),
+            "performance" => Err(SignalKGetError::TBD),
+            "propulsion" => Err(SignalKGetError::TBD),
+
+            &_ => Err(SignalKGetError::NoSuchPath),
+        }
+    }
 }
 
 impl Updatable for V1Vessel {

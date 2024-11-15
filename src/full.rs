@@ -1,7 +1,8 @@
+use log::debug;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use serde::{Deserialize, Serialize};
-
+use crate::helper_functions::{get_path, Path};
 use crate::{SignalKGetError, V1DeltaFormat, V1Sources, V1UpdateType, V1Vessel};
 
 /// These items can be updated by a V1UpdateType
@@ -42,6 +43,21 @@ pub struct V1FullFormat {
     // TODO: Add sar
     // Metadata about the data sources; physical interface, address, protocol, etc.
     // pub sources: Option<V1Sources>,
+}
+
+impl Path<f64> for V1FullFormat {
+    fn get_path(&self, path: &[&str]) -> Result<f64, SignalKGetError> {
+        debug!("get_path({:?})", path);
+        match path[0] {
+            "version" => Err(SignalKGetError::WrongDataType),
+            "self" => get_path(path, &self.get_self()),
+            "vessels" => Err(SignalKGetError::TBD),
+            "aircraft" => Err(SignalKGetError::TBD),
+            "aton" => Err(SignalKGetError::TBD),
+            "sar" => Err(SignalKGetError::TBD),
+            &_ => Err(SignalKGetError::NoSuchPath),
+        }
+    }
 }
 
 impl Default for V1FullFormat {

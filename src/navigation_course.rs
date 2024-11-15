@@ -1,6 +1,7 @@
 use crate::definitions::{V1DateTime, V1StringValue, V2NumberValue};
-use crate::helper_functions::get_f64_value;
-use crate::{SignalKGetError, V1CommonValueFields, V1NumberValue, V1PositionType};
+use crate::helper_functions::{get_f64_value, get_path, Path};
+use crate::{SignalKGetError, V1CommonValueFields, V1NumberValue, V1PositionType, V1PositionValue};
+use log::debug;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -14,6 +15,22 @@ pub struct V1CourseApi {
     pub target_arrival_time: Option<V1DateTime>,
     pub arrival_circle: Option<i64>,
     pub calc_values: Option<V1CourseCalculationsModel>,
+}
+
+impl Path<f64> for V1CourseApi {
+    fn get_path(&self, path: &[&str]) -> Result<f64, SignalKGetError> {
+        debug!("V1CourseApi::get_path({:?})", path);
+        match path[0] {
+            "activeRoute" => get_path(path, &(self.active_route.as_ref())),
+            "nextPoint" => get_path(path, &(self.next_point.as_ref())),
+            "previousPoint" => get_path(path, &(self.previous_point.as_ref())),
+            "startTime" => Err(SignalKGetError::WrongDataType),
+            "targetArrivalTime" => Err(SignalKGetError::WrongDataType),
+            "arrivalCircle" => Err(SignalKGetError::WrongDataType),
+            "calcValues" => get_path(path, &(self.calc_values.as_ref())),
+            &_ => Err(SignalKGetError::NoSuchPath),
+        }
+    }
 }
 
 impl V1CourseApi {
@@ -43,33 +60,6 @@ impl V1CourseApi {
             }
         }
     }
-    pub fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
-        match path[0] {
-            "activeRoute" => {
-                if let Some(ref course) = self.active_route {
-                    path.remove(0);
-                    course.get_f64_for_path(path)
-                } else {
-                    Err(SignalKGetError::ValueNotSet)
-                }
-            }
-            "nextPoint" => Err(SignalKGetError::TBD),
-            "previousPoint" => Err(SignalKGetError::TBD),
-            "startTime" => Err(SignalKGetError::TBD),
-            "targetArrivalTime" => Err(SignalKGetError::TBD),
-            "arrivalCircle" => Err(SignalKGetError::TBD),
-            "calcValues" => {
-                if let Some(ref calc_values) = self.calc_values {
-                    path.remove(0);
-                    calc_values.get_f64_for_path(path)
-                } else {
-                    Err(SignalKGetError::ValueNotSet)
-                }
-            }
-
-            &_ => Err(SignalKGetError::TBD),
-        }
-    }
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
@@ -80,6 +70,20 @@ pub struct V1CourseApiActiveRouteModel {
     pub point_index: i64,
     pub point_total: i64,
     pub reverse: bool,
+}
+
+impl Path<f64> for V1CourseApiActiveRouteModel {
+    fn get_path(&self, path: &[&str]) -> Result<f64, SignalKGetError> {
+        debug!("get_path({:?})", path);
+        match path[0] {
+            "href" => Err(SignalKGetError::WrongDataType),
+            "name" => Err(SignalKGetError::WrongDataType),
+            "pointIndex" => Err(SignalKGetError::WrongDataType),
+            "pointTotal" => Err(SignalKGetError::WrongDataType),
+            "reverse" => Err(SignalKGetError::WrongDataType),
+            &_ => Err(SignalKGetError::NoSuchPath),
+        }
+    }
 }
 
 impl V1CourseApiActiveRouteModel {
@@ -96,25 +100,27 @@ impl V1CourseApiActiveRouteModel {
             }
         }
     }
-    pub fn get_f64_for_path(&self, path: &mut [&str]) -> Result<f64, SignalKGetError> {
-        match path[0] {
-            "href" => Err(SignalKGetError::WrongDataType),
-            "name" => Err(SignalKGetError::WrongDataType),
-            "pointIndex" => Err(SignalKGetError::WrongDataType),
-            "pointTotal" => Err(SignalKGetError::WrongDataType),
-            "reverse" => Err(SignalKGetError::WrongDataType),
-            &_ => Err(SignalKGetError::NoSuchPath),
-        }
-    }
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct V1CourseApiPointModel {
-    pub position: V1PositionType,
+    pub position: V1PositionValue,
     pub href: Option<V1StringValue>,
     #[serde(rename = "type")]
     pub type_: Option<V1StringValue>,
+}
+
+impl Path<f64> for V1CourseApiPointModel {
+    fn get_path(&self, path: &[&str]) -> Result<f64, SignalKGetError> {
+        debug!("V1CourseApiPointModel::get_path({:?})", path);
+        match path[0] {
+            "position" => get_path(path, &(Some(&self.position))),
+            "href" => Err(SignalKGetError::WrongDataType),
+            "type" => Err(SignalKGetError::WrongDataType),
+            &_ => Err(SignalKGetError::NoSuchPath),
+        }
+    }
 }
 
 impl V1CourseApiPointModel {
@@ -148,6 +154,27 @@ pub struct V1CourseCalculationsModel {
     pub time_to_go: Option<V2NumberValue>,
     pub target_speed: Option<V2NumberValue>,
     pub previous_point: Option<V1CourseCalculationsPreviousPoint>,
+}
+
+impl Path<f64> for V1CourseCalculationsModel {
+    fn get_path(&self, path: &[&str]) -> Result<f64, SignalKGetError> {
+        debug!("V1CourseCalculationsModel::get_path({:?})", path);
+        match path[0] {
+            "calcMethod" => get_path(path, &(Some(&self.calc_method))),
+            "crossTrackError" => get_f64_value(&self.cross_track_error),
+            "bearingTrackTrue" => get_f64_value(&self.bearing_track_true),
+            "bearingTrackMagnetic" => get_f64_value(&self.bearing_track_magnetic),
+            "estimatedTimeOfArrival" => Err(SignalKGetError::WrongDataType),
+            "distance" => get_f64_value(&self.distance),
+            "bearingTrue" => get_f64_value(&self.bearing_true),
+            "bearingMagnetic" => get_f64_value(&self.bearing_magnetic),
+            "velocityMadeGood" => get_f64_value(&self.velocity_made_good),
+            "timeToGo" => get_f64_value(&self.time_to_go),
+            "targetSpeed" => get_f64_value(&self.target_speed),
+            "previousPoint" => get_path(path, &(self.previous_point.as_ref())),
+            &_ => Err(SignalKGetError::NoSuchPath),
+        }
+    }
 }
 
 impl V1CourseCalculationsModel {
@@ -205,22 +232,7 @@ impl V1CourseCalculationsModel {
     }
 
     pub fn get_f64_for_path(&self, path: &mut [&str]) -> Result<f64, SignalKGetError> {
-        match path[0] {
-            "calcMethod" => Err(SignalKGetError::WrongDataType),
-            "crossTrackError" => get_f64_value(&self.cross_track_error),
-            "bearingTrackTrue" => get_f64_value(&self.bearing_track_true),
-            "bearingTrackMagnetic" => get_f64_value(&self.bearing_track_magnetic),
-            "estimatedTimeOfArrival" => Err(SignalKGetError::WrongDataType),
-            "distance" => get_f64_value(&self.distance),
-            "bearingTrue" => get_f64_value(&self.bearing_true),
-            "bearingMagnetic" => get_f64_value(&self.bearing_magnetic),
-            "velocityMadeGood" => get_f64_value(&self.velocity_made_good),
-            "timeToGo" => get_f64_value(&self.time_to_go),
-            "targetSpeed" => get_f64_value(&self.target_speed),
-            "previousPoint" => Err(SignalKGetError::TBD),
-
-            &_ => Err(SignalKGetError::TBD),
-        }
+        self.get_path(path)
     }
 }
 
@@ -228,6 +240,16 @@ impl V1CourseCalculationsModel {
 #[serde(rename_all = "camelCase")]
 pub struct V1CourseCalculationsPreviousPoint {
     pub distance: Option<V2NumberValue>,
+}
+
+impl Path<f64> for V1CourseCalculationsPreviousPoint {
+    fn get_path(&self, path: &[&str]) -> Result<f64, SignalKGetError> {
+        debug!("V1CourseNextPoint::get_path({:?})", path);
+        match path[0] {
+            "distance" => get_f64_value(&self.distance),
+            &_ => Err(SignalKGetError::NoSuchPath),
+        }
+    }
 }
 
 impl V1CourseCalculationsPreviousPoint {
@@ -253,6 +275,16 @@ pub enum V1CourseCalculationsMethod {
     Value(V1CourseCalculationsMethodValue),
 }
 
+impl Path<f64> for V1CourseCalculationsMethod {
+    fn get_path(&self, path: &[&str]) -> Result<f64, SignalKGetError> {
+        debug!("V1CourseCalculationsMethod::get_path({:?})", path);
+        match self {
+            V1CourseCalculationsMethod::Expanded(v) => v.get_path(path),
+            V1CourseCalculationsMethod::Value(v) => v.get_path(path),
+        }
+    }
+}
+
 impl Default for V1CourseCalculationsMethod {
     fn default() -> Self {
         V1CourseCalculationsMethod::Value(V1CourseCalculationsMethodValue::default())
@@ -265,11 +297,27 @@ pub struct V1CourseCalculationsExpandedMethod {
     pub common_value_fields: Option<V1CommonValueFields>,
 }
 
+impl Path<f64> for V1CourseCalculationsExpandedMethod {
+    fn get_path(&self, path: &[&str]) -> Result<f64, SignalKGetError> {
+        if let Some(ref v) = self.value {
+            v.get_path(path)
+        } else {
+            Err(SignalKGetError::ValueNotSet)
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 pub enum V1CourseCalculationsMethodValue {
     #[default]
     GreatCircle,
     Rhumbline,
+}
+
+impl Path<f64> for V1CourseCalculationsMethodValue {
+    fn get_path(&self, _path: &[&str]) -> Result<f64, SignalKGetError> {
+        Err(SignalKGetError::WrongDataType)
+    }
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
@@ -281,6 +329,21 @@ pub struct V1Course {
     pub active_route: Option<V1ActiveRoute>,
     pub next_point: Option<V1CourseNextPoint>,
     pub previous_point: Option<V1CoursePreviousPoint>,
+}
+
+impl Path<f64> for V1Course {
+    fn get_path(&self, path: &[&str]) -> Result<f64, SignalKGetError> {
+        debug!("V1Course::get_path({:?})", path);
+        match path[0] {
+            "crossTrackError" => get_f64_value(&self.cross_track_error),
+            "bearingTrackTrue" => get_f64_value(&self.bearing_track_true),
+            "bearingTrackMagnetic" => get_f64_value(&self.bearing_track_magnetic),
+            "activeRoute" => get_path(path, &(self.active_route.as_ref())),
+            "nextPoint" => get_path(path, &(self.next_point.as_ref())),
+            "previousPoint" => get_path(path, &(self.previous_point.as_ref())),
+            &_ => Err(SignalKGetError::NoSuchPath),
+        }
+    }
 }
 
 impl V1Course {
@@ -334,29 +397,7 @@ impl V1Course {
     }
 
     pub fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
-        match path[0] {
-            "crossTrackError" => get_f64_value(&self.cross_track_error),
-            "bearingTrackTrue" => get_f64_value(&self.bearing_track_true),
-            "bearingTrackMagnetic" => get_f64_value(&self.bearing_track_magnetic),
-            "active_route" => Err(SignalKGetError::WrongDataType),
-            "nextPoint" => {
-                if let Some(ref val) = self.next_point {
-                    path.remove(0);
-                    val.get_f64_for_path(path)
-                } else {
-                    Err(SignalKGetError::ValueNotSet)
-                }
-            }
-            "previousPoint" => {
-                if let Some(ref val) = self.previous_point {
-                    path.remove(0);
-                    val.get_f64_for_path(path)
-                } else {
-                    Err(SignalKGetError::ValueNotSet)
-                }
-            }
-            &_ => Err(SignalKGetError::NoSuchPath),
-        }
+        self.get_path(path)
     }
 }
 
@@ -442,6 +483,18 @@ pub struct V1ActiveRoute {
     pub href: Option<V1StringValue>,
     pub estimated_time_of_arrival: Option<V1DateTime>,
     pub start_time: Option<V1DateTime>,
+}
+
+impl Path<f64> for V1ActiveRoute {
+    fn get_path(&self, path: &[&str]) -> Result<f64, SignalKGetError> {
+        debug!("V1ActiveRoute::get_path({:?})", path);
+        match path[0] {
+            "href" => Err(SignalKGetError::WrongDataType),
+            "estimatedTimeOfArrival" => Err(SignalKGetError::WrongDataType),
+            "startTime" => Err(SignalKGetError::WrongDataType),
+            &_ => Err(SignalKGetError::NoSuchPath),
+        }
+    }
 }
 
 impl V1ActiveRoute {
@@ -560,6 +613,24 @@ pub struct V1CourseNextPoint {
     pub common_value_fields: Option<V1CommonValueFields>,
 }
 
+impl Path<f64> for V1CourseNextPoint {
+    fn get_path(&self, path: &[&str]) -> Result<f64, SignalKGetError> {
+        debug!("V1CourseNextPoint::get_path({:?})", path);
+        match path[0] {
+            "value" => Err(SignalKGetError::WrongDataType),
+            "distance" => get_f64_value(&self.distance),
+            "bearingTrue" => get_f64_value(&self.bearing_true),
+            "bearingMagnetic" => get_f64_value(&self.bearing_magnetic),
+            "velocityMadeGood" => get_f64_value(&self.velocity_made_good),
+            "timeToGo" => get_f64_value(&self.time_to_go),
+            "position" => get_path(path, &(self.position.as_ref())),
+            "estimatedTimeOfArrival" => Err(SignalKGetError::WrongDataType),
+            "arrivalCircle" => get_f64_value(&self.arrival_circle),
+            &_ => Err(SignalKGetError::NoSuchPath),
+        }
+    }
+}
+
 impl V1CourseNextPoint {
     pub fn update(&mut self, path: &mut Vec<&str>, value: &serde_json::value::Value) {
         match path[0] {
@@ -614,18 +685,7 @@ impl V1CourseNextPoint {
     }
 
     pub fn get_f64_for_path(&self, path: &mut [&str]) -> Result<f64, SignalKGetError> {
-        match path[0] {
-            "value" => Err(SignalKGetError::WrongDataType),
-            "distance" => get_f64_value(&self.distance),
-            "bearingTrue" => get_f64_value(&self.bearing_true),
-            "bearingMagnetic" => get_f64_value(&self.bearing_magnetic),
-            "velocityMadeGood" => get_f64_value(&self.velocity_made_good),
-            "timeToGo" => get_f64_value(&self.time_to_go),
-            "position" => Err(SignalKGetError::WrongDataType),
-            "estimatedTimeOfArrival" => Err(SignalKGetError::WrongDataType),
-            "arrivalCircle" => get_f64_value(&self.arrival_circle),
-            &_ => Err(SignalKGetError::NoSuchPath),
-        }
+        self.get_path(path)
     }
 }
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
@@ -660,6 +720,17 @@ pub struct V1CoursePreviousPoint {
     position: Option<V1PositionType>,
     #[serde(flatten)]
     pub common_value_fields: Option<V1CommonValueFields>,
+}
+
+impl Path<f64> for V1CoursePreviousPoint {
+    fn get_path(&self, path: &[&str]) -> Result<f64, SignalKGetError> {
+        match path[0] {
+            "value" => Err(SignalKGetError::WrongDataType),
+            "distance" => get_f64_value(&self.distance),
+            "position" => get_path(path, &(self.position.as_ref())),
+            &_ => Err(SignalKGetError::NoSuchPath),
+        }
+    }
 }
 
 impl V1CoursePreviousPoint {
@@ -701,12 +772,7 @@ impl V1CoursePreviousPoint {
         }
     }
     pub fn get_f64_for_path(&self, path: &mut [&str]) -> Result<f64, SignalKGetError> {
-        match path[0] {
-            "value" => Err(SignalKGetError::WrongDataType),
-            "distance" => get_f64_value(&self.distance),
-            "position" => Err(SignalKGetError::WrongDataType),
-            &_ => Err(SignalKGetError::NoSuchPath),
-        }
+        self.get_path(path)
     }
 }
 
@@ -736,12 +802,22 @@ impl V1CoursePreviousPointValue {
 
 #[cfg(test)]
 mod tests {
+    use crate::helper_functions::get_path;
     use crate::navigation_course::{
         V1Course, V1CourseApi, V1CourseCalculationsModel, V1CourseNextPoint, V1CoursePreviousPoint,
     };
+    use crate::SignalKGetError;
+    fn init() {
+        let _ = env_logger::builder().is_test(true).try_init();
+    }
 
     #[test]
     fn course_full_valid() {
+        let course_with_point = full_valid_course();
+        println!("{:?}", course_with_point);
+    }
+
+    fn full_valid_course() -> V1Course {
         let j = r#"
         {
           "crossTrackError": {
@@ -831,7 +907,131 @@ mod tests {
           }
         }"#;
         let course_with_point: V1Course = serde_json::from_str(j).unwrap();
-        println!("{:?}", course_with_point);
+        course_with_point
+    }
+
+    fn get_path_from_course_api(path_string: &str) -> Result<f64, SignalKGetError> {
+        let course_with_point = make_course_api();
+        let path: Vec<&str> = path_string.split('.').collect();
+        let result = get_path(&path, &Some(&course_with_point));
+        result
+    }
+
+    #[test]
+    fn course_api_get_active_route_href_as_f64() {
+        assert_eq!(
+            get_path_from_course_api(".activeRoute.href"),
+            Err(SignalKGetError::WrongDataType)
+        );
+    }
+    #[test]
+    fn course_api_get_active_route_name_as_f64() {
+        assert_eq!(
+            get_path_from_course_api(".activeRoute.name"),
+            Err(SignalKGetError::WrongDataType)
+        );
+    }
+    #[test]
+    fn course_api_get_active_route_point_index_as_f64() {
+        assert_eq!(
+            get_path_from_course_api(".activeRoute.pointIndex"),
+            Err(SignalKGetError::WrongDataType)
+        );
+    }
+    #[test]
+    fn course_api_get_active_route_point_total_as_f64() {
+        assert_eq!(
+            get_path_from_course_api(".activeRoute.pointTotal"),
+            Err(SignalKGetError::WrongDataType)
+        );
+    }
+    #[test]
+    fn course_api_get_active_route_reverse_as_f64() {
+        assert_eq!(
+            get_path_from_course_api(".activeRoute.reverse"),
+            Err(SignalKGetError::WrongDataType)
+        );
+    }
+    #[test]
+    fn course_api_get_next_point_position_latitude_as_f64() {
+        init();
+
+        assert_eq!(
+            get_path_from_course_api(".nextPoint.position.latitude"),
+            Ok(65.4567)
+        );
+    }
+    #[test]
+    fn course_api_get_next_point_position_longitude_as_f64() {
+        assert_eq!(
+            get_path_from_course_api(".nextPoint.position.longitude"),
+            Ok(3.3452)
+        );
+    }
+    #[test]
+    fn course_api_get_previous_point_position_latitude_as_f64() {
+        assert_eq!(
+            get_path_from_course_api(".previousPoint.position.latitude"),
+            Ok(65.4567)
+        );
+    }
+    #[test]
+    fn course_api_get_previous_point_position_longitude_as_f64() {
+        assert_eq!(
+            get_path_from_course_api(".previousPoint.position.longitude"),
+            Ok(3.3452)
+        );
+    }
+    #[test]
+    fn course_api_get_start_time_as_f64() {
+        assert_eq!(
+            get_path_from_course_api(".startTime"),
+            Err(SignalKGetError::WrongDataType)
+        );
+    }
+    #[test]
+    fn course_api_get_target_arrival_time_as_f64() {
+        assert_eq!(
+            get_path_from_course_api(".targetArrivalTime"),
+            Err(SignalKGetError::WrongDataType)
+        );
+    }
+    #[test]
+    fn course_api_get_arrival_circle_as_f64() {
+        assert_eq!(
+            get_path_from_course_api(".arrivalCircle"),
+            Err(SignalKGetError::WrongDataType)
+        );
+    }
+
+    fn make_course_api() -> V1CourseApi {
+        let j = r#"
+        {
+          "activeRoute": {
+            "href": "/resources/routes/ac3a3b2d-07e8-4f25-92bc-98e7c92f7f1a",
+            "name": "Here to eternity.",
+            "pointIndex": 0,
+            "pointTotal": 0,
+            "reverse": true
+          },
+          "nextPoint": {
+            "position": {
+              "latitude": 65.4567,
+              "longitude": 3.3452
+            }
+          },
+          "previousPoint": {
+            "position": {
+              "latitude": 65.4567,
+              "longitude": 3.3452
+            }
+          },
+          "startTime": "2022-04-22T05:02:56.484Z",
+          "targetArrivalTime": "2022-04-22T05:02:56.484Z",
+          "arrivalCircle": 500
+        }"#;
+        let course_with_point: V1CourseApi = serde_json::from_str(j).unwrap();
+        course_with_point
     }
 
     #[test]
@@ -907,33 +1107,7 @@ mod tests {
 
     #[test]
     fn course_api_valid() {
-        let j = r#"
-        {
-          "activeRoute": {
-            "href": "/resources/routes/ac3a3b2d-07e8-4f25-92bc-98e7c92f7f1a",
-            "name": "Here to eternity.",
-            "pointIndex": 0,
-            "pointTotal": 0,
-            "reverse": true
-          },
-          "nextPoint": {
-            "position": {
-              "latitude": 65.4567,
-              "longitude": 3.3452
-            }
-          },
-          "previousPoint": {
-            "position": {
-              "latitude": 65.4567,
-              "longitude": 3.3452
-            }
-          },
-          "startTime": "2022-04-22T05:02:56.484Z",
-          "targetArrivalTime": "2022-04-22T05:02:56.484Z",
-          "arrivalCircle": 500
-        }"#;
-        println!("{:?}", j);
-        let course_with_point: V1CourseApi = serde_json::from_str(j).unwrap();
+        let course_with_point = make_course_api();
         println!("{:?}", course_with_point);
     }
 

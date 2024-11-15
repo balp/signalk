@@ -1,0 +1,550 @@
+{
+  "position": {
+    "meta": {
+      "description": "The position of the vessel in 2 or 3 dimensions (WGS84 datum)",
+      "properties": {
+        "longitude": {
+          "type": "number",
+          "description": "Longitude",
+          "units": "deg",
+          "example": 4.98765245
+        },
+        "latitude": {
+          "type": "number",
+          "description": "Latitude",
+          "units": "deg",
+          "example": 52.0987654
+        },
+        "altitude": {
+          "type": "number",
+          "description": "Altitude",
+          "units": "m"
+        }
+      }
+    },
+    "value": {
+      "longitude": 24.7354072,
+      "latitude": 59.722222
+    },
+    "$source": "can1.160",
+    "timestamp": "2014-08-15T19:01:32.025Z",
+    "pgn": 129025
+  },
+  "datetime": {
+    "meta": {
+      "description": "Time and Date from the GNSS Positioning System"
+    },
+    "value": "2014-08-15T19:01:31.21200Z",
+    "$source": "can1.160",
+    "timestamp": "2014-08-15T19:01:31.617Z",
+    "pgn": 126992
+  },
+  "gnss": {
+    "antennaAltitude": {
+      "meta": {
+        "units": "m",
+        "description": "Altitude of antenna"
+      },
+      "value": 2.17,
+      "$source": "can1.160",
+      "timestamp": "2014-08-15T19:01:31.518Z",
+      "pgn": 129029
+    },
+    "satellites": {
+      "meta": {
+        "description": "Number of satellites"
+      },
+      "value": 11,
+      "$source": "can1.160",
+      "timestamp": "2014-08-15T19:01:31.518Z",
+      "pgn": 129029
+    },
+    "horizontalDilution": {
+      "meta": {
+        "description": "Horizontal Dilution of Precision"
+      },
+      "value": 0.8,
+      "$source": "can1.160",
+      "timestamp": "2014-08-15T19:01:31.518Z",
+      "pgn": 129029
+    },
+    "type": {
+      "meta": {
+        "description": "Fix type"
+      },
+      "value": "GPS",
+      "$source": "can1.160",
+      "timestamp": "2014-08-15T19:01:31.518Z",
+      "pgn": 129029
+    },
+    "methodQuality": {
+      "meta": {
+        "description": "Quality of the satellite fix"
+      },
+      "value": "GNSS Fix",
+      "$source": "can1.160",
+      "timestamp": "2014-08-15T19:01:31.518Z",
+      "pgn": 129029
+    },
+    "integrity": {
+      "meta": {
+        "description": "Integrity of the satellite fix"
+      },
+      "value": "no Integrity checking",
+      "$source": "can1.160",
+      "timestamp": "2014-08-15T19:01:31.518Z",
+      "pgn": 129029
+    },
+    "satellitesInView": {
+      "meta": {},
+      "value": {
+        "count": 11,
+        "satellites": [
+          {
+            "id": 32,
+            "elevation": 1.2217,
+            "azimuth": 3.8921,
+            "SNR": 38
+          },
+          {
+            "id": 1,
+            "elevation": 1.1694,
+            "azimuth": 4.6251,
+            "SNR": 31
+          },
+          {
+            "id": 11,
+            "elevation": 1.0647,
+            "azimuth": 3.5605,
+            "SNR": 35
+          },
+          {
+            "id": 14,
+            "elevation": 0.8029,
+            "azimuth": 1.2043,
+            "SNR": 32
+          },
+          {
+            "id": 20,
+            "elevation": 0.4887,
+            "azimuth": 4.3982,
+            "SNR": 34
+          },
+          {
+            "id": 17,
+            "elevation": 0.384,
+            "azimuth": 5.5676,
+            "SNR": 34
+          },
+          {
+            "id": 4,
+            "elevation": 0.3316,
+            "azimuth": 5.1487,
+            "SNR": 30
+          },
+          {
+            "id": 22,
+            "elevation": 0.3142,
+            "azimuth": 1.4137,
+            "SNR": 27
+          },
+          {
+            "id": 19,
+            "elevation": 0.2618,
+            "azimuth": 3.2463,
+            "SNR": 29
+          },
+          {
+            "id": 28,
+            "elevation": 0.1745,
+            "azimuth": 4.9218,
+            "SNR": 30
+          },
+          {
+            "id": 24,
+            "elevation": 0.1396,
+            "azimuth": 0.1571,
+            "SNR": 24
+          }
+        ]
+      },
+      "$source": "can1.160",
+      "timestamp": "2014-08-15T19:01:31.344Z",
+      "pgn": 129540
+    }
+  },
+  "speedThroughWater": {
+    "meta": {
+      "units": "m/s",
+      "description": "Vessel speed through the water"
+    },
+    "value": 3.34,
+    "$source": "can1.115",
+    "timestamp": "2014-08-15T19:01:31.290Z",
+    "pgn": 128259
+  },
+  "speedThroughWaterReferenceType": {
+    "meta": {},
+    "value": "Paddle wheel",
+    "$source": "can1.115",
+    "timestamp": "2014-08-15T19:01:31.290Z",
+    "pgn": 128259
+  },
+  "trip": {
+    "log": {
+      "meta": {
+        "units": "m",
+        "description": "Total distance traveled on this trip / since trip reset"
+      },
+      "value": 80247,
+      "$source": "can1.115",
+      "timestamp": "2014-08-15T19:01:31.954Z",
+      "pgn": 128275
+    }
+  },
+  "log": {
+    "meta": {
+      "units": "m",
+      "description": "Total distance traveled"
+    },
+    "value": 17441395,
+    "$source": "can1.115",
+    "timestamp": "2014-08-15T19:01:31.954Z",
+    "pgn": 128275
+  },
+  "speedOverGround": {
+    "meta": {
+      "units": "m/s",
+      "description": "Vessel speed over ground. If converting from AIS 'HIGH' value, set to 102.2 (Ais max value) and add warning in notifications"
+    },
+    "value": 3.32,
+    "$source": "can1.160",
+    "timestamp": "2014-08-15T19:01:32.023Z",
+    "pgn": 130577
+  },
+  "courseOverGroundTrue": {
+    "meta": {
+      "units": "rad",
+      "description": "Course over ground (true)"
+    },
+    "value": 3.461,
+    "$source": "can1.160",
+    "timestamp": "2014-08-15T19:01:32.023Z",
+    "pgn": 130577
+  },
+  "headingTrue": {
+    "meta": {
+      "units": "rad",
+      "description": "The current true north heading of the vessel, equals 'headingMagnetic adjusted for magneticVariation'"
+    },
+    "value": 3.5535,
+    "$source": "can1.160",
+    "timestamp": "2014-08-15T19:01:31.346Z",
+    "pgn": 127250
+  },
+  "magneticVariation": {
+    "meta": {
+      "units": "rad",
+      "description": "The magnetic variation (declination) at the current position that must be added to the magnetic heading to derive the true heading. Easterly variations are positive and Westerly variations are negative (in Radians)."
+    },
+    "value": 0.1414,
+    "$source": "can1.160",
+    "timestamp": "2014-08-15T19:01:31.346Z",
+    "pgn": 127250
+  },
+  "courseGreatCircle": {
+    "activeRoute": {
+      "href": {
+        "meta": {
+          "description": "A reference (URL) to the presently active route, in resources."
+        },
+        "value": "/resources/routes/f273bede-706d-40cb-bfd2-775499e40653",
+        "$source": "courseApi",
+        "timestamp": "2024-10-02T13:45:12.268Z"
+      },
+      "startTime": {
+        "meta": {
+          "description": "The time this route was activated"
+        },
+        "value": "2024-10-02T13:45:12.264Z",
+        "$source": "courseApi",
+        "timestamp": "2024-10-02T13:45:12.268Z"
+      }
+    },
+    "nextPoint": {
+      "value": {
+        "href": {
+          "meta": {},
+          "value": null,
+          "$source": "courseApi",
+          "timestamp": "2024-10-02T13:45:12.268Z"
+        },
+        "type": {
+          "meta": {},
+          "value": "RoutePoint",
+          "$source": "courseApi",
+          "timestamp": "2024-10-02T13:45:12.268Z"
+        }
+      },
+      "position": {
+        "meta": {},
+        "value": {
+          "latitude": 59.67512773750016,
+          "longitude": 24.69305084158094
+        },
+        "$source": "courseApi",
+        "timestamp": "2024-10-02T13:45:12.268Z"
+      },
+      "arrivalCircle": {
+        "meta": {},
+        "value": 0,
+        "$source": "courseApi",
+        "timestamp": "2024-10-02T13:45:12.268Z"
+      }
+    },
+    "previousPoint": {
+      "position": {
+        "meta": {
+          "description": "The position of lastPoint in two dimensions",
+          "properties": {
+            "longitude": {
+              "type": "number",
+              "description": "Longitude",
+              "units": "deg",
+              "example": 4.98765245
+            },
+            "latitude": {
+              "type": "number",
+              "description": "Latitude",
+              "units": "deg",
+              "example": 52.0987654
+            },
+            "altitude": {
+              "type": "number",
+              "description": "Altitude",
+              "units": "m"
+            }
+          }
+        },
+        "value": {
+          "longitude": 24.7351314,
+          "latitude": 59.7217554
+        },
+        "$source": "courseApi",
+        "timestamp": "2024-10-02T13:45:12.268Z"
+      },
+      "value": {
+        "type": {
+          "meta": {},
+          "value": "VesselPosition",
+          "$source": "courseApi",
+          "timestamp": "2024-10-02T13:45:12.268Z"
+        }
+      }
+    }
+  },
+  "courseRhumbline": {
+    "activeRoute": {
+      "href": {
+        "meta": {
+          "description": "A reference (URL) to the presently active route, in resources."
+        },
+        "value": "/resources/routes/f273bede-706d-40cb-bfd2-775499e40653",
+        "$source": "courseApi",
+        "timestamp": "2024-10-02T13:45:12.268Z"
+      },
+      "startTime": {
+        "meta": {
+          "description": "The time this route was activated"
+        },
+        "value": "2024-10-02T13:45:12.264Z",
+        "$source": "courseApi",
+        "timestamp": "2024-10-02T13:45:12.268Z"
+      }
+    },
+    "nextPoint": {
+      "value": {
+        "href": {
+          "meta": {},
+          "value": null,
+          "$source": "courseApi",
+          "timestamp": "2024-10-02T13:45:12.268Z"
+        },
+        "type": {
+          "meta": {},
+          "value": "RoutePoint",
+          "$source": "courseApi",
+          "timestamp": "2024-10-02T13:45:12.268Z"
+        }
+      },
+      "position": {
+        "meta": {},
+        "value": {
+          "latitude": 59.67512773750016,
+          "longitude": 24.69305084158094
+        },
+        "$source": "courseApi",
+        "timestamp": "2024-10-02T13:45:12.268Z"
+      },
+      "arrivalCircle": {
+        "meta": {},
+        "value": 0,
+        "$source": "courseApi",
+        "timestamp": "2024-10-02T13:45:12.268Z"
+      }
+    },
+    "previousPoint": {
+      "position": {
+        "meta": {
+          "description": "The position of lastPoint in two dimensions",
+          "properties": {
+            "longitude": {
+              "type": "number",
+              "description": "Longitude",
+              "units": "deg",
+              "example": 4.98765245
+            },
+            "latitude": {
+              "type": "number",
+              "description": "Latitude",
+              "units": "deg",
+              "example": 52.0987654
+            },
+            "altitude": {
+              "type": "number",
+              "description": "Altitude",
+              "units": "m"
+            }
+          }
+        },
+        "value": {
+          "longitude": 24.7351314,
+          "latitude": 59.7217554
+        },
+        "$source": "courseApi",
+        "timestamp": "2024-10-02T13:45:12.268Z"
+      },
+      "value": {
+        "type": {
+          "meta": {},
+          "value": "VesselPosition",
+          "$source": "courseApi",
+          "timestamp": "2024-10-02T13:45:12.268Z"
+        }
+      }
+    }
+  },
+  "course": {
+    "calcValues": {
+      "calcMethod": {
+        "meta": {
+          "description": "Calculation type used (GreatCircle or Rhumbline)."
+        },
+        "value": "GreatCircle",
+        "$source": "course-provider",
+        "timestamp": "2024-10-02T19:03:06.540Z"
+      },
+      "bearingTrackTrue": {
+        "meta": {
+          "description": "The bearing of a line between previousPoint and nextPoint, relative to true north.",
+          "units": "rad"
+        },
+        "value": 3.5692017850905313,
+        "$source": "course-provider",
+        "timestamp": "2024-10-02T19:03:06.540Z"
+      },
+      "bearingTrackMagnetic": {
+        "meta": {
+          "description": "The bearing of a line between previousPoint and nextPoint, relative to magnetic north.",
+          "units": "rad"
+        },
+        "value": 3.7106017850905313,
+        "$source": "course-provider",
+        "timestamp": "2024-10-02T19:03:06.540Z"
+      },
+      "crossTrackError": {
+        "meta": {
+          "description": "The distance from the vessel's present position to the closest point on a line (track) between previousPoint and nextPoint. A negative number indicates that the vessel is currently to the left of this line (and thus must steer right to compensate), a positive number means the vessel is to the right of the line (steer left to compensate).",
+          "units": "m"
+        },
+        "value": 7.445808293426564,
+        "$source": "course-provider",
+        "timestamp": "2024-10-02T19:03:06.540Z"
+      },
+      "previousPoint": {
+        "distance": {
+          "meta": {
+            "description": "The distance in meters between the vessel's present position and the previousPoint.",
+            "units": "m"
+          },
+          "value": 54.13862750114139,
+          "$source": "course-provider",
+          "timestamp": "2024-10-02T19:03:06.540Z"
+        }
+      },
+      "distance": {
+        "meta": {
+          "description": "The distance in meters between the vessel's present position and the nextPoint.",
+          "units": "m"
+        },
+        "value": 5750.5951760268945,
+        "$source": "course-provider",
+        "timestamp": "2024-10-02T19:03:06.540Z"
+      },
+      "bearingTrue": {
+        "meta": {
+          "description": "The bearing of a line between the vessel's current position and nextPoint, relative to true north.",
+          "units": "rad"
+        },
+        "value": 3.5679111529044167,
+        "$source": "course-provider",
+        "timestamp": "2024-10-02T19:03:06.540Z"
+      },
+      "bearingMagnetic": {
+        "meta": {
+          "description": "The bearing of a line between the vessel's current position and nextPoint, relative to magnetic north.",
+          "units": "rad"
+        },
+        "value": 3.7093111529044167,
+        "$source": "course-provider",
+        "timestamp": "2024-10-02T19:03:06.540Z"
+      },
+      "velocityMadeGood": {
+        "meta": {
+          "description": "The velocity component of the vessel towards the nextPoint.",
+          "units": "m/s"
+        },
+        "value": 3.31965525496195,
+        "$source": "course-provider",
+        "timestamp": "2024-10-02T19:03:06.540Z"
+      },
+      "timeToGo": {
+        "meta": {
+          "description": "Time in seconds to reach nextPoint's perpendicular) with current speed & direction.",
+          "units": "s"
+        },
+        "value": 1732.286,
+        "$source": "course-provider",
+        "timestamp": "2024-10-02T19:03:06.540Z"
+      },
+      "estimatedTimeOfArrival": {
+        "meta": {
+          "description": "The estimated time of arrival at nextPoint position.",
+          "units": "s"
+        },
+        "value": "2014-08-15T19:30:23.250Z",
+        "$source": "course-provider",
+        "timestamp": "2024-10-02T19:03:06.540Z"
+      },
+      "targetSpeed": {
+        "meta": {
+          "description": "The average speed required to arrive at the destination at the targetArrivalTime.",
+          "units": "m/s"
+        },
+        "value": null,
+        "$source": "course-provider",
+        "timestamp": "2024-10-02T19:03:06.540Z"
+      }
+    }
+  }
+}   
