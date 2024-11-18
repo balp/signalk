@@ -215,10 +215,6 @@ impl V1Navigation {
             }
         }
     }
-
-    pub fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
-        self.get_path(path)
-    }
 }
 
 #[derive(Default)]

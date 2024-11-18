@@ -75,7 +75,7 @@ impl Path<f64> for V1Vessel {
             "flag" => Err(SignalKGetError::WrongDataType),
             "navigation" => get_path(path, &(self.navigation.as_ref())),
             "communication" => Err(SignalKGetError::TBD),
-            "environment" => Err(SignalKGetError::TBD),
+            "environment" => get_path(path, &(self.environment.as_ref())),
             "notifications" => Err(SignalKGetError::TBD),
             "electrical" => Err(SignalKGetError::TBD),
             "steering" => Err(SignalKGetError::TBD),
@@ -254,14 +254,7 @@ impl V1Vessel {
             "name" => Err(SignalKGetError::WrongDataType),
             "port" => Err(SignalKGetError::WrongDataType),
             "flag" => Err(SignalKGetError::WrongDataType),
-            "navigation" => {
-                if let Some(ref navigation) = self.navigation {
-                    path.remove(0);
-                    navigation.get_f64_for_path(path)
-                } else {
-                    Err(SignalKGetError::NoSuchPath)
-                }
-            }
+            "navigation" => get_path(path, &self.navigation.as_ref()),
             "environment" => {
                 if let Some(ref environment) = self.environment {
                     path.remove(0);

@@ -1,9 +1,11 @@
+use log::debug;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use serde::{Deserialize, Serialize};
-
 use crate::definitions::{V1CommonValueFields, V1NumberValue, V2NumberValue};
-use crate::helper_functions::{get_f64_value, get_f64_value_for_path, F64CompatiblePath};
+use crate::helper_functions::{
+    get_f64_value, get_f64_value_for_path, get_path, F64CompatiblePath, Path,
+};
 use crate::sources::V1Source;
 use crate::SignalKGetError;
 
@@ -23,6 +25,25 @@ pub struct V1Environment {
     pub wind: Option<V1EnvironmentWind>,
     pub time: Option<V1EnvironmentTime>,
     pub mode: Option<V1EnvironmentMode>,
+}
+
+impl Path<f64> for V1Environment {
+    fn get_path(&self, path: &[&str]) -> Result<f64, SignalKGetError> {
+        debug!("V1Environment::get_path({:?}) {:?}", path, self);
+        match path[0] {
+            "outside" => get_path(path, &self.outside.as_ref()),
+            "inside" => get_path(path, &self.inside.as_ref()),
+            "water" => Err(SignalKGetError::TBD), // get_path(path, &self.water.as_ref()),
+            "depth" => Err(SignalKGetError::TBD), // get_path(path, &self.depth.as_ref()),
+            "current" => Err(SignalKGetError::TBD), // get_path(path, &self.current.as_ref()),
+            "tide" => Err(SignalKGetError::TBD),  // get_path(path, &self.tide.as_ref()),
+            "heave" => get_f64_value(&self.heave),
+            "wind" => Err(SignalKGetError::TBD), // get_path(path, &self.wind.as_ref()),
+            "time" => Err(SignalKGetError::TBD), // get_path(path, &self.time.as_ref()),
+            "mode" => Err(SignalKGetError::TBD), // get_path(path, &self.mode.as_ref()),
+            &_ => Err(SignalKGetError::NoSuchPath),
+        }
+    }
 }
 
 impl V1Environment {
@@ -285,6 +306,27 @@ pub struct V1EnvironmentOutside {
     pub illuminance: Option<V1NumberValue>,
 }
 
+impl Path<f64> for V1EnvironmentOutside {
+    fn get_path(&self, path: &[&str]) -> Result<f64, SignalKGetError> {
+        debug!("V1EnvironmentOutside::get_path({:?}) {:?}", path, self);
+        match path[0] {
+            "temperature" => get_f64_value(&self.temperature),
+            "dewPointTemperature" => get_f64_value(&self.dew_point_temperature),
+            "apparentWindChillTemperature" => get_f64_value(&self.apparent_wind_chill_temperature),
+            "theoreticalWindChillTemperature" => {
+                get_f64_value(&self.theoretical_wind_chill_temperature)
+            }
+            "heatIndexTemperature" => get_f64_value(&self.heat_index_temperature),
+            "pressure" => get_f64_value(&self.pressure),
+            "humidity" => get_f64_value(&self.humidity),
+            "relativeHumidity" => get_f64_value(&self.relative_humidity),
+            "airDensity" => get_f64_value(&self.air_density),
+            "illuminance" => get_f64_value(&self.illuminance),
+            &_ => Err(SignalKGetError::NoSuchPath),
+        }
+    }
+}
+
 impl F64Gettable for V1EnvironmentOutside {
     fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
         match path[0] {
@@ -405,7 +447,25 @@ impl V1EnvironmentOutsideBuilder {
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 pub struct V1EnvironmentInside {
     #[serde(flatten)]
+    pub inside: Option<V1EnvironmentZone>,
+    #[serde(flatten)]
     pub zones: HashMap<String, V1EnvironmentZone>,
+}
+
+impl Path<f64> for V1EnvironmentInside {
+    fn get_path(&self, path: &[&str]) -> Result<f64, SignalKGetError> {
+        debug!("V1EnvironmentInside::get_path({:?}) {:?}", path, self);
+        if path.len() < 2 {
+            if let Some(ref inside) = self.inside {
+                inside.get_path(path)
+            } else {
+                Err(SignalKGetError::ValueNotSet)
+            }
+        } else {
+            let ref zone = self.zones.get(path[0]);
+            get_path(path, zone)
+        }
+    }
 }
 
 impl V1EnvironmentInside {
@@ -432,7 +492,8 @@ impl F64Gettable for V1EnvironmentInside {
 
 #[derive(Default)]
 pub struct V1EnvironmentInsideBuilder {
-    pub zones: HashMap<String, V1EnvironmentZone>,
+    zones: HashMap<String, V1EnvironmentZone>,
+    inside: Option<V1EnvironmentZone>,
 }
 
 impl V1EnvironmentInsideBuilder {
@@ -441,7 +502,10 @@ impl V1EnvironmentInsideBuilder {
         self
     }
     pub fn build(self) -> V1EnvironmentInside {
-        V1EnvironmentInside { zones: self.zones }
+        V1EnvironmentInside {
+            zones: self.zones,
+            inside: self.inside,
+        }
     }
 }
 
@@ -456,6 +520,27 @@ pub struct V1EnvironmentZone {
     pub dew_point_temperature: Option<V1NumberValue>,
     pub air_density: Option<V1NumberValue>,
     pub illuminance: Option<V1NumberValue>,
+}
+
+impl Path<f64> for V1EnvironmentZone {
+    fn get_path(&self, path: &[&str]) -> Result<f64, SignalKGetError> {
+        debug!("V1EnvironmentZone::get_path({:?}) {:?}", path, self);
+        if path.is_empty() {
+            get_f64_value(&self.temperature)
+        } else {
+            match path[0] {
+                "temperature" => get_f64_value(&self.temperature),
+                "heatIndexTemperature" => get_f64_value(&self.heat_index_temperature),
+                "pressure" => get_f64_value(&self.pressure),
+                "relativeHumidity" => get_f64_value(&self.relative_humidity),
+                "dewPoint" => get_f64_value(&self.dew_point),
+                "dewPointTemperature" => get_f64_value(&self.dew_point_temperature),
+                "airDensity" => get_f64_value(&self.air_density),
+                "illuminance" => get_f64_value(&self.illuminance),
+                &_ => Err(SignalKGetError::NoSuchPath),
+            }
+        }
+    }
 }
 
 impl V1EnvironmentZone {
@@ -473,17 +558,7 @@ impl V1EnvironmentZone {
 }
 impl F64Gettable for V1EnvironmentZone {
     fn get_f64_for_path(&self, path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
-        match path[0] {
-            "temperature" => get_f64_value(&self.temperature),
-            "heatIndexTemperature" => get_f64_value(&self.heat_index_temperature),
-            "pressure" => get_f64_value(&self.pressure),
-            "relativeHumidity" => get_f64_value(&self.relative_humidity),
-            "dewPoint" => get_f64_value(&self.dew_point),
-            "dewPointTemperature" => get_f64_value(&self.dew_point_temperature),
-            "airDensity" => get_f64_value(&self.air_density),
-            "illuminance" => get_f64_value(&self.illuminance),
-            &_ => Err(SignalKGetError::NoSuchPath),
-        }
+        self.get_path(path)
     }
 }
 
@@ -1027,5 +1102,95 @@ impl V1EnvironmentMode {
 impl F64Gettable for V1EnvironmentMode {
     fn get_f64_for_path(&self, _path: &mut Vec<&str>) -> Result<f64, SignalKGetError> {
         Err(SignalKGetError::WrongDataType)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::helper_functions::get_path;
+    use crate::{SignalKGetError, V1FullFormat};
+    use std::fs::File;
+    use std::io::BufReader;
+    use std::path::Path;
+
+    fn init() {
+        let _ = env_logger::builder().is_test(true).try_init();
+    }
+
+    #[test]
+    fn path_outside_temperature() {
+        init();
+        assert_eq!(
+            get_path_from_full_file(
+                ".self.environment.outside.temperature",
+                "tests/specification/test_data/full-valid/temperatures-sample.json"
+            ),
+            Ok(0.0)
+        )
+    }
+    #[test]
+    fn path_outside_dew_point_temperature() {
+        init();
+        assert_eq!(
+            get_path_from_full_file(
+                ".self.environment.outside.dewPointTemperature",
+                "tests/specification/test_data/full-valid/temperatures-sample.json"
+            ),
+            Ok(1.0)
+        )
+    }
+    #[test]
+    fn path_outside_apparent_wind_chill_temperature() {
+        init();
+        assert_eq!(
+            get_path_from_full_file(
+                ".self.environment.outside.apparentWindChillTemperature",
+                "tests/specification/test_data/full-valid/temperatures-sample.json"
+            ),
+            Ok(2.0)
+        )
+    }
+    #[test]
+    fn path_outside_theoretical_wind_chill_temperature() {
+        init();
+        assert_eq!(
+            get_path_from_full_file(
+                ".self.environment.outside.theoreticalWindChillTemperature",
+                "tests/specification/test_data/full-valid/temperatures-sample.json"
+            ),
+            Ok(3.0)
+        )
+    }
+    #[test]
+    fn path_outside_heat_index_temperature() {
+        init();
+        assert_eq!(
+            get_path_from_full_file(
+                ".self.environment.outside.heatIndexTemperature",
+                "tests/specification/test_data/full-valid/temperatures-sample.json"
+            ),
+            Ok(4.0)
+        )
+    }
+    #[test]
+    fn path_inside_temperature() {
+        init();
+        assert_eq!(
+            get_path_from_full_file(
+                ".self.environment.inside.temperature",
+                "tests/specification/test_data/full-valid/temperatures-sample.json"
+            ),
+            Ok(5.0)
+        )
+    }
+
+    fn get_path_from_full_file(path_string: &str, file_name: &str) -> Result<f64, SignalKGetError> {
+        let path = Path::new(file_name);
+        let file = File::open(path).unwrap();
+        let reader = BufReader::new(file);
+        let course_with_point: V1FullFormat = serde_json::from_reader(reader).unwrap();
+        let path: Vec<&str> = path_string.split('.').collect();
+        let result = get_path(&path, &Some(&course_with_point));
+        result
     }
 }
