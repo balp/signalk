@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["V1FullFormat","V1FullFormatBuilder"],"trait":["Updatable"]};

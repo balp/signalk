@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["SignalKGetError","SignalKStreamMessage"],"mod":["communication","definitions","delta","discovery","electrical","environment","full","hello","navigation","notification","propulsion","put","sources","subscribe","unsubscribe","vessel"],"struct":["Storage"]};
