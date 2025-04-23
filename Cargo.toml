@@ -1,6 +1,6 @@
 [package]
 name = "signalk"
-version = "0.6.3"
+version = "0.7.0"
 rust-version = "1.75"
 edition = "2021"
 license-file = "LICENSE"
